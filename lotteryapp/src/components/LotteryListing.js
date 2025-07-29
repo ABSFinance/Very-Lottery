@@ -1,32 +1,30 @@
-import {useEffect, useState, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
-  Button,
-  Input,
   Flex,
+  Text,
+  Button,
+  Badge,
   Icon,
   SimpleGrid,
+  Stack,
+  useToast,
+  Link,
+  HStack,
+  VStack,
   useColorModeValue,
   Heading,
-  Text,
-  Badge,
-  Stack,
-  useToast
+  Alert,
+  AlertIcon
 } from "@chakra-ui/react";
 import { FaEthereum } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { ethers } from "ethers";
+import { useMetaMaskAccount } from "../context/AccountContext";
+import useLotteryAction from "../hooks/useLotteryActions";
 import useLotteryContract from "../hooks/useLotteryContract";
 import Spinner from "./Spinner";
-import { checkIfLoading, checkIfError } from '../redux/reducers/selector';
 import ToastMessage from './ToastMessage';
-import {ethers} from 'ethers';
-import useLotteryAction from '../hooks/useLotteryActions';
 import {getEMessage, eventMessage} from '../errorMessages';
-import { useMetaMaskAccount } from '../context/AccountContext';
-import { useContractEvent, useProvider } from 'wagmi';
-import Confetti from 'react-confetti'
-import LotteryContract from '../contracts/Lottery.json';
-
 
 const backgrounds = [
   `url("data:image/svg+xml, %3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'560\' height=\'185\' viewBox=\'0 0 560 185\' fill=\'none\'%3E%3Cellipse cx=\'102.633\' cy=\'61.0737\' rx=\'102.633\' ry=\'61.0737\' fill=\'%23ED64A6\' /%3E%3Cellipse cx=\'399.573\' cy=\'123.926\' rx=\'102.633\' ry=\'61.0737\' fill=\'%23F56565\' /%3E%3Cellipse cx=\'366.192\' cy=\'73.2292\' rx=\'193.808\' ry=\'73.2292\' fill=\'%2338B2AC\' /%3E%3Cellipse cx=\'222.705\' cy=\'110.585\' rx=\'193.808\' ry=\'73.2292\' fill=\'%23ED8936\' /%3E%3C/svg%3E")`,
@@ -36,38 +34,11 @@ const backgrounds = [
 ];
 
 function Lottery(props) {
-  const { index,lotteryId,enterLotteryHandler, entryBtnLoaders, pickWinnerHandler, winBtnLoaders, setDeclareWinner } = props;
-  const [entryFee, setEntryFee] = useState('');
-  const { connectedAddr } = useMetaMaskAccount();
-  const {getLotteryDetail} = useLotteryContract();
-  const {details, manager} = useSelector(state => state.lottery);
-  const loadingState = useSelector(state => state.loading);
-  const isDetailLoading = checkIfLoading(loadingState, 'FETCHING_LOTTERY_DETAIL_SUCCESS')
-  const [reloadInfo, setReloadInfo] = useState(false);
-  useEffect(() => {
-    (async()=>{
-      await getLotteryDetail(lotteryId);
-    })()
-  },[entryBtnLoaders[lotteryId], reloadInfo])
+  const { index, lotteryId, enterLotteryHandler, entryBtnLoaders, selectedGame, gameInfo, loading, transactionHashes } = props;
+  const contractAddress = selectedGame?.address;
 
 
-  useContractEvent(
-    {
-        addressOrName: process.env.REACT_APP_LOTTERY_CONTRACT,
-        contractInterface: LotteryContract.abi,
-    },
-    'WinnerDeclared',
-    (event) => {
-      if(typeof details[lotteryId.toString()] !== 'undefined'){
-        if(!details[lotteryId.toString()].active){
-          setDeclareWinner(true);
-          setReloadInfo(true);
-        }
-      }
-    },{
-      once: true
-    }
-  )
+
  
   return (
     <Flex
@@ -102,26 +73,26 @@ function Lottery(props) {
         justifyContent={"space-between"}
       >
         <Heading fontSize={"1xl"} fontWeight={300} fontFamily={"body"}>
-          Eth-Lottery
+          {selectedGame?.title || 'Cryptolotto'}
         </Heading>
         <Text color={"gray.500"}>
           <Badge variant="solid" colorScheme="green">
-            ID: {lotteryId.toString()}
+            Game: {lotteryId.toString()}
           </Badge>
         </Text>
 
-        {isDetailLoading ? <Spinner/> :
+        {loading ? <Spinner/> :
             <>
-              {(typeof details[lotteryId.toString()] !== 'undefined') ?
+              {gameInfo ?
                 <>
                   <Text fontSize={"sm"} color={"gray.500"} pt={4}>
-                    Active Players {details[lotteryId.toString()].players}
+                    Active Players: {gameInfo.players}
                   </Text>
                   <Text fontSize={"sm"} color={"gray.500"}>
-                    Ticket Price {details[lotteryId.toString()].ticketPrice} Eth
+                    Ticket Price: {gameInfo.ticketPrice} VERY
                   </Text>
                   <Text fontSize={"sm"} color={"gray.500"}>
-                    Price Pool {details[lotteryId.toString()].pricePool} Eth
+                    Jackpot: {gameInfo.jackpot} VERY
                   </Text>
                 </>
                 : ''
@@ -130,62 +101,58 @@ function Lottery(props) {
         }
        
 
-       {(typeof details[lotteryId.toString()] !== 'undefined') ?
+       {gameInfo ?
         <Box pt={4}>
-          {(!details[lotteryId.toString()].active) && 
+          {gameInfo.isActive && 
               <>
-              
-                {((details[lotteryId.toString()].playersData.length) && (details[lotteryId.toString()].playersData.includes(connectedAddr))) ?
-                  ''
-                :
-                 <>
-                  <Input type="number" placeholder="Enter Eth" size="sm" value={entryFee} onChange={(e) => setEntryFee(e.target.value)}/>
-                  <Button
-                    size="sm"
-                    w={"full"}
-                    mt={3}
-                    bg={"#3182ce"}
-                    color={"white"}
-                    rounded={"md"}
-                    _hover={{
-                      transform: "translateY(-2px)",
-                      boxShadow: "lg",
-                    }}
-                    onClick={() => {
-                      if((details[lotteryId.toString()].playersData.length)&&(details[lotteryId.toString()].playersData.includes(connectedAddr))){
-                          return;
-                      }
-                      enterLotteryHandler(lotteryId, entryFee)
-                    }}
-                    isLoading={entryBtnLoaders[lotteryId]}
-                    id={`enterBtn${lotteryId}`}
-                  >
-                    Enter Lottery
-                  </Button>
-                 </>
-                }
-                
-
-                {((connectedAddr === manager )&&(details[lotteryId.toString()].players >= 1)) &&
-                  <Button size="xs"
+                <Text fontSize={"sm"} color={"gray.500"} mb={2}>
+                  Ticket Price: {gameInfo.ticketPrice} VERY
+                </Text>
+                <Button
+                  size="sm"
                   w={"full"}
                   mt={3}
-                  bg={"#000000"}
+                  bg={"#3182ce"}
                   color={"white"}
                   rounded={"md"}
                   _hover={{
                     transform: "translateY(-2px)",
                     boxShadow: "lg",
-                  }} onClick={() => {pickWinnerHandler(lotteryId)}} isLoading={winBtnLoaders[lotteryId]}>PickWinner</Button>
-                }
+                  }}
+                  onClick={() => {
+                    enterLotteryHandler(lotteryId, gameInfo.ticketPrice)
+                  }}
+                  isLoading={entryBtnLoaders[lotteryId]}
+                  id={`enterBtn${lotteryId}`}
+                >
+                  Buy Ticket for {gameInfo.ticketPrice} VERY
+                </Button>
+                
+                {/* Show transaction hash if available */}
+                {transactionHashes[lotteryId] && (
+                  <Box mt={2} p={2} bg="blue.50" borderRadius="md">
+                    <Text fontSize="xs" color="gray.600" mb={1}>
+                      Last Transaction:
+                    </Text>
+                    <Link 
+                      href={`https://veryscan.io/tx/${transactionHashes[lotteryId]}`}
+                      isExternal
+                      fontSize="xs"
+                      color="blue.500"
+                      _hover={{ textDecoration: "underline" }}
+                    >
+                      {transactionHashes[lotteryId].substring(0, 10)}...{transactionHashes[lotteryId].substring(transactionHashes[lotteryId].length - 8)}
+                    </Link>
+                  </Box>
+                )}
               </>
           }
           {
-            (details[lotteryId.toString()].active) &&  
+            !gameInfo.isActive &&  
             <>
-              <Text as='i' pr="2">Winner</Text>
-              <Badge variant='solid' colorScheme='green'>
-                {details[lotteryId.toString()].winner}
+              <Text as='i' pr="2">Game Ended</Text>
+              <Badge variant='solid' colorScheme='red'>
+                Inactive
               </Badge>
             </>
           }
@@ -197,36 +164,121 @@ function Lottery(props) {
   );
 }
 
-export default function LotteryListing() {
+export default function LotteryListing({ selectedGame }) {
   const toast = useToast();
-  const [reloadList, setReloadList] = useState(true);
-  const [declareWinner, setDeclareWinner] = useState(false);
-  const [confetti, setConfetti] = useState(0);
-  const { connectedAddr, connected} = useMetaMaskAccount();
+  const { connected, connectedAddr } = useMetaMaskAccount();
   const [entryBtnLoaders, setEntryBtnLoaders] = useState({})
-  const [winBtnLoaders, setWinBtnLoaders] = useState({})
+  const [transactionHashes, setTransactionHashes] = useState({})
+  const [processedTransactions, setProcessedTransactions] = useState(new Set())
+  const [referralInfo, setReferralInfo] = useState(null)
+  const contractAddress = selectedGame?.address;
+
   const {
     txnError, 
     callContract,
     waitData:entryLWaitData, waitLoading:entryLWaitLoading, wait
-  } = useLotteryAction('enterLottery');
+  } = useLotteryAction('buyTicket', contractAddress);
 
   const {
     txnError: startLError,
-    callContract:startLottery, waitData:startLWaitResult, waitLoading:startLWaitLoading, wait: swait } = useLotteryAction('startLottery');
+    callContract:startLottery, waitData:startLWaitResult, waitLoading:startLWaitLoading } = useLotteryAction('start', contractAddress);
 
-  const {
-    txnError: winnerTxnErr, 
-    callContract:pickWinner,
-    waitData:winLWaitData, waitLoading:winLWaitLoading, wait:pickWait,
-  } = useLotteryAction('pickWinner');
+  const { contract } = useLotteryContract(contractAddress);
 
-  const {fetchAllLotteryIds} = useLotteryContract();
-  const {allLotteryIds, manager} = useSelector(state => state.lottery);
-  const loadingState = useSelector(state => state.loading);
-  
-  const isLoading = checkIfLoading(loadingState, 'FETCH_LOTTERY_IDS')
-  const hasError = checkIfError(loadingState,'FETCH_LOTTERY_IDS');
+  // Initialize contract if not already initialized
+  const initializeContract = useCallback(async () => {
+    if (contract && selectedGame) {
+      try {
+        const ownableAddress = await contract.ownable();
+        if (ownableAddress === "0x0000000000000000000000000000000000000000") {
+          console.log('Contract not initialized, attempting to initialize...');
+          
+          // Get addresses from environment variables
+          const ownableContract = process.env.REACT_APP_OWNABLE;
+          const distributorContract = process.env.REACT_APP_FUNDS_DISTRIBUTOR;
+          const statsContract = process.env.REACT_APP_STATS_AGGREGATOR;
+          const referralContract = process.env.REACT_APP_REFERRAL_CONTRACT;
+          
+          console.log('Initialization addresses:', {
+            ownable: ownableContract,
+            distributor: distributorContract,
+            stats: statsContract,
+            referral: referralContract
+          });
+          
+          // Show warning that contract needs initialization
+          toast({
+            title: 'Contract not initialized',
+            description: `The lottery contract at ${selectedGame.address} needs to be initialized. Please contact the contract owner.`,
+            status: 'warning',
+            isClosable: true,
+            duration: 10000,
+          });
+          
+          // Disable ticket purchase
+          setGameInfo(prev => prev ? { ...prev, isActive: false } : null);
+        }
+      } catch (error) {
+        console.error('Contract initialization check failed:', error);
+      }
+    }
+  }, [contract, selectedGame, toast]);
+
+  // Check if contract is initialized
+  const checkContractInitialization = useCallback(async () => {
+    if (contract && selectedGame) {
+      try {
+        // Check if ownable contract is set
+        const ownableAddress = await contract.ownable();
+        console.log('Ownable address:', ownableAddress);
+        
+        // Check if stats contract is set
+        const statsAddress = await contract.stats();
+        console.log('Stats address:', statsAddress);
+        
+        // Check if referral contract is set
+        const referralAddress = await contract.referralInstance();
+        console.log('Referral address:', referralAddress);
+        
+        // Check if funds distributor is set
+        const distributorAddress = await contract.fundsDistributor();
+        console.log('Funds distributor address:', distributorAddress);
+        
+        // Check if game is active
+        const isActive = await contract.isActive();
+        console.log('Game is active:', isActive);
+        
+        // Check ticket price
+        const ticketPrice = await contract.ticketPrice();
+        console.log('Ticket price:', ethers.utils.formatEther(ticketPrice));
+        
+        // Check if contract is properly initialized
+        if (ownableAddress === "0x0000000000000000000000000000000000000000" ||
+            statsAddress === "0x0000000000000000000000000000000000000000" ||
+            referralAddress === "0x0000000000000000000000000000000000000000" ||
+            distributorAddress === "0x0000000000000000000000000000000000000000") {
+          console.error('Contract is not properly initialized!');
+          toast({
+            title: 'Contract not initialized',
+            description: 'The lottery contract needs to be initialized with proper addresses',
+            status: 'error',
+            isClosable: true,
+          });
+        }
+        
+      } catch (error) {
+        console.error('Contract initialization check failed:', error);
+        toast({
+          title: 'Contract error',
+          description: 'Failed to check contract initialization',
+          status: 'error',
+          isClosable: true,
+        });
+      }
+    }
+  }, [contract, selectedGame, toast]);
+  const [gameInfo, setGameInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   //start Lottery Event 
   useEffect(() => {
@@ -237,72 +289,181 @@ export default function LotteryListing() {
 
   //enter Lottery
   useEffect(() => {
+    console.log('entryLWaitData changed:', entryLWaitData);
+    console.log('entryLWaitLoading:', entryLWaitLoading);
+    
     if((typeof entryLWaitData !== "undefined") && (!entryLWaitLoading)){
-     handleEvents(entryLWaitData, 'NewLotteryPlayer')
+      console.log('Processing entryLWaitData:', entryLWaitData);
+      
+      // Check if this transaction has already been processed
+      const txHash = entryLWaitData.transactionHash;
+      if (processedTransactions.has(txHash)) {
+        console.log('Transaction already processed in useEffect, skipping');
+        return;
+      }
+      
+      handleEvents(entryLWaitData, 'Ticket')
     }
- },[entryLWaitData, entryLWaitLoading]);
+  },[entryLWaitData, entryLWaitLoading, processedTransactions]);
 
- //Picking Winner
- useEffect(() => {
-  if((typeof winLWaitData !== "undefined") && (!winLWaitLoading)){
-   handleEvents(winLWaitData, 'RandomnessRequested')
-  }
-},[winLWaitData, winLWaitLoading]);
+
 
 
   //event handler
   const handleEvents = async (eventData, eventType) => {
+    console.log('handleEvents called with:', { eventData, eventType });
+    
     if(eventData.events){
+      console.log('Events found:', eventData.events);
+      console.log('Looking for event type:', eventType);
+      
+      // Log all event names to see what's available
+      eventData.events.forEach((evt, index) => {
+        console.log(`Event ${index}:`, evt);
+      });
+      
       const e = eventData.events.find(eve => eve.event === eventType);
+      console.log('Found event:', e);
+      
       if(typeof e !== "undefined"){
-        toast({
-          title:  eventMessage(e.event) ,
-          status: 'success',
-          isClosable: true,
-        });
+        // Get transaction hash for scan link
+        let txHash = eventData.transactionHash || eventData.hash;
+        console.log('Event data for txHash:', eventData);
+        console.log('Extracted txHash from event:', txHash);
+        
+        if (!txHash) {
+          console.error('Could not find transaction hash in event data');
+          return;
+        }
+        
+        // Check if this transaction has already been processed
+        if (processedTransactions.has(txHash)) {
+          console.log('Transaction already processed in event handler, skipping');
+          return;
+        }
+        
+        console.log('Processing Ticket event for transaction:', txHash);
+        
+        // Mark transaction as processed
+        setProcessedTransactions(prev => new Set([...prev, txHash]));
+        
+        const scanUrl = `https://veryscan.io/tx/${txHash}`;
+        
+        console.log('Showing toast from event handler for transaction:', txHash);
+        // Temporarily disable toast from event handler to prevent duplicates
+        // toast({
+        //   title: eventMessage(e.event),
+        //   description: (
+        //     <VStack spacing={2} align="start">
+        //       <Text fontSize="sm">Transaction completed successfully!</Text>
+        //       <Link href={scanUrl} isExternal color="blue.500" fontWeight="bold">
+        //         🔍 View on Very Scan →
+        //       </Link>
+        //     </VStack>
+        //   ),
+        //   status: 'success',
+        //   isClosable: true,
+        //   duration: 15000,
+        // });
   
-        if(e.event === 'NewLotteryPlayer'){
+        if(e.event === 'Ticket'){
+          // Reset button loader for this specific lottery
           setEntryBtnLoaders(prevS => {
             return {
               ...prevS,
-              [e.args[0].toString()]: entryLWaitLoading
+              [e.args[1].toString()]: false  // e.args[1] is the game number
             }
           });
+          
+          // Store transaction hash for this lottery
+          setTransactionHashes(prev => ({
+            ...prev,
+            [e.args[1].toString()]: txHash  // e.args[1] is the game number
+          }));
+          
+          // Refresh game info after successful transaction
+          if(contract && selectedGame) {
+            const fetchGameInfo = async () => {
+              try {
+                const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
+                  contract.game(),
+                  contract.ticketPrice(),
+                  contract.isActive(),
+                  contract.getPlayedGamePlayers(),
+                  contract.getPlayedGameJackpot()
+                ]);
+                
+                setGameInfo({
+                  game: game.toString(),
+                  ticketPrice: ethers.utils.formatEther(ticketPrice),
+                  isActive,
+                  players: players.toString(),
+                  jackpot: ethers.utils.formatEther(jackpot)
+                });
+              } catch (error) {
+                console.error('Error fetching game info after transaction:', error);
+              }
+            };
+            
+            fetchGameInfo();
+          }
         }
-  
+
         if(e.event === 'LotteryCreated') {
-          setReloadList(true);
+          // Refresh game info
+          if(contract && selectedGame) {
+            const fetchGameInfo = async () => {
+              setLoading(true);
+              try {
+                const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
+                  contract.game(),
+                  contract.ticketPrice(),
+                  contract.isActive(),
+                  contract.getPlayedGamePlayers(),
+                  contract.getPlayedGameJackpot()
+                ]);
+                
+                setGameInfo({
+                  game: game.toString(),
+                  ticketPrice: ethers.utils.formatEther(ticketPrice),
+                  isActive,
+                  players: players.toString(),
+                  jackpot: ethers.utils.formatEther(jackpot)
+                });
+              } catch (error) {
+                console.error('Error fetching game info:', error);
+              }
+              setLoading(false);
+            };
+            
+            fetchGameInfo();
+          }
         }
   
-        if(e.event === 'RandomnessRequested'){
-          setWinBtnLoaders(prevS => {
-            return {
-              ...prevS,
-              [e.args[1].toString()]: winLWaitLoading
-            }
-          });
-        }
+
       }
 
     }
   }
 
   useEffect(() => {
-    handlerTxnErrors(txnError);
-    setEntryBtnLoaders({})
+    if (txnError) {
+      handlerTxnErrors(txnError);
+      // Reset all button loaders on error
+      setEntryBtnLoaders({});
+    }
   },[txnError])
 
   useEffect(() => {
-    handlerTxnErrors(startLError);
+    if (startLError) {
+      handlerTxnErrors(startLError);
+    }
   },[startLError])
-
-  useEffect(() => {
-    handlerTxnErrors(winnerTxnErr);
-    setWinBtnLoaders({})
-  },[winnerTxnErr])
 
   const handlerTxnErrors = async(err) => {
     if(typeof err !== "undefined"){
+      console.error('Transaction error:', err);
+      
       if(err?.name && err.name === "UserRejectedRequestError"){
         toast({
           title: 'User rejected the transaction',
@@ -311,30 +472,79 @@ export default function LotteryListing() {
         });
         return;
       }
-      if(err?.name && err.name === "Error"){
+      
+      // Log detailed error information
+      if(err?.data?.message) {
+        console.error('Error message:', err.data.message);
         toast({
-          title: 'Invalid Input',
+          title: `Transaction failed: ${err.data.message}`,
           status: 'error',
           isClosable: true,
         });
-        return;
+      } else if(err?.message) {
+        console.error('Error message:', err.message);
+        toast({
+          title: `Transaction failed: ${err.message}`,
+          status: 'error',
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Transaction failed - check console for details',
+          status: 'error',
+          isClosable: true,
+        });
       }
-      toast({
-        title: getEMessage(err?.data?.message),
-        status: 'error',
-        isClosable: true,
-      });
     } 
   }
 
 
   useEffect(() => {
-      if(!reloadList) return;
-      (async () => {
-        await fetchAllLotteryIds();
-        setReloadList(false);
-      })()
-  },[reloadList])
+      if (contract && selectedGame) {
+        // Check contract initialization first
+        checkContractInitialization();
+        initializeContract();
+        
+        const fetchGameInfo = async () => {
+          setLoading(true);
+          try {
+            const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
+              contract.game(),
+              contract.ticketPrice(),
+              contract.isActive(),
+              contract.getPlayedGamePlayers(),
+              contract.getPlayedGameJackpot()
+            ]);
+            
+            setGameInfo({
+              game: game.toString(),
+              ticketPrice: ethers.utils.formatEther(ticketPrice),
+              isActive,
+              players: players.toString(),
+              jackpot: ethers.utils.formatEther(jackpot)
+            });
+          } catch (error) {
+            console.error('Error fetching game info:', error);
+          }
+          setLoading(false);
+        };
+        
+        fetchGameInfo();
+      }
+  },[contract, selectedGame, checkContractInitialization, initializeContract])
+
+  // Check for referral information
+  useEffect(() => {
+    const referralAddress = localStorage.getItem('referralAddress');
+    if (referralAddress && referralAddress !== "0x0000000000000000000000000000000000000000") {
+      setReferralInfo({
+        address: referralAddress,
+        message: `You were referred by: ${referralAddress.substring(0, 6)}...${referralAddress.substring(38)}`
+      });
+    } else {
+      setReferralInfo(null);
+    }
+  }, []);
 
 
   //enter lottery action
@@ -348,84 +558,220 @@ export default function LotteryListing() {
       });
       return;
     }
+    
+    // Check if game is active
+    if(gameInfo && !gameInfo.isActive) {
+      toast({
+        title: 'Game is not active',
+        status: 'error',
+        isClosable: true,
+      });
+      return;
+    }
+    
+    // Verify contract is properly initialized before attempting to buy
+    try {
+      const [ownableAddress, statsAddress, referralAddress, distributorAddress] = await Promise.all([
+        contract.ownable(),
+        contract.stats(),
+        contract.referralInstance(),
+        contract.fundsDistributor()
+      ]);
+      
+      if (ownableAddress === "0x0000000000000000000000000000000000000000" ||
+          statsAddress === "0x0000000000000000000000000000000000000000" ||
+          referralAddress === "0x0000000000000000000000000000000000000000" ||
+          distributorAddress === "0x0000000000000000000000000000000000000000") {
+        toast({
+          title: 'Contract not initialized',
+          description: 'The lottery contract needs to be properly initialized',
+          status: 'error',
+          isClosable: true,
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Contract verification failed:', error);
+      toast({
+        title: 'Contract verification failed',
+        description: 'Unable to verify contract initialization',
+        status: 'error',
+        isClosable: true,
+      });
+      return;
+    }
+    
+    // Use exact ticket price from contract
+    const ticketPrice = gameInfo ? gameInfo.ticketPrice : "0.02";
+    const exactPrice = ethers.utils.parseEther(ticketPrice);
+    
+    // Get referral address from localStorage
+    const referralAddress = localStorage.getItem('referralAddress') || 
+                           "0x0000000000000000000000000000000000000000";
+    
+    console.log('Attempting to buy ticket with:', {
+      ticketPrice,
+      exactPrice: exactPrice.toString(),
+      isActive: gameInfo?.isActive,
+      partner: referralAddress,
+      userAddress: connectedAddr
+    });
+    
     setEntryBtnLoaders(prevS => {
       return {
         ...prevS,
         [lotteryId]: true
       }
     });
-    const txn = await callContract({
-      args: [lotteryId],
-      overrides: {
-        value: ethers.utils.parseEther(ethValue.toString())
+    
+    try {
+      console.log('Calling contract with args:', [referralAddress]);
+      console.log('Value:', exactPrice.toString());
+      
+      const txn = await callContract({
+        args: [referralAddress], // Use referral address instead of user address
+        overrides: {
+          value: exactPrice
+        }
+      });
+      
+      console.log('Transaction result:', txn);
+      
+      if(typeof txn.data !== 'undefined'){
+        console.log('Transaction data:', txn.data);
+        
+        // Show pending transaction toast
+        toast({
+          title: 'Transaction submitted',
+          description: '⏳ Waiting for confirmation...',
+          status: 'info',
+          isClosable: true,
+          duration: 8000,
+        });
+        
+        console.log('Waiting for transaction confirmation...');
+        const waitResult = await wait({wait: txn.data.wait});
+        console.log('Wait result:', waitResult);
+        
+        // If no events are detected, show a simple success message
+        if (waitResult && (!waitResult.events || waitResult.events.length === 0)) {
+          console.log('No events detected, showing simple success message');
+          console.log('Wait result for txHash:', waitResult);
+          
+          // Try to get transaction hash from different sources
+          let txHash = waitResult.transactionHash || waitResult.hash || txn.data.hash || txn.data.transactionHash;
+          console.log('Extracted txHash:', txHash);
+          console.log('txn.data:', txn.data);
+          console.log('waitResult:', waitResult);
+          
+          if (!txHash) {
+            console.error('Could not find transaction hash');
+            toast({
+              title: 'Transaction completed successfully!',
+              description: 'Your ticket has been purchased!',
+              status: 'success',
+              isClosable: true,
+              duration: 15000,
+            });
+            return;
+          }
+          
+          // Check if this transaction has already been processed
+          if (!processedTransactions.has(txHash)) {
+            // Mark transaction as processed
+            setProcessedTransactions(prev => new Set([...prev, txHash]));
+            
+            const scanUrl = `https://veryscan.io/tx/${txHash}`;
+            
+            console.log('Showing toast from fallback handler for transaction:', txHash);
+            toast({
+              title: 'Transaction completed successfully!',
+              description: (
+                <VStack spacing={2} align="start">
+                  <Text fontSize="sm">Your ticket has been purchased!</Text>
+                  <Link href={scanUrl} isExternal color="blue.500" fontWeight="bold">
+                    🔍 View on Very Scan →
+                  </Link>
+                </VStack>
+              ),
+              status: 'success',
+              isClosable: true,
+              duration: 15000,
+            });
+            
+            // Store transaction hash
+            setTransactionHashes(prev => ({
+              ...prev,
+              [lotteryId]: txHash
+            }));
+            
+            // Clear referral address after successful transaction
+            localStorage.removeItem('referralAddress');
+            
+            // Refresh game info
+            if(contract && selectedGame) {
+              const fetchGameInfo = async () => {
+                try {
+                  const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
+                    contract.game(),
+                    contract.ticketPrice(),
+                    contract.isActive(),
+                    contract.getPlayedGamePlayers(),
+                    contract.getPlayedGameJackpot()
+                  ]);
+                  
+                  setGameInfo({
+                    game: game.toString(),
+                    ticketPrice: ethers.utils.formatEther(ticketPrice),
+                    isActive,
+                    players: players.toString(),
+                    jackpot: ethers.utils.formatEther(jackpot)
+                  });
+                } catch (error) {
+                  console.error('Error fetching game info after transaction:', error);
+                }
+              };
+              
+              fetchGameInfo();
+            }
+          }
+          
+          // Always reset button loader
+          setEntryBtnLoaders(prevS => ({
+            ...prevS,
+            [lotteryId]: false
+          }));
+        }
       }
-    });
-    if(typeof txn.data !== 'undefined'){
-      await wait({wait: txn.data.wait});
+    } catch (error) {
+      console.error('Buy ticket error:', error);
+      // Reset button loader on error
+      setEntryBtnLoaders(prevS => {
+        return {
+          ...prevS,
+          [lotteryId]: false
+        }
+      });
+      
+      // Show error toast
+      toast({
+        title: 'Transaction failed',
+        description: error.message || 'Failed to buy ticket',
+        status: 'error',
+        isClosable: true,
+      });
     }
-  },[connected, callContract, toast, wait]);
+  },[connected, callContract, toast, wait, connectedAddr, gameInfo, contract]);
 
   //start lottery action
-  const startLotteryHandler = async () => {
-    if(!connected){
-      toast({
-        title: 'Please Connect to MetaMask',
-        status: 'error',
-        isClosable: true,
-      });
-      return;
-    }
-    const txn = await startLottery();
-    if(typeof txn.data !== 'undefined'){
-      await swait({wait: txn.data.wait});
-    }
-  };
 
-  const pickWinnerHandler = useCallback(async(lotteryId) => {
-    if(!connected){
-      toast({
-        title: 'Please Connect to MetaMask',
-        status: 'error',
-        isClosable: true,
-      });
-      return;
-    }
-    setWinBtnLoaders(prevS => {
-      return {
-        ...prevS,
-        [lotteryId]: true
-      }
-    });
-    const txn = await pickWinner({
-      args: [lotteryId]
-    });
-    if(typeof txn.data !== 'undefined'){
-      await pickWait({wait: txn.data.wait});
-    }
-  },[connected, pickWait, pickWinner, toast]);
 
-  useEffect(() => {
-    if(declareWinner){
-      setConfetti(300);
-      setTimeout(
-        () => setConfetti(0), 
-        20000
-      );
-    }
-  },[declareWinner])
+
+
+
 
   return (
    <>
-   {((connected) && (connectedAddr === manager)) && 
-    <Flex textAlign={"center"}
-        pt={8}
-        ml={20}
-        justifyContent={"flex-start"}
-        direction={"row"}
-        >
-      <Button colorScheme="blue" isLoading={startLWaitLoading} onClick={startLotteryHandler}>Start Lottery</Button>
-    </Flex>
-    }
      <Flex
       textAlign={"center"}
       pt={3}
@@ -433,11 +779,25 @@ export default function LotteryListing() {
       direction={"column"}
       width={"full"}
       >
-        {(confetti !== 0) && <Confetti numberOfPieces={confetti}/>} 
+
+        {/* Referral Information */}
+        {referralInfo && (
+          <Alert status="info" mb={4} borderRadius="md">
+            <AlertIcon />
+            <Box>
+              <Text fontWeight="bold">{referralInfo.message}</Text>
+              <Text fontSize="sm" color="gray.600">
+                The referrer will earn commission from your ticket purchase
+              </Text>
+            </Box>
+          </Alert>
+        )}
         
-       { (!isLoading) ?
-        <>
-          {allLotteryIds.length && !hasError?
+        {loading ? (
+          <Spinner loading size={40} applyPadding/>
+        ) : (
+          <>
+            {gameInfo ? (
               <SimpleGrid
                 p={4}
                 columns={{ base: 1, xl: 3 }}
@@ -445,22 +805,25 @@ export default function LotteryListing() {
                 mt={8}
                 ml={4}
               >
-                
-                {allLotteryIds.map((data, index) =>(
-                  <Lottery index={index} key={index} lotteryId={data} enterLotteryHandler={enterLotteryHandler} entryBtnLoaders={entryBtnLoaders} winBtnLoaders={winBtnLoaders} pickWinnerHandler={pickWinnerHandler} setDeclareWinner={setDeclareWinner}/>
-                ))}
-              </SimpleGrid>:
-
+                <Lottery 
+                  index={0} 
+                  key={0} 
+                  lotteryId={gameInfo.game} 
+                  enterLotteryHandler={enterLotteryHandler} 
+                  entryBtnLoaders={entryBtnLoaders} 
+                  selectedGame={selectedGame}
+                  gameInfo={gameInfo}
+                  loading={loading}
+                  transactionHashes={transactionHashes}
+                />
+              </SimpleGrid>
+            ) : (
               <Stack direction="row" alignItems="center" justifyContent={'center'} pt="8">
-                <Text p="10">No Active Lotteries Currently</Text>
+                <Text p="10">No Game Selected</Text>
               </Stack>
-            }
-              
-        </>
-      
-       : <Spinner loading size={40} applyPadding/>}
-       {/* <LotteryDetailModal isOpen={isOpen} onClose={onClose} lId={modalLotteryId} data={details} isDetailLoading={isDetailLoading} /> */}
-       <ToastMessage message={hasError} toastType="error"/>
+            )}
+          </>
+        )}
     </Flex>
    </>
   );

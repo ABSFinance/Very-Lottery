@@ -10,7 +10,8 @@ import {
     Button,
     Text,
     List,
-    ListItem
+    ListItem,
+    Box
   } from '@chakra-ui/react'
 import Spinner from './Spinner'
   
@@ -32,7 +33,9 @@ const LotteryDetailModal = ({isOpen, onClose, lId, data, isDetailLoading}) => {
                       <Text as={'span'} fontWeight={'bold'}>
                         Ticket Price:
                       </Text>{' '}
-                      {data[lId]['ticketPrice']} ether
+                      <Text>
+                        {data[lId]['ticketPrice']} VERY
+                      </Text>
                     </ListItem>
                     <ListItem>
                       <Text as={'span'} fontWeight={'bold'}>
@@ -44,7 +47,12 @@ const LotteryDetailModal = ({isOpen, onClose, lId, data, isDetailLoading}) => {
                       <Text as={'span'} fontWeight={'bold'}>
                         Current Price Pool:
                       </Text>{' '}
-                      {data[lId]['pricePool']} ether
+                      <Box>
+                        <Text fontWeight="bold">Price Pool:</Text>
+                        <Text>
+                          {data[lId]['pricePool']} VERY
+                        </Text>
+                      </Box>
                     </ListItem>
                   </List>
                   :

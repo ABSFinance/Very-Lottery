@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {
     Box,
     Flex,
@@ -8,10 +8,9 @@ import {
     StatNumber,
     useColorModeValue
   } from '@chakra-ui/react';
-import { useSelector } from 'react-redux';
+
 import useLotteryContract from "../hooks/useLotteryContract";
-import { checkIfLoading, checkIfError } from '../redux/reducers/selector';
-import ToastMessage from './ToastMessage';
+import { ethers } from 'ethers';
 
   function StatsCard(props) {
     const { title, stat } = props;
@@ -37,27 +36,51 @@ import ToastMessage from './ToastMessage';
     );
   }
   
-  export default function LotteryStats() {  
-    const { getLotteryManagerAddress, getLotteryAllowedCount } = useLotteryContract();
-    const {manager, allowedCount}= useSelector(state => state.lottery);
-    const loadingState = useSelector(state => state.loading);
-    const isLoadingManger = checkIfLoading(loadingState, 'FETCH_LOTTERY_MANAGER')
-    const errorFetchingManager = checkIfError(loadingState,'FETCH_LOTTERY_MANAGER');
-
-    const isLoadingAllowedCount = checkIfLoading(loadingState, 'FETCHING_ALLOWED_COUNT')
-    const errorFetchingAllowedCount = checkIfError(loadingState,'FETCHING_ALLOWED_COUNT');
+  export default function LotteryStats({ selectedGame }) {  
+    const contractAddress = selectedGame?.address;
+    const { contract } = useLotteryContract(contractAddress);
+    const [gameInfo, setGameInfo] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-      (async()=>{
-          await getLotteryManagerAddress();
-      })()
-    },[])
-
-    useEffect(() => {
-      (async()=>{
-          await getLotteryAllowedCount();
-      })()
-    },[])
+      let isMounted = true;
+      
+      if (contract && selectedGame) {
+        const fetchGameInfo = async () => {
+          setLoading(true);
+          try {
+            const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
+              contract.game(),
+              contract.ticketPrice(),
+              contract.isActive(),
+              contract.getPlayedGamePlayers(),
+              contract.getPlayedGameJackpot()
+            ]);
+            
+            if (isMounted) {
+              setGameInfo({
+                game: game.toString(),
+                ticketPrice: ethers.utils.formatEther(ticketPrice),
+                isActive,
+                players: players.toString(),
+                jackpot: ethers.utils.formatEther(jackpot)
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching game info:', error);
+          }
+          if (isMounted) {
+            setLoading(false);
+          }
+        };
+        
+        fetchGameInfo();
+      }
+      
+      return () => {
+        isMounted = false;
+      };
+    }, [contract, selectedGame]);
 
 
     return (
@@ -65,26 +88,31 @@ import ToastMessage from './ToastMessage';
         <Box maxW="7xl" mx={'auto'} pt={5} px={{ base: 2, sm: 12, md: 17 }}>
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 5, lg: 8 }}>
             <StatsCard
-              title={'Lottery Managed By'}
-              stat={
-                (isLoadingManger)?'Loading...':
-                  (manager && !errorFetchingManager) && manager
-              }
+              title={'Current Game'}
+              stat={loading ? 'Loading...' : (gameInfo?.game || 'N/A')}
             />
             <StatsCard
-              title={'Total Players Allowed Per Lottery'}
-              stat={
-                (isLoadingAllowedCount)?'Loading...':
-                  (allowedCount && !errorFetchingAllowedCount) && allowedCount
-              }
+              title={'Ticket Price'}
+              stat={loading ? 'Loading...' : (gameInfo?.ticketPrice ? `${gameInfo.ticketPrice} VERY` : 'N/A')}
             />
             <StatsCard
-              title={'LOTTERY ADDRESS'}
-              stat={process.env.REACT_APP_LOTTERY_CONTRACT}
+              title={'Active Players'}
+              stat={loading ? 'Loading...' : (gameInfo?.players || 'N/A')}
+            />
+            <StatsCard
+              title={'Current Jackpot'}
+              stat={loading ? 'Loading...' : (gameInfo?.jackpot ? `${gameInfo.jackpot} VERY` : 'N/A')}
+            />
+            <StatsCard
+              title={'Game Status'}
+              stat={loading ? 'Loading...' : (gameInfo?.isActive ? 'Active' : 'Inactive')}
+            />
+            <StatsCard
+              title={'Contract Address'}
+              stat={selectedGame?.address || 'N/A'}
             />
           </SimpleGrid>
         </Box>
-        <ToastMessage message={errorFetchingManager} toastType="error"/>
       </>
     );
   }

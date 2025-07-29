@@ -6,6 +6,7 @@ const messages = {
 
 const eventMessages = {
     "LotteryCreated": "New Lottery Has Been Created Successfully",
+    "Ticket": "You have successfully entered the lottery",
     "NewLotteryPlayer":"You have successfully entered the lottery",
     "RandomnessRequested" : "Winner will be announced within 60secs"
 }

@@ -18,7 +18,7 @@ const provider = providers.getDefaultProvider(process.env.REACT_APP_PROVIDER_URL
 
 const connector = [
   new InjectedConnector({
-    chains: defaultChains.filter(c => c.id === 4),
+    chains: defaultChains.filter(c => c.id === 4613),
     //options: { shimDisconnect: true }
   })
 ]

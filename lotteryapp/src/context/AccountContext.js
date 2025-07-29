@@ -40,7 +40,7 @@ export const AccountProvider = ({ children }) => {
   const checkChain = (cId) => {
     const connectedNetwork = getSupportedNetworks(cId)
     if(typeof connectedNetwork == 'undefined'){
-      setAccountErrorMessage('Please Connect To Rinkeby Test Network');
+      setAccountErrorMessage('Please Connect To Verynet Network (4613)');
       setAllowSignIn(false);
       setNetworkName('')
       disconnect();
@@ -83,8 +83,8 @@ function getSupportedNetworks(chainId){
   const networks = {
     1337:"Localhost 8545",
     31337:"Localhost 8545",
-    4: "Rinkeby",
-    '0x4': "Rinkeby"
+    4613: "Verynet",
+    '0x1205': "Verynet"
   };
   return networks[chainId];
 }

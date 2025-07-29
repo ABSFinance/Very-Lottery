@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import * as wagmi from 'wagmi';
 import {useProvider, useSigner,} from 'wagmi';
 import {useDispatch} from 'react-redux';
 import {ethers} from 'ethers';
-import LotteryContract from '../contracts/Lottery.json';
 import { startAction, stopAction, errorAction } from '../redux/reducers/uiActions';
 import { 
     FETCHING_LOTTERY_DETAIL,
@@ -18,18 +17,44 @@ import {
 } from '../redux/actionConstants';
 
 
-const useLotteryContract = () => {
+const useLotteryContract = (contractAddress = null) => {
     const  dispatch = useDispatch();
 
     const [signer] = useSigner();
 
     const provider = useProvider();
 
-    const contract = wagmi.useContract({
-        addressOrName: process.env.REACT_APP_LOTTERY_CONTRACT,
-        contractInterface: LotteryContract.abi,
+    // Use provided contract address
+    const address = contractAddress || "0x0000000000000000000000000000000000000000";
+
+    // Cryptolotto contract interface - actual functions
+    const contractInterface = [
+        "function game() view returns (uint)",
+        "function ticketPrice() view returns (uint)",
+        "function isActive() view returns (bool)",
+        "function getPlayedGamePlayers() view returns (uint)",
+        "function getPlayedGameJackpot() view returns (uint)",
+        "function getPlayersInGame(uint) view returns (uint)",
+        "function getGameJackpot(uint) view returns (uint)",
+        "function buyTicket(address) payable",
+        "function start()",
+        "function toogleActive()",
+        "function changeTicketPrice(uint)",
+        "function ownable() view returns (address)",
+        "function stats() view returns (address)",
+        "function referralInstance() view returns (address)",
+        "function fundsDistributor() view returns (address)",
+        "event Ticket(address indexed _address, uint indexed _game, uint _number, uint _time)",
+        "event Game(uint _game, uint indexed _time)"
+    ];
+
+    const contractConfig = useMemo(() => ({
+        addressOrName: address,
+        contractInterface: contractInterface,
         signerOrProvider: signer.data || provider
-    });
+    }), [address, signer.data, provider]);
+
+    const contract = wagmi.useContract(contractConfig);
 
 
       
