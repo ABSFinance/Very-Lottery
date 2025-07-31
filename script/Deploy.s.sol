@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import "forge-std/Script.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "../contracts/games/Cryptolotto1Day.sol";
-import "../contracts/games/Cryptolotto7Days.sol";
-import "../contracts/analytics/StatsAggregator.sol";
-import "../contracts/distribution/FundsDistributor.sol";
-import "../contracts/distribution/CryptolottoReferral.sol";
-import "../contracts/managers/TreasuryManager.sol";
-import "../contracts/core/SimpleOwnable.sol";
+import "../contracts/modules/lottery/Cryptolotto1Day.sol";
+import "../contracts/modules/lottery/Cryptolotto7Days.sol";
+import "../contracts/modules/analytics/StatsAggregator.sol";
+import "../contracts/modules/treasury/FundsDistributor.sol";
+import "../contracts/modules/treasury/CryptolottoReferral.sol";
+import "../contracts/modules/treasury/TreasuryManager.sol";
+import "../contracts/modules/lottery/SimpleOwnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract DeployScript is Script {

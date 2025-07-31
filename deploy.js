@@ -1,104 +1,135 @@
-const { ethers } = require('ethers');
+const { ethers } = require("hardhat");
 
-// Contract ABIs (simplified for deployment)
-const OWNABLE_ABI = [
-  "constructor()"
-];
+async function main() {
+    const [deployer] = await ethers.getSigners();
+    console.log("Deploying contracts with the account:", deployer.address);
 
-const FUNDS_DISTRIBUTOR_ABI = [
-  "constructor()"
-];
+    // 1. ContractRegistry 배포
+    console.log("Deploying ContractRegistry...");
+    const ContractRegistry = await ethers.getContractFactory("ContractRegistry");
+    const contractRegistry = await ContractRegistry.deploy();
+    await contractRegistry.waitForDeployment();
+    console.log("ContractRegistry deployed to:", await contractRegistry.getAddress());
 
-const STATS_AGGREGATOR_ABI = [
-  "constructor()"
-];
-
-const REFERRAL_ABI = [
-  "constructor(address owner)"
-];
-
-const CRYPTOLOTTO_ABI = [
-  "constructor(address ownableContract, address distributor, address statsA, address referralSystem)"
-];
-
-async function deployContracts() {
-  try {
-    // Connect to provider
-    const provider = new ethers.providers.JsonRpcProvider('https://rpc.verylabs.io');
+    // 2. 기본 컨트랙트들 배포
+    console.log("Deploying basic contracts...");
     
-    // Get private key from environment
-    const privateKey = process.env.PRIVATE_KEY;
-    if (!privateKey) {
-      console.error('Please set PRIVATE_KEY environment variable');
-      return;
-    }
-    
-    const wallet = new ethers.Wallet(privateKey, provider);
-    console.log('Deploying from address:', wallet.address);
-    
-    // Deploy Ownable
-    console.log('Deploying Ownable...');
-    const Ownable = new ethers.ContractFactory(OWNABLE_ABI, [], wallet);
-    const ownable = await Ownable.deploy();
-    await ownable.deployed();
-    console.log('Ownable deployed at:', ownable.address);
-    
-    // Deploy FundsDistributor
-    console.log('Deploying FundsDistributor...');
-    const FundsDistributor = new ethers.ContractFactory(FUNDS_DISTRIBUTOR_ABI, [], wallet);
-    const fundsDistributor = await FundsDistributor.deploy();
-    await fundsDistributor.deployed();
-    console.log('FundsDistributor deployed at:', fundsDistributor.address);
-    
-    // Deploy StatsAggregator
-    console.log('Deploying StatsAggregator...');
-    const StatsAggregator = new ethers.ContractFactory(STATS_AGGREGATOR_ABI, [], wallet);
+    const SimpleOwnable = await ethers.getContractFactory("SimpleOwnable");
+    const simpleOwnable = await SimpleOwnable.deploy();
+    await simpleOwnable.waitForDeployment();
+    console.log("SimpleOwnable deployed to:", await simpleOwnable.getAddress());
+
+    const TreasuryManager = await ethers.getContractFactory("TreasuryManager");
+    const treasuryManager = await TreasuryManager.deploy();
+    await treasuryManager.waitForDeployment();
+    console.log("TreasuryManager deployed to:", await treasuryManager.getAddress());
+
+    const CryptolottoReferral = await ethers.getContractFactory("CryptolottoReferral");
+    const cryptolottoReferral = await CryptolottoReferral.deploy();
+    await cryptolottoReferral.waitForDeployment();
+    console.log("CryptolottoReferral deployed to:", await cryptolottoReferral.getAddress());
+
+    const StatsAggregator = await ethers.getContractFactory("StatsAggregator");
     const statsAggregator = await StatsAggregator.deploy();
-    await statsAggregator.deployed();
-    console.log('StatsAggregator deployed at:', statsAggregator.address);
+    await statsAggregator.waitForDeployment();
+    console.log("StatsAggregator deployed to:", await statsAggregator.getAddress());
+
+    const FundsDistributor = await ethers.getContractFactory("FundsDistributor");
+    const fundsDistributor = await FundsDistributor.deploy();
+    await fundsDistributor.waitForDeployment();
+    console.log("FundsDistributor deployed to:", await fundsDistributor.getAddress());
     
-    // Deploy CryptolottoReferral
-    console.log('Deploying CryptolottoReferral...');
-    const CryptolottoReferral = new ethers.ContractFactory(REFERRAL_ABI, [], wallet);
-    const referral = await CryptolottoReferral.deploy(ownable.address);
-    await referral.deployed();
-    console.log('CryptolottoReferral deployed at:', referral.address);
+    // 3. ContractRegistry에 컨트랙트들 등록
+    console.log("Registering contracts in ContractRegistry...");
     
-    // Deploy Cryptolotto1Day
-    console.log('Deploying Cryptolotto1Day...');
-    const Cryptolotto1Day = new ethers.ContractFactory(CRYPTOLOTTO_ABI, [], wallet);
-    const cryptolotto1Day = await Cryptolotto1Day.deploy(
-      ownable.address,
-      fundsDistributor.address,
-      statsAggregator.address,
-      referral.address
+    const contractNames = [
+        "TreasuryManager",
+        "CryptolottoReferral", 
+        "StatsAggregator",
+        "FundsDistributor",
+        "SimpleOwnable"
+    ];
+    
+    const contractAddresses = [
+        await treasuryManager.getAddress(),
+        await cryptolottoReferral.getAddress(),
+        await statsAggregator.getAddress(),
+        await fundsDistributor.getAddress(),
+        await simpleOwnable.getAddress()
+    ];
+
+    await contractRegistry.registerBatchContracts(contractNames, contractAddresses);
+    console.log("Contracts registered in ContractRegistry");
+
+    // 4. 게임 구현체들 배포
+    console.log("Deploying game implementations...");
+    
+    const Cryptolotto1Day = await ethers.getContractFactory("Cryptolotto1Day");
+    const cryptolotto1DayImpl = await Cryptolotto1Day.deploy();
+    await cryptolotto1DayImpl.waitForDeployment();
+    console.log("Cryptolotto1Day implementation deployed to:", await cryptolotto1DayImpl.getAddress());
+
+    const Cryptolotto7Days = await ethers.getContractFactory("Cryptolotto7Days");
+    const cryptolotto7DaysImpl = await Cryptolotto7Days.deploy();
+    await cryptolotto7DaysImpl.waitForDeployment();
+    console.log("Cryptolotto7Days implementation deployed to:", await cryptolotto7DaysImpl.getAddress());
+    
+    // 5. GameFactory 배포
+    console.log("Deploying GameFactory...");
+    const GameFactory = await ethers.getContractFactory("GameFactory");
+    const gameFactory = await GameFactory.deploy();
+    await gameFactory.waitForDeployment();
+    console.log("GameFactory deployed to:", await gameFactory.getAddress());
+
+    // 6. GameFactory 초기화
+    console.log("Initializing GameFactory...");
+    await gameFactory.initialize(
+        deployer.address,
+        await simpleOwnable.getAddress(),
+        await statsAggregator.getAddress(),
+        await cryptolottoReferral.getAddress(),
+        await fundsDistributor.getAddress(),
+        await cryptolotto1DayImpl.getAddress(),
+        await cryptolotto7DaysImpl.getAddress(),
+        await contractRegistry.getAddress()
     );
-    await cryptolotto1Day.deployed();
-    console.log('Cryptolotto1Day deployed at:', cryptolotto1Day.address);
-    
-    // Deploy Cryptolotto7Days
-    console.log('Deploying Cryptolotto7Days...');
-    const Cryptolotto7Days = new ethers.ContractFactory(CRYPTOLOTTO_ABI, [], wallet);
-    const cryptolotto7Days = await Cryptolotto7Days.deploy(
-      ownable.address,
-      fundsDistributor.address,
-      statsAggregator.address,
-      referral.address
+    console.log("GameFactory initialized");
+
+    // 7. ContractRegistry에 게임 구현체들 등록
+    console.log("Registering game implementations in ContractRegistry...");
+    await contractRegistry.registerBatchContracts(
+        ["OneDayImplementation", "SevenDaysImplementation"],
+        [await cryptolotto1DayImpl.getAddress(), await cryptolotto7DaysImpl.getAddress()]
     );
-    await cryptolotto7Days.deployed();
-    console.log('Cryptolotto7Days deployed at:', cryptolotto7Days.address);
     
-    console.log('\n=== DEPLOYMENT SUMMARY ===');
-    console.log('Ownable:', ownable.address);
-    console.log('FundsDistributor:', fundsDistributor.address);
-    console.log('StatsAggregator:', statsAggregator.address);
-    console.log('CryptolottoReferral:', referral.address);
-    console.log('Cryptolotto1Day:', cryptolotto1Day.address);
-    console.log('Cryptolotto7Days:', cryptolotto7Days.address);
+    // 8. 배포 결과 출력
+    console.log("\n=== Deployment Summary ===");
+    console.log("ContractRegistry:", await contractRegistry.getAddress());
+    console.log("TreasuryManager:", await treasuryManager.getAddress());
+    console.log("CryptolottoReferral:", await cryptolottoReferral.getAddress());
+    console.log("StatsAggregator:", await statsAggregator.getAddress());
+    console.log("FundsDistributor:", await fundsDistributor.getAddress());
+    console.log("SimpleOwnable:", await simpleOwnable.getAddress());
+    console.log("Cryptolotto1Day Implementation:", await cryptolotto1DayImpl.getAddress());
+    console.log("Cryptolotto7Days Implementation:", await cryptolotto7DaysImpl.getAddress());
+    console.log("GameFactory:", await gameFactory.getAddress());
     
-  } catch (error) {
-    console.error('Deployment failed:', error);
-  }
+    // 9. ContractRegistry 검증
+    console.log("\n=== ContractRegistry Verification ===");
+    const treasuryAddress = await contractRegistry.getContract("TreasuryManager");
+    console.log("TreasuryManager from registry:", treasuryAddress);
+    console.log("Expected address:", await treasuryManager.getAddress());
+    console.log("Match:", treasuryAddress === await treasuryManager.getAddress());
+
+    const registeredCount = await contractRegistry.getContractCount();
+    console.log("Total registered contracts:", registeredCount.toString());
+
+    console.log("\nDeployment completed successfully!");
 }
 
-deployContracts(); 
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    }); 
