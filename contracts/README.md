@@ -16,8 +16,8 @@ graph TB
                 AT[AdToken.sol]
                 TR[TokenRegistry.sol]
                 SO[SimpleOwnable.sol]
-                BG <.. C1D
-                BG <.. C7D
+                BG --> C1D
+                BG --> C7D
             end
             subgraph "treasury/"
                 TM[TreasuryManager.sol]
@@ -36,7 +36,7 @@ graph TB
                 MS[MonitoringSystem.sol]
             end
             subgraph "security/"
-                // (보안 모듈 - 현재 비어있음)
+                %% (보안 모듈 - 현재 비어있음)
             end
         end
         subgraph "shared/"
@@ -83,7 +83,7 @@ graph TB
                 SO[StorageOptimizer.sol]
             end
             subgraph "libraries/"
-                // (공통 라이브러리들)
+                %% (공통 라이브러리들)
             end
         end
         subgraph "deployment/"
@@ -91,7 +91,7 @@ graph TB
                 GF[GameFactory.sol]
             end
             subgraph "proxies/"
-                // (프록시 관련 컨트랙트 - 현재 비어있음)
+                %% (프록시 관련 컨트랙트 - 현재 비어있음)
             end
             MG[Migrations.sol]
         end
