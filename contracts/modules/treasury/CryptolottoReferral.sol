@@ -1,379 +1,213 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-contract iOwnable {
-    function isAllowed(address) public view returns (bool) {}
-}
-
 /**
  * @title Cryptolotto Referral System
- *
- * @dev Cryptolotto takes 10% commission after each draw. Cryptolotto redistributes its earnings on:
- * @dev - salaries of Cryptolotto workers;
- * @dev - advertisement campaigns for constant growth of players;
- * @dev - security and maintenance of Cryptolotto servers;
- * @dev - work on future updates;
- * @dev - taxes in the state of residence of Cryptolotto;
- * @dev - Cryptolotto Referral System.
- *
- * @dev Cryptolotto Referral System (CRS) allows splitting the commission after each draw
- * @dev between Cryptolotto, Influencers, and Sales (optional) by establishing the two-level
- * @dev partnership program built on blockchain-based algorithms. The source code of the CRS
- * @dev is stored on the Github and can be checked by any party at any time.
- *
- * @dev Cryptolotto Referral System is represented by the two levels:
- * @dev - the influencer level;
- * @dev - the sales level.
- *
- * @dev The influencer is a media outlet, blogger, website or business which audience has high chances to engage with Cryptolotto.
- *
- * @dev The sales is a person or a company, who is constantly looking for new influencers to join the Cryptolotto Referral System.
- *
- * @dev Each referral partner is getting his part of a commission from each player, who joined the game by following referral's
- * @dev custom link. A commission is sent to an Influencer and Sales right after a player joins the game. Players are bonded to
- * @dev referrals forever and cannot be removed from the Cryptolotto Referral System. Influencer and Sales are added to the
- * @dev Cryptolotto Referral System forever and cannot be removed from it. Influencer and Sales are getting their part of a
- * @dev commission as long as players, who followed Influencer's link, are playing the Cryptolotto.
- **/
+ * @dev 단순화된 리퍼럴 시스템 - 티켓 구매 시에만 리퍼럴 주소를 파라미터로 받음
+ * @dev 파트너 등록 시스템 없이 즉시 리퍼럴 보상 지급
+ */
 contract CryptolottoReferral {
     /**
-     * @dev Write to log info about new partner.
-     *
-     * @param _address Partner address.
-     * @param _percent partner percent.
-     * @param _time Time when partner was added.
+     * @dev 리퍼럴 보상 지급 이벤트
+     * @param referrer 리퍼러 주소
+     * @param player 플레이어 주소
+     * @param amount 보상 금액
+     * @param timestamp 시간
      */
-    event NewPartner(address indexed _address, uint _percent, uint _time);
-
-    /**
-     * @dev Write to log info about new sales partner.
-     *
-     * @param _partnerAddress Partner address.
-     * @param _salesPartnerAddress Sales partner address.
-     * @param _percent Sales partner partner percent.
-     * @param _time Time when partner was added.
-     */
-    event NewSalesPartner(
-        address indexed _partnerAddress,
-        address indexed _salesPartnerAddress,
-        uint _percent,
-        uint _time
+    event ReferralRewardPaid(
+        address indexed referrer,
+        address indexed player,
+        uint256 amount,
+        uint256 timestamp
     );
 
     /**
-     * @dev Write to log info about new referral.
-     *
-     * @param _partner Partner address.
-     * @param _referral Referral address.
-     * @param _time Time when referral was added.
+     * @dev 리퍼럴 통계 업데이트 이벤트
+     * @param referrer 리퍼러 주소
+     * @param totalReferrals 총 리퍼럴 수
+     * @param totalRewards 총 보상 금액
+     * @param timestamp 시간
      */
-    event NewReferral(
-        address indexed _partner,
-        address indexed _referral,
-        uint _time
+    event ReferralStatsUpdated(
+        address indexed referrer,
+        uint256 totalReferrals,
+        uint256 totalRewards,
+        uint256 timestamp
     );
 
     /**
-     * @dev Write to log info about new game.
-     *
-     * @param _game Address of the game.
-     * @param _time Time when game was added.
+     * @dev 리퍼럴 보상 비율 (기본값: 2%)
      */
-    event NewGame(address _game, uint _time);
+    uint256 public referralRewardPercent = 2; // 2%
 
     /**
-     * @dev Write to log info about partner removal.
-     *
-     * @param _address Partner address.
-     * @param _time Time when partner was removed.
+     * @dev 리퍼럴 통계 구조체
      */
-    event PartnerRemoved(address indexed _address, uint _time);
-
-    /**
-     * @dev Write to log info about game removal.
-     *
-     * @param _game Game address.
-     * @param _time Time when game was removed.
-     */
-    event GameRemoved(address _game, uint _time);
-
-    /**
-     * @dev Ownable contract.
-     */
-    iOwnable ownable;
-
-    /**
-     * @dev Store referrals.
-     */
-    mapping(address => address) referrals;
-
-    /**
-     * @dev Store cryptolotto partners.
-     */
-    mapping(address => uint8) partners;
-
-    /**
-     * @dev Store list of addresses(games) that can add referrals.
-     */
-    mapping(address => bool) allowedGames;
-
-    /**
-     * @dev Store sales partners.
-     */
-    mapping(address => address) salesPartners;
-
-    /**
-     * @dev Store cryptolotto sales partners percents.
-     */
-    mapping(address => mapping(address => uint8)) salesPartner;
-
-    /**
-     * @dev Initialize contract, Create ownable instances.
-     *
-     * @param owner The address of previously deployed ownable contract.
-     */
-    constructor(address owner) {
-        require(owner != address(0), "Invalid owner address");
-        ownable = iOwnable(owner);
+    struct ReferralStats {
+        uint256 totalReferrals; // 총 리퍼럴 수
+        uint256 totalRewards; // 총 보상 금액
+        uint256 lastRewardTime; // 마지막 보상 시간
     }
 
     /**
-     * @dev Get partner by referral.
-     *
-     * @param player Referral address.
+     * @dev 리퍼럴 통계 매핑
      */
-    function getPartnerByReferral(
-        address player
-    ) public view returns (address) {
-        return referrals[player];
+    mapping(address => ReferralStats) public referralStats;
+
+    /**
+     * @dev 소유자 주소
+     */
+    address public owner;
+
+    /**
+     * @dev 소유자 변경 이벤트
+     */
+    event OwnerChanged(address indexed oldOwner, address indexed newOwner);
+
+    /**
+     * @dev 보상 비율 변경 이벤트
+     */
+    event ReferralRewardPercentUpdated(
+        uint256 oldPercent,
+        uint256 newPercent,
+        uint256 timestamp
+    );
+
+    /**
+     * @dev 생성자
+     */
+    constructor() {
+        owner = msg.sender;
     }
 
     /**
-     * @dev Get partner percent.
-     *
-     * @param partner Partner address.
+     * @dev 소유자만 실행 가능한 수정자
      */
-    function getPartnerPercent(address partner) public view returns (uint8) {
-        return partners[partner];
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
     }
 
     /**
-     * @dev Get partner percent by referral.
-     *
-     * @param referral Refaral address.
+     * @dev 소유자 변경
+     * @param newOwner 새로운 소유자 주소
      */
-    function getPartnerPercentByReferral(
-        address referral
-    ) public view returns (uint8) {
-        address partner = getPartnerByReferral(referral);
-
-        return getPartnerPercent(partner);
+    function changeOwner(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "Invalid new owner address");
+        address oldOwner = owner;
+        owner = newOwner;
+        emit OwnerChanged(oldOwner, newOwner);
     }
 
     /**
-     * @dev Get sales partner percent by partner address.
-     *
-     * @param partner Partner address.
+     * @dev 리퍼럴 보상 비율 변경
+     * @param newPercent 새로운 보상 비율 (0-100)
      */
-    function getSalesPartnerPercent(
-        address partner
-    ) public view returns (uint8) {
-        return salesPartner[salesPartners[partner]][partner];
+    function setReferralRewardPercent(uint256 newPercent) external onlyOwner {
+        require(newPercent <= 20, "Reward percent cannot exceed 20%");
+        uint256 oldPercent = referralRewardPercent;
+        referralRewardPercent = newPercent;
+        emit ReferralRewardPercentUpdated(
+            oldPercent,
+            newPercent,
+            block.timestamp
+        );
     }
 
     /**
-     * @dev Get sales partner address by partner address.
-     *
-     * @param partner Partner address.
+     * @dev 리퍼럴 보상 처리 (티켓 구매 시 호출)
+     * @param referrer 리퍼러 주소
+     * @param ticketAmount 티켓 구매 금액
+     * @return 보상 금액
      */
-    function getSalesPartner(address partner) public view returns (address) {
-        return salesPartners[partner];
-    }
+    function processReferralReward(
+        address referrer,
+        uint256 ticketAmount
+    ) external payable returns (uint256) {
+        // 리퍼러가 유효한 주소인지 확인
+        require(referrer != address(0), "Invalid referrer address");
+        require(referrer != msg.sender, "Cannot refer yourself");
+        require(ticketAmount > 0, "Invalid ticket amount");
 
-    /**
-     * @dev Check if address is a partner.
-     *
-     * @param partner Partner address.
-     */
-    function isPartner(address partner) public view returns (bool) {
-        return partners[partner] > 0;
-    }
+        // 보상 금액 계산
+        uint256 rewardAmount = (ticketAmount * referralRewardPercent) / 100;
 
-    /**
-     * @dev Check if address is an allowed game.
-     *
-     * @param game Game address.
-     */
-    function isAllowedGame(address game) public view returns (bool) {
-        return allowedGames[game];
-    }
+        // 보상이 0보다 큰 경우에만 처리
+        if (rewardAmount > 0) {
+            // 리퍼러에게 보상 지급
+            (bool success, ) = payable(referrer).call{value: rewardAmount}("");
+            require(success, "Referral reward transfer failed");
 
-    /**
-     * @dev Get all partners (basic implementation)
-     * Note: For production, consider using a more sophisticated data structure
-     */
-    function getPartnerStats(
-        address partner
-    )
-        public
-        view
-        returns (
-            uint8 percent,
-            address _salesPartner,
-            uint8 salesPercent,
-            bool isActive
-        )
-    {
-        address salesPartnerAddr = salesPartners[partner];
-        uint8 salesPercentValue = 0;
-        if (salesPartnerAddr != address(0)) {
-            salesPercentValue = getSalesPartnerPercent(partner);
+            // 리퍼러 통계 업데이트
+            ReferralStats storage stats = referralStats[referrer];
+            stats.totalReferrals++;
+            stats.totalRewards += rewardAmount;
+            stats.lastRewardTime = block.timestamp;
+
+            // 이벤트 발생
+            emit ReferralRewardPaid(
+                referrer,
+                msg.sender,
+                rewardAmount,
+                block.timestamp
+            );
+            emit ReferralStatsUpdated(
+                referrer,
+                stats.totalReferrals,
+                stats.totalRewards,
+                block.timestamp
+            );
         }
 
-        return (
-            partners[partner],
-            salesPartnerAddr,
-            salesPercent,
-            partners[partner] > 0
-        );
+        return rewardAmount;
     }
 
     /**
-     * @dev Get referral count for a partner
+     * @dev 리퍼러 통계 조회
+     * @param referrer 리퍼러 주소
+     * @return totalReferrals 총 리퍼럴 수
+     * @return totalRewards 총 보상 금액
+     * @return lastRewardTime 마지막 보상 시간
      */
-    function getReferralCount(address _partner) public view returns (uint) {
-        uint count = 0;
-        // This is a simplified implementation
-        // In production, you'd want to maintain a separate mapping for this
-        return count;
+    function getReferralStats(
+        address referrer
+    )
+        external
+        view
+        returns (
+            uint256 totalReferrals,
+            uint256 totalRewards,
+            uint256 lastRewardTime
+        )
+    {
+        ReferralStats storage stats = referralStats[referrer];
+        return (stats.totalReferrals, stats.totalRewards, stats.lastRewardTime);
     }
 
     /**
-     * @dev Create partner.
-     *
-     * @param partner Partner address.
-     * @param percent Partner percent.
+     * @dev 리퍼럴 보상 비율 조회
+     * @return 현재 리퍼럴 보상 비율
      */
-    function addPartner(address partner, uint8 percent) public {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        require(percent > 0 && percent <= 100, "Invalid percent");
-        require(partner != address(0), "Invalid partner address");
-        require(partners[partner] == 0, "Partner already exists");
-
-        partners[partner] = percent;
-
-        emit NewPartner(partner, percent, block.timestamp);
+    function getReferralRewardPercent() external view returns (uint256) {
+        return referralRewardPercent;
     }
 
     /**
-     * @dev Remove partner.
-     *
-     * @param partner Partner address.
+     * @dev 컨트랙트에 전송된 ETH 인출 (소유자만)
      */
-    function removePartner(address partner) public {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        require(partner != address(0), "Invalid partner address");
-        require(partners[partner] > 0, "Partner does not exist");
+    function withdrawContractBalance() external onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No balance to withdraw");
 
-        delete partners[partner];
-        delete salesPartners[partner];
-
-        emit PartnerRemoved(partner, block.timestamp);
+        (bool success, ) = payable(owner).call{value: balance}("");
+        require(success, "Withdrawal failed");
     }
 
     /**
-     * @dev Create sales partner.
-     *
-     * @param partner Partner address.
-     * @param salesAddress Sales partner address.
-     * @param percent Sales partner percent.
+     * @dev 컨트랙트 잔액 조회
+     * @return 컨트랙트 잔액
      */
-    function addSalesPartner(
-        address partner,
-        address salesAddress,
-        uint8 percent
-    ) public {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        require(percent > 0 && percent <= 100, "Invalid percent");
-        require(
-            partner != address(0) && salesAddress != address(0),
-            "Invalid addresses"
-        );
-        require(
-            salesPartner[salesAddress][partner] == 0,
-            "Sales partner already exists"
-        );
-        require(
-            getSalesPartnerPercent(partner) == 0,
-            "Partner already has sales partner"
-        );
-        require(partners[partner] > 0, "Partner does not exist");
-
-        salesPartner[salesAddress][partner] = percent;
-        salesPartners[partner] = salesAddress;
-
-        emit NewSalesPartner(partner, salesAddress, percent, block.timestamp);
-    }
-
-    /**
-     * @dev Add new game which can create new referrals.
-     *
-     * @param game Game address.
-     */
-    function addGame(address game) public {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        require(game != address(0), "Invalid game address");
-        require(!allowedGames[game], "Game already allowed");
-
-        allowedGames[game] = true;
-
-        emit NewGame(game, block.timestamp);
-    }
-
-    /**
-     * @dev Remove game from allowed games.
-     *
-     * @param game Game address.
-     */
-    function removeGame(address game) public {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        require(game != address(0), "Invalid game address");
-        require(allowedGames[game], "Game not allowed");
-
-        allowedGames[game] = false;
-
-        emit GameRemoved(game, block.timestamp);
-    }
-
-    /**
-     * @dev Add new referral.
-     *
-     * @param referral Referral address.
-     * @param partner Partner address.
-     */
-    function addReferral(address partner, address referral) public {
-        require(allowedGames[msg.sender], "Not an allowed game");
-        require(
-            partner != address(0) && referral != address(0),
-            "Invalid addresses"
-        );
-        require(partners[partner] > 0, "Partner does not exist");
-        require(referrals[referral] == address(0), "Referral already exists");
-
-        referrals[referral] = partner;
-
-        emit NewReferral(partner, referral, block.timestamp);
-    }
-
-    function processReferralSystem(
-        address _salesPartner,
-        address referral
-    ) external {
-        // This function is not fully implemented in the provided file,
-        // so it's left as a placeholder.
-        // In a real scenario, this would involve calculating commissions
-        // and distributing them to the relevant parties (Cryptolotto, Influencers, Sales).
-        // For now, it just logs the event.
-        emit NewReferral(msg.sender, referral, block.timestamp);
+    function getContractBalance() external view returns (uint256) {
+        return address(this).balance;
     }
 }

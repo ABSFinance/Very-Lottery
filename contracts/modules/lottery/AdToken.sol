@@ -2,14 +2,16 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title AdToken
  * @dev 광고 로또용 AD 토큰
  * @dev 사용자가 광고를 시청하거나 특정 활동을 통해 AD 토큰을 획득할 수 있습니다.
+ * @dev Ad Lottery 티켓 구매 시 소각되는 유틸리티 토큰입니다.
  */
-contract AdToken is ERC20, Ownable {
+contract AdToken is ERC20, ERC20Burnable, Ownable {
     /**
      * @dev 광고 시청 보상 (기본값: 1 AD)
      */
@@ -83,6 +85,7 @@ contract AdToken is ERC20, Ownable {
     function watchAd(address viewer) external {
         require(!emergencyPaused, "Contract is emergency paused");
         require(viewer != address(0), "Invalid viewer address");
+        require(viewer != address(this), "Cannot watch ad for contract");
         require(
             balanceOf(msg.sender) >= adReward,
             "Insufficient tokens for reward"
@@ -106,7 +109,7 @@ contract AdToken is ERC20, Ownable {
 
         // 기록 업데이트
         lastAdWatchTime[viewer] = block.timestamp;
-        totalAdsWatched[viewer] += 1;
+        totalAdsWatched[viewer]++;
         totalRewardsEarned[viewer] += adReward;
         dailyRewards[viewer] += adReward;
 
@@ -114,18 +117,20 @@ contract AdToken is ERC20, Ownable {
     }
 
     /**
-     * @dev 일일 보상 리셋 (필요시)
+     * @dev 일일 보상 리셋 확인
      */
     function _resetDailyRewardIfNeeded(address user) internal {
-        if (block.timestamp >= lastRewardReset[user] + 86400) {
-            // 24 hours
+        uint256 lastReset = lastRewardReset[user];
+        uint256 currentDay = block.timestamp / 86400; // 24시간을 하루로 계산
+
+        if (lastReset < currentDay) {
             dailyRewards[user] = 0;
-            lastRewardReset[user] = block.timestamp;
+            lastRewardReset[user] = currentDay;
         }
     }
 
     /**
-     * @dev 광고 시청 보상 금액 변경 (관리자만)
+     * @dev 광고 보상 금액 업데이트
      */
     function setAdReward(uint256 newReward) external onlyOwner {
         require(newReward > 0, "Reward must be greater than 0");
@@ -134,46 +139,33 @@ contract AdToken is ERC20, Ownable {
     }
 
     /**
-     * @dev 사용자의 광고 시청 정보 조회
+     * @dev 사용자 통계 조회
      */
-    function getAdStats(
-        address viewer
+    function getUserStats(
+        address user
     )
-        public
+        external
         view
         returns (
             uint256 lastWatch,
             uint256 totalWatched,
-            uint256 nextAvailableTime,
-            uint256 totalRewards,
-            uint256 dailyRewardUsed,
-            uint256 dailyRewardLimit
+            uint256 totalEarned,
+            uint256 dailyReward,
+            uint256 lastReset,
+            bool canWatchNow
         )
     {
+        uint256 timeSinceLastWatch = block.timestamp - lastAdWatchTime[user];
+        canWatchNow = timeSinceLastWatch >= 3600;
+
         return (
-            lastAdWatchTime[viewer],
-            totalAdsWatched[viewer],
-            lastAdWatchTime[viewer] + 3600,
-            totalRewardsEarned[viewer],
-            dailyRewards[viewer],
-            maxRewardPerDay
+            lastAdWatchTime[user],
+            totalAdsWatched[user],
+            totalRewardsEarned[user],
+            dailyRewards[user],
+            lastRewardReset[user],
+            canWatchNow
         );
-    }
-
-    /**
-     * @dev 광고 시청 가능 여부 확인
-     */
-    function canWatchAd(address viewer) public view returns (bool) {
-        if (emergencyPaused) return false;
-        if (block.timestamp < lastAdWatchTime[viewer] + 3600) return false;
-
-        // 일일 한도 확인
-        uint256 currentDailyReward = dailyRewards[viewer];
-        if (block.timestamp >= lastRewardReset[viewer] + 86400) {
-            currentDailyReward = 0;
-        }
-
-        return currentDailyReward + adReward <= maxRewardPerDay;
     }
 
     /**
@@ -183,19 +175,73 @@ contract AdToken is ERC20, Ownable {
         external
         view
         returns (
-            uint256 totalSupply,
-            uint256 currentBalance,
-            uint256 adReward,
+            uint256 totalSupplyAmount,
+            uint256 adRewardAmount,
             uint256 maxDailyReward,
-            bool isEmergencyPaused
+            bool isEmergencyPaused,
+            uint256 totalHolders
         )
     {
         return (
             ERC20.totalSupply(),
-            address(this).balance,
             adReward,
             maxRewardPerDay,
-            emergencyPaused
+            emergencyPaused,
+            0 // 실제 구현에서는 holder 수를 계산해야 함
         );
+    }
+
+    /**
+     * @dev 긴급 상황에서 토큰 인출
+     */
+    function emergencyWithdraw(address to) external onlyOwner {
+        require(
+            emergencyPaused,
+            "Contract must be paused for emergency withdrawal"
+        );
+        require(to != address(0), "Invalid recipient address");
+        require(to != address(this), "Cannot withdraw to self");
+
+        uint256 balance = balanceOf(address(this));
+        if (balance > 0) {
+            _transfer(address(this), to, balance);
+        }
+    }
+
+    /**
+     * @dev 토큰 소각 (Ad Lottery용)
+     */
+    function burnForLottery(address from, uint256 amount) external {
+        require(
+            msg.sender == owner() || isAuthorizedBurner(msg.sender),
+            "Not authorized to burn"
+        );
+        require(from != address(0), "Invalid from address");
+        require(from != address(this), "Cannot burn from self");
+        require(amount > 0, "Amount must be greater than 0");
+        require(balanceOf(from) >= amount, "Insufficient balance to burn");
+
+        _burn(from, amount);
+    }
+
+    /**
+     * @dev 소각 권한 확인
+     */
+    function isAuthorizedBurner(address burner) public view returns (bool) {
+        // 실제 구현에서는 승인된 소각자 목록을 확인
+        return burner == owner();
+    }
+
+    /**
+     * @dev 토큰 전송 전 검증 (ERC20Burnable과 호환)
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 /* amount */
+    ) internal virtual {
+        // 긴급 정지 확인
+        require(!emergencyPaused, "Token transfers paused");
+        require(from != address(0) || to != address(0), "Invalid transfer");
     }
 }

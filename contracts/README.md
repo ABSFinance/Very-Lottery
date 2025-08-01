@@ -12,7 +12,6 @@ graph TB
                 BG[BaseGame.sol]
                 C1D[Cryptolotto1Day.sol]
                 C7D[Cryptolotto7Days.sol]
-                CT[CryptolottoToken.sol]
                 AT[AdToken.sol]
                 TR[TokenRegistry.sol]
                 SO[SimpleOwnable.sol]
@@ -23,7 +22,6 @@ graph TB
                 TM[TreasuryManager.sol]
                 SM[SystemManager.sol]
                 CR[CryptolottoReferral.sol]
-                GM[GovernanceManager.sol]
                 EM[EmergencyManager.sol]
                 CM[ConfigManager.sol]
                 FD[FundsDistributor.sol]
@@ -43,7 +41,6 @@ graph TB
             subgraph "interfaces/"
                 IBG[IBaseGame.sol]
                 IAT[IAdToken.sol]
-                ICT[ICryptolottoToken.sol]
                 IT[IToken.sol]
                 ID[IDistribution.sol]
                 IA[IAnalytics.sol]
@@ -122,7 +119,6 @@ graph TB
   - `BaseGame.sol` - 기본 게임 로직
   - `Cryptolotto1Day.sol` - 1일 게임
   - `Cryptolotto7Days.sol` - 7일 게임
-  - `CryptolottoToken.sol` - 메인 토큰
   - `AdToken.sol` - 광고 토큰
   - `TokenRegistry.sol` - 토큰 레지스트리
   - `SimpleOwnable.sol` - 간단한 소유권 관리
@@ -131,7 +127,6 @@ graph TB
   - `TreasuryManager.sol` - 재무 관리
   - `SystemManager.sol` - 시스템 관리
   - `CryptolottoReferral.sol` - 리퍼럴 시스템
-  - `GovernanceManager.sol` - 거버넌스 관리
   - `EmergencyManager.sol` - 긴급 상황 관리
   - `ConfigManager.sol` - 설정 관리
   - `FundsDistributor.sol` - 자금 분배
@@ -145,7 +140,7 @@ graph TB
 
 ### shared/
 - **interfaces/**: 모든 인터페이스 정의 (25개)
-  - 게임 관련: `IBaseGame.sol`, `IAdToken.sol`, `ICryptolottoToken.sol`
+  - 게임 관련: `IBaseGame.sol`, `IAdToken.sol`
   - 재무 관련: `ITreasuryManager.sol`, `IFundsDistributor.sol`, `ICryptolottoReferral.sol`
   - 분석 관련: `IAnalytics.sol`, `IAnalyticsEngine.sol`, `IMonitoringSystem.sol`
   - 시스템 관련: `ISystemManager.sol`, `IGovernanceManager.sol`, `IEmergencyManager.sol`
@@ -181,10 +176,6 @@ graph TB
 ## import 예시
 
 ```solidity
-// 토큰 사용 예시
-import "../modules/lottery/CryptolottoToken.sol";
-import "../shared/interfaces/ICryptolottoToken.sol";
-
 // 분석 시스템 사용 예시
 import "../modules/analytics/AnalyticsEngine.sol";
 import "../shared/interfaces/IAnalyticsEngine.sol";
@@ -217,7 +208,7 @@ BaseGame (Abstract)
 SimpleOwnable
 ├── TreasuryManager
 ├── SystemManager
-└── GovernanceManager
+└── EmergencyManager
 ```
 
 ### 🔗 **의존성 관계**
@@ -236,7 +227,6 @@ modules/analytics/
 modules/treasury/
 ├── FundsDistributor
 ├── SystemManager
-├── GovernanceManager
 ├── EmergencyManager
 └── ConfigManager
 ```

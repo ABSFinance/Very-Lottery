@@ -5,14 +5,16 @@ libs = ["lib"]
 solc_version = "0.8.22"
 optimizer = true
 optimizer_runs = 200
-via_ir = true
-remappings = [
-    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
-]
+via_ir = false
+extra_output = ["metadata", "storageLayout"]
+extra_output_files = ["metadata", "storageLayout"]
 
 [rpc_endpoints]
-verynet = "https://rpc.verylabs.io"
+verynetwork = "https://rpc.verynetwork.com"
+verynetwork-testnet = "https://testnet-rpc.verynetwork.com"
 
 [etherscan]
-verynet = { key = "", url = "https://veryscan.io" } 
+verynetwork = { key = "" }
+verynetwork-testnet = { key = "" }
+
+# Veryscan is free to use, no API key required 

@@ -1,0 +1,49 @@
+name: Deploy to Verychain
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to deploy to'
+        required: true
+        default: 'verychain'
+        type: choice
+        options:
+          - verychain
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run tests before deployment
+        run: forge test
+
+      - name: Deploy to ${{ github.event.inputs.network }}
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: |
+          forge script script/Deploy.s.sol \
+            --rpc-url https://rpc.verylabs.io \
+            --broadcast
+
+      - name: Create deployment summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Network: ${{ github.event.inputs.network }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Chain ID: 4613" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployer: ${{ secrets.DEPLOYER_ADDRESS }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- Contracts deployed to Verychain" >> $GITHUB_STEP_SUMMARY
+          echo "- Explorer: https://veryscan.io" >> $GITHUB_STEP_SUMMARY
+          echo "- Veryscan: Free to use, no API key required" >> $GITHUB_STEP_SUMMARY 

@@ -33,6 +33,9 @@ interface IAdToken {
         uint256 amount
     ) external returns (bool);
 
+    // ERC20Burnable functions
+    function burn(uint256 amount) external;
+
     // AdToken specific functions
     function watchAd(address viewer) external;
 

@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "../../shared/utils/GasOptimizer.sol";
+
+using GasOptimizer for address[];
 
 /**
  * @title AnalyticsEngine
@@ -291,15 +294,37 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
     }
 
     /**
-     * @dev 상위 사용자 조회 (기본 구현)
+     * @dev Get top users by activity
+     * @return Array of top user addresses
      */
     function getTopUsers(
-        uint256 count
-    ) external view returns (address[] memory) {
-        // This is a simplified implementation
-        // In production, you'd want to maintain sorted lists
-        address[] memory topUsers = new address[](count);
-        return topUsers;
+        uint256 /* limit */
+    ) external pure returns (address[] memory) {
+        // 실제 구현에서는 상위 사용자 목록을 반환
+        return new address[](0);
+    }
+
+    /**
+     * @dev 사용자 활동 분석 (가스 최적화)
+     * @param users 분석할 사용자 배열
+     * @return activeUsers 활성 사용자 수
+     * @return totalVolume 총 거래량
+     */
+    function analyzeUserActivity(
+        address[] memory users
+    ) external view returns (uint256 activeUsers, uint256 totalVolume) {
+        // 가스 최적화된 중복 제거
+        address[] memory uniqueUsers = users.removeDuplicatesFromMemory();
+
+        for (uint256 i = 0; i < uniqueUsers.length; i++) {
+            UserAnalytics storage analytics = userAnalytics[uniqueUsers[i]];
+            if (analytics.lastActivity > block.timestamp - 24 hours) {
+                activeUsers++;
+            }
+            totalVolume += analytics.totalVolume;
+        }
+
+        return (activeUsers, totalVolume);
     }
 
     /**
@@ -323,5 +348,56 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
             systemAnalytics.totalVolume,
             systemAnalytics.totalTransactions
         );
+    }
+
+    /**
+     * @dev 게임 타입별 통계 비교 (가스 최적화)
+     * @param gameTypes 비교할 게임 타입 배열
+     * @return volumes 각 게임 타입별 거래량
+     * @return players 각 게임 타입별 플레이어 수
+     */
+    function compareGameTypes(
+        uint8[] memory gameTypes
+    )
+        external
+        view
+        returns (uint256[] memory volumes, uint256[] memory players)
+    {
+        volumes = new uint256[](gameTypes.length);
+        players = new uint256[](gameTypes.length);
+
+        for (uint256 i = 0; i < gameTypes.length; i++) {
+            GameAnalytics storage analytics = gameAnalytics[gameTypes[i]];
+            volumes[i] = analytics.totalVolume;
+            players[i] = analytics.totalPlayers;
+        }
+
+        return (volumes, players);
+    }
+
+    /**
+     * @dev 기간별 사용자 활동 분석 (가스 최적화)
+     * @param users 분석할 사용자 배열
+     * @param dayCount 기간 (일)
+     * @return activeUsers 활성 사용자 수
+     * @return totalVolume 총 거래량
+     */
+    function analyzeUserActivityByPeriod(
+        address[] memory users,
+        uint256 dayCount
+    ) external view returns (uint256 activeUsers, uint256 totalVolume) {
+        // 가스 최적화된 중복 제거
+        address[] memory uniqueUsers = users.removeDuplicatesFromMemory();
+        uint256 cutoffTime = block.timestamp - (dayCount * 1 days);
+
+        for (uint256 i = 0; i < uniqueUsers.length; i++) {
+            UserAnalytics storage analytics = userAnalytics[uniqueUsers[i]];
+            if (analytics.lastActivity > cutoffTime) {
+                activeUsers++;
+            }
+            totalVolume += analytics.totalVolume;
+        }
+
+        return (activeUsers, totalVolume);
     }
 }

@@ -217,11 +217,8 @@ contract StorageManager is Ownable, StorageAccess {
     function cleanupOldData(uint256 daysOld) external onlyOwner {
         require(daysOld > 30, "Minimum 30 days");
 
-        uint256 cutoffTime = block.timestamp - (daysOld * 1 days);
-
-        // 오래된 분석 데이터 정리
-        StorageLayout.AnalyticsStorage
-            storage analyticsStorage = getAnalyticsStorage();
+        // uint256 cutoffTime = block.timestamp - (daysOld * 1 days);
+        // StorageLayout.AnalyticsStorage storage analyticsStorage = getAnalyticsStorage();
 
         emit StorageOptimized("old_data_cleanup", 10000, block.timestamp);
     }

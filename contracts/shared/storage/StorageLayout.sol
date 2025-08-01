@@ -31,6 +31,7 @@ contract StorageLayout {
         uint256 jackpot;
         uint256 playerCount;
         address[] players;
+        mapping(address => bool) playerExists; // O(1) 중복 체크를 위한 mapping
         GameState state;
     }
 

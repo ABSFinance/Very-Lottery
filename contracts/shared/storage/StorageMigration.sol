@@ -136,8 +136,7 @@ contract StorageMigration is Ownable, StorageAccess {
         }
 
         // 사용자 잔액 정리
-        mapping(address => uint256) storage userBalances = treasuryStorage
-            .userBalances;
+        // mapping(address => uint256) storage userBalances = treasuryStorage.userBalances;
         // 0 잔액 사용자 정리 로직
     }
 

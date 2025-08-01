@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../../shared/interfaces/IEmergencyManager.sol";
 import "../../shared/interfaces/IConfigManager.sol";
-import "../../shared/interfaces/ITokenRegistry.sol";
 import "../../shared/interfaces/ISecurityUtils.sol";
 import "../../shared/interfaces/IMonitoringSystem.sol";
 import "../../shared/interfaces/IEventLogger.sol";
@@ -14,7 +13,7 @@ import "../../shared/interfaces/IAnalyticsEngine.sol";
 import "../../shared/interfaces/IRateLimiter.sol";
 import "../../shared/interfaces/ICircuitBreaker.sol";
 import "../../shared/interfaces/ITreasuryManager.sol";
-import "../../shared/interfaces/IGovernanceManager.sol";
+import "../../shared/utils/GasOptimizer.sol";
 
 /**
  * @title SystemManager
@@ -24,7 +23,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
     // Core system contracts
     IEmergencyManager public emergencyManager;
     IConfigManager public configManager;
-    ITokenRegistry public tokenRegistry;
     ISecurityUtils public securityUtils;
     IMonitoringSystem public monitoringSystem;
     IEventLogger public eventLogger;
@@ -32,7 +30,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
     IRateLimiter public rateLimiter;
     ICircuitBreaker public circuitBreaker;
     ITreasuryManager public treasuryManager;
-    IGovernanceManager public governanceManager;
 
     // System state
     bool public systemActive;
@@ -42,7 +39,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
     event SystemInitialized(
         address indexed emergencyManager,
         address indexed configManager,
-        address indexed tokenRegistry,
         address securityUtils,
         address monitoringSystem,
         address eventLogger,
@@ -50,7 +46,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         address rateLimiter,
         address circuitBreaker,
         address treasuryManager,
-        address governanceManager,
         uint256 timestamp
     );
     event SystemActivated(uint256 timestamp);
@@ -90,15 +85,13 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         address owner,
         address _emergencyManager,
         address _configManager,
-        address _tokenRegistry,
         address _securityUtils,
         address _monitoringSystem,
         address _eventLogger,
         address _analyticsEngine,
         address _rateLimiter,
         address _circuitBreaker,
-        address _treasuryManager,
-        address _governanceManager
+        address _treasuryManager
     ) public initializer {
         __Ownable_init(owner);
 
@@ -107,7 +100,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
             "Invalid emergency manager address"
         );
         require(_configManager != address(0), "Invalid config manager address");
-        require(_tokenRegistry != address(0), "Invalid token registry address");
         require(_securityUtils != address(0), "Invalid security utils address");
         require(
             _monitoringSystem != address(0),
@@ -127,14 +119,9 @@ contract SystemManager is Initializable, OwnableUpgradeable {
             _treasuryManager != address(0),
             "Invalid treasury manager address"
         );
-        require(
-            _governanceManager != address(0),
-            "Invalid governance manager address"
-        );
 
         emergencyManager = IEmergencyManager(_emergencyManager);
         configManager = IConfigManager(_configManager);
-        tokenRegistry = ITokenRegistry(_tokenRegistry);
         securityUtils = ISecurityUtils(_securityUtils);
         monitoringSystem = IMonitoringSystem(_monitoringSystem);
         eventLogger = IEventLogger(_eventLogger);
@@ -142,7 +129,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         rateLimiter = IRateLimiter(_rateLimiter);
         circuitBreaker = ICircuitBreaker(_circuitBreaker);
         treasuryManager = ITreasuryManager(_treasuryManager);
-        governanceManager = IGovernanceManager(_governanceManager);
 
         systemActive = true;
         lastSystemCheck = block.timestamp;
@@ -150,7 +136,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         emit SystemInitialized(
             _emergencyManager,
             _configManager,
-            _tokenRegistry,
             _securityUtils,
             _monitoringSystem,
             _eventLogger,
@@ -158,7 +143,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
             _rateLimiter,
             _circuitBreaker,
             _treasuryManager,
-            _governanceManager,
             block.timestamp
         );
     }
@@ -197,13 +181,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         // Check config manager
         try configManager.getSystemParam("minTicketPrice") returns (uint) {
             // Config manager is responsive
-        } catch {
-            isHealthy = false;
-        }
-
-        // Check token registry
-        try tokenRegistry.getActiveTokenCount() returns (uint256) {
-            // Token registry is responsive
         } catch {
             isHealthy = false;
         }
@@ -302,25 +279,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
             gameDuration,
             fee,
             maxTicketsPerPlayer
-        );
-    }
-
-    /**
-     * @dev 토큰 등록
-     */
-    function registerToken(
-        address tokenAddress,
-        string memory name,
-        string memory symbol,
-        uint8 decimals,
-        uint256 totalSupply
-    ) external onlyOwner {
-        tokenRegistry.registerToken(
-            tokenAddress,
-            name,
-            symbol,
-            decimals,
-            totalSupply
         );
     }
 
@@ -488,7 +446,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
             bool isSystemActive,
             bool isEmergencyPaused,
             uint256 lastCheck,
-            uint256 activeTokenCount,
             uint256 totalContracts,
             bool isSecurityHealthy,
             bool isMonitoringHealthy,
@@ -573,7 +530,6 @@ contract SystemManager is Initializable, OwnableUpgradeable {
             systemActive,
             emergencyManager.isEmergencyPaused(),
             lastSystemCheck,
-            tokenRegistry.getActiveTokenCount(),
             emergencyManager.getAllContracts().length,
             securityHealthy,
             monitoringHealthy,

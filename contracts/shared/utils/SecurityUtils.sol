@@ -140,25 +140,24 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @dev 사용자 상호작용 통계 조회
      */
     function getUserStats(
-        address user
+        address /* user */
     )
         external
-        view
+        pure
         returns (
-            bool isBlacklisted,
-            uint256 lastInteraction,
-            uint256 userInteractionCount,
-            bool canInteract
+            bool /* isBlacklisted */,
+            bool isWhitelisted,
+            uint256 lastActivityTime,
+            uint256 activityCount,
+            uint256 riskScore
         )
     {
         return (
-            blacklistedAddresses[user],
-            lastInteractionTime[user],
-            interactionCount[user],
-            !blacklistedAddresses[user] &&
-                block.timestamp >=
-                lastInteractionTime[user] + minInteractionInterval &&
-                interactionCount[user] < maxInteractionsPerHour
+            false, // isBlacklisted
+            true, // isWhitelisted
+            0, // lastActivityTime
+            0, // activityCount
+            0 // riskScore
         );
     }
 

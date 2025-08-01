@@ -1,0 +1,177 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run tests
+        run: forge test --gas-report
+
+      - name: Run specific test suites
+        run: |
+          forge test --match-contract Cryptolotto -vv
+          forge test --match-contract CryptolottoIntegration -vv
+          forge test --match-contract CryptolottoFuzz -vv
+          forge test --match-contract CryptolottoPerformance -vv
+          forge test --match-contract CryptolottoSecurity -vv
+
+      - name: Generate coverage report
+        run: forge coverage --report lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Build contracts
+        run: forge build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: contracts
+          path: out/
+
+  security:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run security tests
+        run: forge test --match-contract CryptolottoSecurity -vv
+
+      - name: Run fuzzing tests
+        run: forge test --match-contract CryptolottoFuzz -vv
+
+  performance:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run performance tests
+        run: forge test --match-contract CryptolottoPerformance -vv
+
+      - name: Generate gas report
+        run: forge test --gas-report > gas_report.txt
+
+      - name: Upload gas report
+        uses: actions/upload-artifact@v3
+        with:
+          name: gas-report
+          path: gas_report.txt
+
+  lint:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run Solhint
+        run: |
+          npm install -g solhint
+          solhint 'contracts/**/*.sol'
+
+      - name: Check formatting
+        run: forge fmt --check
+
+  deploy:
+    needs: [test, build, security, performance, lint]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Deploy to Verychain
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: |
+          forge script script/Deploy.s.sol --rpc-url https://rpc.verylabs.io --broadcast
+
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            ## Changes
+            - Automated deployment to Verychain (Chain ID: 4613)
+            - All tests passing
+            - Security and performance checks completed
+            - Contracts deployed successfully
+            - Explorer: https://veryscan.io
+          draft: false
+          prerelease: false 

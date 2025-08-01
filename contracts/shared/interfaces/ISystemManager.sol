@@ -38,7 +38,17 @@ interface ISystemManager {
 
     function getConfigManager() external view returns (address);
 
-    function getGovernanceManager() external view returns (address);
+    function getSecurityUtils() external view returns (address);
+
+    function getMonitoringSystem() external view returns (address);
+
+    function getEventLogger() external view returns (address);
+
+    function getAnalyticsEngine() external view returns (address);
+
+    function getRateLimiter() external view returns (address);
+
+    function getCircuitBreaker() external view returns (address);
 
     function getTreasuryManager() external view returns (address);
 
