@@ -1041,7 +1041,7 @@ contract CryptolottoTest is Test {
 
         // Try to buy 5 tickets but send wrong amount
         vm.prank(player1);
-        vm.expectRevert("Incorrect amount sent");
+        vm.expectRevert("Wrong amount");
         lottery1Day.buyTicket{value: 0.04 ether}(address(0), 5); // Should be 0.05 ether
     }
 
@@ -1139,7 +1139,7 @@ contract CryptolottoTest is Test {
         vm.deal(player1, 1 ether);
 
         vm.prank(player1);
-        vm.expectRevert("Incorrect amount sent");
+        vm.expectRevert("Wrong amount");
         lottery1Day.buyTicket{value: 0.005 ether}(address(0), 1);
     }
 

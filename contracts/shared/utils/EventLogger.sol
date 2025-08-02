@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IEventLogger.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IEventLogger} from "../interfaces/IEventLogger.sol";
 
 /**
  * @title EventLogger
@@ -51,7 +51,10 @@ contract EventLogger is Ownable, IEventLogger {
      * @param timestamp Log timestamp
      */
     event EventLogged(
-        string indexed eventType, string indexed message, address indexed indexedAddress, uint256 timestamp
+        string indexed eventType,
+        string indexed message,
+        address indexed indexedAddress,
+        uint256 timestamp
     );
     /**
      * @notice Emitted when logging is toggled
@@ -80,15 +83,22 @@ contract EventLogger is Ownable, IEventLogger {
      * @param indexedAddress Associated address
      * @param data Additional data
      */
-    function logEvent(string calldata eventType, string calldata message, address indexedAddress, bytes calldata data)
-        external
-        override
-    {
+    function logEvent(
+        string calldata eventType,
+        string calldata message,
+        address indexedAddress,
+        bytes calldata data
+    ) external override {
         if (!loggingEnabled) revert LoggingDisabled();
         if (bytes(eventType).length == 0) revert InvalidEventType();
         if (bytes(message).length == 0) revert InvalidMessage();
 
-        EventLog memory newLog = _createEventLog(eventType, message, indexedAddress, data);
+        EventLog memory newLog = _createEventLog(
+            eventType,
+            message,
+            indexedAddress,
+            data
+        );
         _storeEventLog(newLog, eventType);
         _emitEventLogged(eventType, message, indexedAddress);
     }
@@ -107,14 +117,15 @@ contract EventLogger is Ownable, IEventLogger {
         address indexedAddress,
         bytes calldata data
     ) internal view returns (EventLog memory newLog) {
-        return EventLog({
-            eventType: eventType,
-            message: message,
-            indexedAddress: indexedAddress,
-            data: data,
-            timestamp: block.timestamp, // solhint-disable-line not-rely-on-time
-            logIndex: eventLogs.length
-        });
+        return
+            EventLog({
+                eventType: eventType,
+                message: message,
+                indexedAddress: indexedAddress,
+                data: data,
+                timestamp: block.timestamp, // solhint-disable-line not-rely-on-time
+                logIndex: eventLogs.length
+            });
     }
 
     /**
@@ -122,7 +133,10 @@ contract EventLogger is Ownable, IEventLogger {
      * @param newLog Event log to store
      * @param eventType Type of event
      */
-    function _storeEventLog(EventLog memory newLog, string calldata eventType) internal {
+    function _storeEventLog(
+        EventLog memory newLog,
+        string calldata eventType
+    ) internal {
         eventLogs.push(newLog);
         ++eventTypeCounters[eventType]; // solhint-disable-line gas-increment-by-one
     }
@@ -133,7 +147,11 @@ contract EventLogger is Ownable, IEventLogger {
      * @param message Event message
      * @param indexedAddress Associated address
      */
-    function _emitEventLogged(string calldata eventType, string calldata message, address indexedAddress) internal {
+    function _emitEventLogged(
+        string calldata eventType,
+        string calldata message,
+        address indexedAddress
+    ) internal {
         emit EventLogged(eventType, message, indexedAddress, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
@@ -174,7 +192,9 @@ contract EventLogger is Ownable, IEventLogger {
      * @param eventType Type of event
      * @return Count of events for the specified type
      */
-    function getEventTypeCount(string calldata eventType) external view returns (uint256) {
+    function getEventTypeCount(
+        string calldata eventType
+    ) external view returns (uint256) {
         return eventTypeCounters[eventType];
     }
 
@@ -183,7 +203,9 @@ contract EventLogger is Ownable, IEventLogger {
      * @param count Number of recent logs to retrieve
      * @return Array of recent event logs
      */
-    function getRecentLogs(uint256 count) external view returns (EventLog[] memory) {
+    function getRecentLogs(
+        uint256 count
+    ) external view returns (EventLog[] memory) {
         uint256 totalLogs = eventLogs.length;
         uint256 returnCount = count > totalLogs ? totalLogs : count;
 
