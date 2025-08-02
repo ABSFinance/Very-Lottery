@@ -14,7 +14,6 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
         CLOSED, // Normal operation
         OPEN, // Circuit is open, operations are blocked
         HALF_OPEN // Testing if system is ready to close
-
     }
 
     // Circuit breaker struct
@@ -38,8 +37,17 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     uint256 public defaultTimeout = 300; // 5 minutes
 
     // Events
-    event CircuitCreated(string indexed circuitName, uint256 threshold, uint256 timeout, uint256 timestamp);
-    event CircuitOpened(string indexed circuitName, uint256 failureCount, uint256 timestamp);
+    event CircuitCreated(
+        string indexed circuitName,
+        uint256 threshold,
+        uint256 timeout,
+        uint256 timestamp
+    );
+    event CircuitOpened(
+        string indexed circuitName,
+        uint256 failureCount,
+        uint256 timestamp
+    );
     event CircuitClosed(string indexed circuitName, uint256 timestamp);
     event CircuitHalfOpened(string indexed circuitName, uint256 timestamp);
     event CircuitBreakerToggled(bool enabled, uint256 timestamp);
@@ -57,16 +65,23 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 서킷 생성
      */
-    function createCircuit(string memory circuitName, uint256 threshold, uint256 timeout) external onlyOwner {
+    function createCircuit(
+        string memory circuitName,
+        uint256 threshold,
+        uint256 timeout
+    ) external onlyOwner {
         _validateCircuitParams(threshold, timeout);
         _createCircuit(circuitName, threshold, timeout);
-        emit CircuitCreated(circuitName, threshold, timeout, block.timestamp);
+        emit CircuitCreated(circuitName, threshold, timeout, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
      * @dev 서킷 매개변수 검증
      */
-    function _validateCircuitParams(uint256 threshold, uint256 timeout) internal pure {
+    function _validateCircuitParams(
+        uint256 threshold,
+        uint256 timeout
+    ) internal pure {
         require(threshold > 0, "Threshold must be greater than 0");
         require(timeout > 0, "Timeout must be greater than 0");
     }
@@ -74,7 +89,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 서킷 생성
      */
-    function _createCircuit(string memory circuitName, uint256 threshold, uint256 timeout) internal {
+    function _createCircuit(
+        string memory circuitName,
+        uint256 threshold,
+        uint256 timeout
+    ) internal {
         circuits[circuitName] = Circuit({
             state: CircuitState.CLOSED,
             failureCount: 0,
@@ -88,16 +107,29 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 주소별 서킷 생성
      */
-    function createAddressCircuit(address targetAddress, uint256 threshold, uint256 timeout) external onlyOwner {
+    function createAddressCircuit(
+        address targetAddress,
+        uint256 threshold,
+        uint256 timeout
+    ) external onlyOwner {
         _validateCircuitParams(threshold, timeout);
         _createAddressCircuit(targetAddress, threshold, timeout);
-        emit CircuitCreated(_addressToString(targetAddress), threshold, timeout, block.timestamp);
+        emit CircuitCreated(
+            _addressToString(targetAddress),
+            threshold,
+            timeout,
+            block.timestamp
+        ); // solhint-disable-line not-rely-on-time
     }
 
     /**
      * @dev 주소별 서킷 생성
      */
-    function _createAddressCircuit(address targetAddress, uint256 threshold, uint256 timeout) internal {
+    function _createAddressCircuit(
+        address targetAddress,
+        uint256 threshold,
+        uint256 timeout
+    ) internal {
         addressCircuits[targetAddress] = Circuit({
             state: CircuitState.CLOSED,
             failureCount: 0,
@@ -111,14 +143,20 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 주소를 문자열로 변환
      */
-    function _addressToString(address addr) internal pure returns (string memory) {
+    function _addressToString(
+        address addr
+    ) internal pure returns (string memory) {
         return string(abi.encodePacked(addr));
     }
 
     /**
      * @dev 함수별 서킷 생성
      */
-    function createFunctionCircuit(string memory functionName, uint256 threshold, uint256 timeout) external onlyOwner {
+    function createFunctionCircuit(
+        string memory functionName,
+        uint256 threshold,
+        uint256 timeout
+    ) external onlyOwner {
         require(threshold > 0, "Threshold must be greater than 0");
         require(timeout > 0, "Timeout must be greater than 0");
 
@@ -135,7 +173,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 서킷 상태 확인
      */
-    function checkCircuit(string memory circuitName) external view returns (bool) {
+    function checkCircuit(
+        string memory circuitName
+    ) external view returns (bool) {
         if (!circuitBreakerEnabled) return true;
 
         Circuit storage circuit = circuits[circuitName];
@@ -147,7 +187,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 주소 서킷 상태 확인
      */
-    function checkAddressCircuit(address targetAddress) external view returns (bool) {
+    function checkAddressCircuit(
+        address targetAddress
+    ) external view returns (bool) {
         if (!circuitBreakerEnabled) return true;
 
         Circuit storage circuit = addressCircuits[targetAddress];
@@ -159,7 +201,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 함수 서킷 상태 확인
      */
-    function checkFunctionCircuit(string memory functionName) external view returns (bool) {
+    function checkFunctionCircuit(
+        string memory functionName
+    ) external view returns (bool) {
         if (!circuitBreakerEnabled) return true;
 
         Circuit storage circuit = functionCircuits[functionName];
@@ -171,10 +215,13 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     /**
      * @dev 내부 서킷 상태 확인
      */
-    function _checkCircuitState(Circuit storage circuit) internal view returns (bool) {
+    function _checkCircuitState(
+        Circuit storage circuit
+    ) internal view returns (bool) {
         if (circuit.state == CircuitState.OPEN) {
             // Check if timeout has passed for half-open
             if (block.timestamp >= circuit.lastFailureTime + circuit.timeout) {
+                // solhint-disable-line not-rely-on-time
                 return true; // Allow one request to test
             }
             return false;
@@ -190,11 +237,15 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
         if (!circuit.isActive) return;
 
         circuit.failureCount++;
-        circuit.lastFailureTime = block.timestamp;
+        circuit.lastFailureTime = block.timestamp; // solhint-disable-line not-rely-on-time
 
         if (circuit.failureCount >= circuit.threshold) {
             circuit.state = CircuitState.OPEN;
-            emit CircuitOpened(circuitName, circuit.failureCount, block.timestamp);
+            emit CircuitOpened(
+                circuitName,
+                circuit.failureCount,
+                block.timestamp // solhint-disable-line not-rely-on-time
+            );
         }
     }
 
@@ -206,27 +257,37 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
         if (!circuit.isActive) return;
 
         circuit.failureCount++;
-        circuit.lastFailureTime = block.timestamp;
+        circuit.lastFailureTime = block.timestamp; // solhint-disable-line not-rely-on-time
 
         if (circuit.failureCount >= circuit.threshold) {
             circuit.state = CircuitState.OPEN;
-            emit CircuitOpened(string(abi.encodePacked(targetAddress)), circuit.failureCount, block.timestamp);
+            emit CircuitOpened(
+                string(abi.encodePacked(targetAddress)),
+                circuit.failureCount,
+                block.timestamp // solhint-disable-line not-rely-on-time
+            );
         }
     }
 
     /**
      * @dev 함수 실패 기록
      */
-    function recordFunctionFailure(string memory functionName) external onlyOwner {
+    function recordFunctionFailure(
+        string memory functionName
+    ) external onlyOwner {
         Circuit storage circuit = functionCircuits[functionName];
         if (!circuit.isActive) return;
 
         circuit.failureCount++;
-        circuit.lastFailureTime = block.timestamp;
+        circuit.lastFailureTime = block.timestamp; // solhint-disable-line not-rely-on-time
 
         if (circuit.failureCount >= circuit.threshold) {
             circuit.state = CircuitState.OPEN;
-            emit CircuitOpened(functionName, circuit.failureCount, block.timestamp);
+            emit CircuitOpened(
+                functionName,
+                circuit.failureCount,
+                block.timestamp // solhint-disable-line not-rely-on-time
+            );
         }
     }
 
@@ -239,11 +300,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
 
         if (circuit.state == CircuitState.OPEN) {
             circuit.state = CircuitState.HALF_OPEN;
-            emit CircuitHalfOpened(circuitName, block.timestamp);
+            emit CircuitHalfOpened(circuitName, block.timestamp); // solhint-disable-line not-rely-on-time
         } else if (circuit.state == CircuitState.HALF_OPEN) {
             circuit.state = CircuitState.CLOSED;
             circuit.failureCount = 0;
-            emit CircuitClosed(circuitName, block.timestamp);
+            emit CircuitClosed(circuitName, block.timestamp); // solhint-disable-line not-rely-on-time
         }
     }
 
@@ -256,28 +317,36 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
 
         if (circuit.state == CircuitState.OPEN) {
             circuit.state = CircuitState.HALF_OPEN;
-            emit CircuitHalfOpened(string(abi.encodePacked(targetAddress)), block.timestamp);
+            emit CircuitHalfOpened(
+                string(abi.encodePacked(targetAddress)),
+                block.timestamp
+            ); // solhint-disable-line not-rely-on-time
         } else if (circuit.state == CircuitState.HALF_OPEN) {
             circuit.state = CircuitState.CLOSED;
             circuit.failureCount = 0;
-            emit CircuitClosed(string(abi.encodePacked(targetAddress)), block.timestamp);
+            emit CircuitClosed(
+                string(abi.encodePacked(targetAddress)),
+                block.timestamp
+            ); // solhint-disable-line not-rely-on-time
         }
     }
 
     /**
      * @dev 함수 성공 기록
      */
-    function recordFunctionSuccess(string memory functionName) external onlyOwner {
+    function recordFunctionSuccess(
+        string memory functionName
+    ) external onlyOwner {
         Circuit storage circuit = functionCircuits[functionName];
         if (!circuit.isActive) return;
 
         if (circuit.state == CircuitState.OPEN) {
             circuit.state = CircuitState.HALF_OPEN;
-            emit CircuitHalfOpened(functionName, block.timestamp);
+            emit CircuitHalfOpened(functionName, block.timestamp); // solhint-disable-line not-rely-on-time
         } else if (circuit.state == CircuitState.HALF_OPEN) {
             circuit.state = CircuitState.CLOSED;
             circuit.failureCount = 0;
-            emit CircuitClosed(functionName, block.timestamp);
+            emit CircuitClosed(functionName, block.timestamp); // solhint-disable-line not-rely-on-time
         }
     }
 
@@ -286,13 +355,15 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      */
     function toggleCircuitBreaker() external onlyOwner {
         circuitBreakerEnabled = !circuitBreakerEnabled;
-        emit CircuitBreakerToggled(circuitBreakerEnabled, block.timestamp);
+        emit CircuitBreakerToggled(circuitBreakerEnabled, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
      * @dev 서킷 정보 조회
      */
-    function getCircuitInfo(string memory circuitName)
+    function getCircuitInfo(
+        string memory circuitName
+    )
         external
         view
         returns (

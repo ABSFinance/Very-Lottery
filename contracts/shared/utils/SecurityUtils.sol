@@ -1,72 +1,135 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Initializable} from "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 
 /**
  * @title SecurityUtils
- * @dev 보안 관련 유틸리티 함수들을 제공하는 컨트랙트
+ * @author Cryptolotto Team
+ * @notice Security utility functions contract
+ * @dev Provides security-related utility functions and blacklist management
  */
 contract SecurityUtils is Initializable, OwnableUpgradeable {
+    // Custom Errors
+    error CannotBlacklistZeroAddress();
+    error AddressNotBlacklisted();
+    error AddressIsBlacklisted();
+    error InteractionTooFrequent();
+    error TooManyInteractionsPerHour();
+    error InvalidRateLimitParameters();
+
     // Security settings
+    /** @notice Mapping of blacklisted addresses */
     mapping(address => bool) public blacklistedAddresses;
+    /** @notice Mapping of last interaction times */
     mapping(address => uint256) public lastInteractionTime;
+    /** @notice Mapping of interaction counts */
     mapping(address => uint256) public interactionCount;
 
     // Rate limiting
+    /** @notice Minimum interval between interactions in seconds */
     uint256 public minInteractionInterval = 1; // 1 second
+    /** @notice Maximum interactions per hour */
     uint256 public maxInteractionsPerHour = 100;
 
-    // Events
+    /**
+     * @notice Emitted when an address is blacklisted
+     * @param target The blacklisted address
+     * @param timestamp When the address was blacklisted
+     */
     event AddressBlacklisted(address indexed target, uint256 timestamp);
+
+    /**
+     * @notice Emitted when an address is whitelisted
+     * @param target The whitelisted address
+     * @param timestamp When the address was whitelisted
+     */
     event AddressWhitelisted(address indexed target, uint256 timestamp);
+
+    /**
+     * @notice Emitted when rate limits are updated
+     * @param oldMinInterval Previous minimum interval
+     * @param newMinInterval New minimum interval
+     * @param oldMaxInteractions Previous maximum interactions
+     * @param newMaxInteractions New maximum interactions
+     */
     event RateLimitUpdated(
-        uint256 oldMinInterval, uint256 newMinInterval, uint256 oldMaxInteractions, uint256 newMaxInteractions
+        uint256 oldMinInterval,
+        uint256 newMinInterval,
+        uint256 oldMaxInteractions,
+        uint256 newMaxInteractions
     );
-    event SuspiciousActivityDetected(address indexed account, string reason, uint256 timestamp);
+
+    /**
+     * @notice Emitted when suspicious activity is detected
+     * @param account The account with suspicious activity
+     * @param reason The reason for suspicion
+     * @param timestamp When the activity was detected
+     */
+    event SuspiciousActivityDetected(
+        address indexed account,
+        string reason,
+        uint256 timestamp
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
+    /**
+     * @notice Initialize the security utils contract
+     * @param owner The owner of the contract
+     */
     function initialize(address owner) public initializer {
         __Ownable_init(owner);
     }
 
     /**
-     * @dev 주소 블랙리스트 추가
+     * @notice Add an address to the blacklist
+     * @param target The address to blacklist
      */
     function blacklistAddress(address target) external onlyOwner {
-        require(target != address(0), "Cannot blacklist zero address");
+        if (target == address(0)) {
+            revert CannotBlacklistZeroAddress();
+        }
         blacklistedAddresses[target] = true;
-        emit AddressBlacklisted(target, block.timestamp);
+        emit AddressBlacklisted(target, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 주소 블랙리스트 제거
+     * @notice Remove an address from the blacklist
+     * @param target The address to whitelist
      */
     function whitelistAddress(address target) external onlyOwner {
-        require(blacklistedAddresses[target], "Address not blacklisted");
+        if (!blacklistedAddresses[target]) {
+            revert AddressNotBlacklisted();
+        }
         blacklistedAddresses[target] = false;
-        emit AddressWhitelisted(target, block.timestamp);
+        emit AddressWhitelisted(target, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 블랙리스트 확인
+     * @notice Check if an address is blacklisted
+     * @param target The address to check
+     * @return True if the address is blacklisted
      */
     function isBlacklisted(address target) public view returns (bool) {
         return blacklistedAddresses[target];
     }
 
     /**
-     * @dev 상호작용 기록 및 속도 제한 확인
+     * @notice Record interaction and check rate limits
+     * @param user The user address
+     * @return True if the interaction is allowed
      */
     function recordInteraction(address user) external returns (bool) {
-        require(!blacklistedAddresses[user], "Address is blacklisted");
+        if (blacklistedAddresses[user]) {
+            revert AddressIsBlacklisted();
+        }
 
-        uint256 currentTime = block.timestamp;
+        uint256 currentTime = block.timestamp; // solhint-disable-line not-rely-on-time
         uint256 lastTime = lastInteractionTime[user];
 
         _checkMinimumInterval(currentTime, lastTime);
@@ -77,31 +140,56 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
     }
 
     /**
-     * @dev 최소 간격 확인
+     * @notice Check minimum interval between interactions
+     * @param currentTime Current timestamp
+     * @param lastTime Last interaction timestamp
      */
-    function _checkMinimumInterval(uint256 currentTime, uint256 lastTime) internal view {
-        require(currentTime >= lastTime + minInteractionInterval, "Interaction too frequent");
-    }
-
-    /**
-     * @dev 상호작용 수 업데이트
-     */
-    function _updateInteractionCount(address user, uint256 currentTime, uint256 lastTime) internal {
-        if (currentTime - lastTime >= 3600) {
-            // 1시간
-            interactionCount[user] = 1;
-        } else {
-            interactionCount[user]++;
-            require(interactionCount[user] <= maxInteractionsPerHour, "Too many interactions per hour");
+    function _checkMinimumInterval(
+        uint256 currentTime,
+        uint256 lastTime
+    ) internal view {
+        if (currentTime < lastTime + minInteractionInterval) {
+            revert InteractionTooFrequent();
         }
     }
 
     /**
-     * @dev 속도 제한 설정 업데이트
+     * @notice Update interaction count for a user
+     * @param user The user address
+     * @param currentTime Current timestamp
+     * @param lastTime Last interaction timestamp
      */
-    function updateRateLimits(uint256 newMinInterval, uint256 newMaxInteractions) external onlyOwner {
-        require(newMinInterval > 0, "Min interval must be greater than 0");
-        require(newMaxInteractions > 0, "Max interactions must be greater than 0");
+    function _updateInteractionCount(
+        address user,
+        uint256 currentTime,
+        uint256 lastTime
+    ) internal {
+        if (currentTime - lastTime >= 3600) {
+            // 1시간
+            interactionCount[user] = 1;
+        } else {
+            ++interactionCount[user];
+            if (interactionCount[user] > maxInteractionsPerHour) {
+                revert TooManyInteractionsPerHour();
+            }
+        }
+    }
+
+    /**
+     * @notice Update rate limit settings
+     * @param newMinInterval New minimum interval in seconds
+     * @param newMaxInteractions New maximum interactions per hour
+     */
+    function updateRateLimits(
+        uint256 newMinInterval,
+        uint256 newMaxInteractions
+    ) external onlyOwner {
+        if (newMinInterval == 0) {
+            revert InvalidRateLimitParameters();
+        }
+        if (newMaxInteractions == 0) {
+            revert InvalidRateLimitParameters();
+        }
 
         uint256 oldMinInterval = minInteractionInterval;
         uint256 oldMaxInteractions = maxInteractionsPerHour;
@@ -109,54 +197,80 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
         minInteractionInterval = newMinInterval;
         maxInteractionsPerHour = newMaxInteractions;
 
-        emit RateLimitUpdated(oldMinInterval, newMinInterval, oldMaxInteractions, newMaxInteractions);
-    }
-
-    /**
-     * @dev 의심스러운 활동 감지
-     */
-    function detectSuspiciousActivity(address user, string memory reason) external onlyOwner {
-        emit SuspiciousActivityDetected(user, reason, block.timestamp);
-    }
-
-    /**
-     * @dev 사용자 상호작용 통계 조회
-     */
-    function getUserStats(address /* user */ )
-        external
-        pure
-        returns (
-            bool, /* isBlacklisted */
-            bool isWhitelisted,
-            uint256 lastActivityTime,
-            uint256 activityCount,
-            uint256 riskScore
-        )
-    {
-        return (
-            false, // isBlacklisted
-            true, // isWhitelisted
-            0, // lastActivityTime
-            0, // activityCount
-            0 // riskScore
+        emit RateLimitUpdated(
+            oldMinInterval,
+            newMinInterval,
+            oldMaxInteractions,
+            newMaxInteractions
         );
     }
 
     /**
-     * @dev 블랙리스트 수정자
+     * @notice Detect suspicious activity
+     * @param user The user address
+     * @param reason The reason for suspicion
      */
-    modifier whenNotBlacklisted(address user) {
-        require(!blacklistedAddresses[user], "Address is blacklisted");
-        _;
+    function detectSuspiciousActivity(
+        address user,
+        string calldata reason
+    ) external {
+        emit SuspiciousActivityDetected(user, reason, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 속도 제한 수정자
+     * @notice Get user statistics
+     * @param user The user address
+     * @return userIsBlacklisted Whether the user is blacklisted
+     * @return lastInteraction Last interaction timestamp
+     * @return userInteractionCount Current interaction count
+     * @return minInterval Minimum interval setting
+     * @return maxInteractions Maximum interactions setting
      */
-    modifier rateLimited(address user) {
-        require(!blacklistedAddresses[user], "Address is blacklisted");
-        require(block.timestamp >= lastInteractionTime[user] + minInteractionInterval, "Interaction too frequent");
-        require(interactionCount[user] < maxInteractionsPerHour, "Too many interactions per hour");
-        _;
+    function getUserStats(
+        address user
+    )
+        external
+        view
+        returns (
+            bool userIsBlacklisted,
+            uint256 lastInteraction,
+            uint256 userInteractionCount,
+            uint256 minInterval,
+            uint256 maxInteractions
+        )
+    {
+        return (
+            blacklistedAddresses[user],
+            lastInteractionTime[user],
+            interactionCount[user],
+            minInteractionInterval,
+            maxInteractionsPerHour
+        );
+    }
+
+    /**
+     * @notice Check if a user can interact
+     * @param user The user address
+     * @return True if the user can interact
+     */
+    function canInteract(address user) external view returns (bool) {
+        if (blacklistedAddresses[user]) {
+            return false;
+        }
+
+        uint256 currentTime = block.timestamp;
+        uint256 lastTime = lastInteractionTime[user];
+
+        if (currentTime < lastTime + minInteractionInterval) {
+            return false;
+        }
+
+        if (currentTime - lastTime < 3600) {
+            if (interactionCount[user] >= maxInteractionsPerHour) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

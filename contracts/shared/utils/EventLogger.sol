@@ -29,7 +29,12 @@ contract EventLogger is IEventLogger, Ownable {
     mapping(string => uint256) public eventTypeCounters;
 
     // Events
-    event EventLogged(string indexed eventType, string message, address indexedAddress, uint256 timestamp);
+    event EventLogged(
+        string indexed eventType,
+        string message,
+        address indexedAddress,
+        uint256 timestamp
+    );
     event LoggingToggled(bool enabled, uint256 timestamp);
     event LogsCleared(uint256 timestamp);
 
@@ -38,13 +43,20 @@ contract EventLogger is IEventLogger, Ownable {
     /**
      * @dev 이벤트 로깅
      */
-    function logEvent(string memory eventType, string memory message, address indexedAddress, bytes memory data)
-        external
-        override
-    {
+    function logEvent(
+        string memory eventType,
+        string memory message,
+        address indexedAddress,
+        bytes memory data
+    ) external override {
         require(loggingEnabled, "Logging is disabled");
 
-        EventLog memory newLog = _createEventLog(eventType, message, indexedAddress, data);
+        EventLog memory newLog = _createEventLog(
+            eventType,
+            message,
+            indexedAddress,
+            data
+        );
         _storeEventLog(newLog, eventType);
         _emitEventLogged(eventType, message, indexedAddress);
     }
@@ -52,25 +64,30 @@ contract EventLogger is IEventLogger, Ownable {
     /**
      * @dev 이벤트 로그 생성
      */
-    function _createEventLog(string memory eventType, string memory message, address indexedAddress, bytes memory data)
-        internal
-        view
-        returns (EventLog memory)
-    {
-        return EventLog({
-            eventType: eventType,
-            message: message,
-            indexedAddress: indexedAddress,
-            data: data,
-            timestamp: block.timestamp,
-            blockNumber: block.number
-        });
+    function _createEventLog(
+        string memory eventType,
+        string memory message,
+        address indexedAddress,
+        bytes memory data
+    ) internal view returns (EventLog memory) {
+        return
+            EventLog({
+                eventType: eventType,
+                message: message,
+                indexedAddress: indexedAddress,
+                data: data,
+                timestamp: block.timestamp, // solhint-disable-line not-rely-on-time
+                blockNumber: block.number
+            });
     }
 
     /**
      * @dev 이벤트 로그 저장
      */
-    function _storeEventLog(EventLog memory newLog, string memory eventType) internal {
+    function _storeEventLog(
+        EventLog memory newLog,
+        string memory eventType
+    ) internal {
         eventLogs.push(newLog);
         eventTypeCounters[eventType]++;
     }
@@ -78,8 +95,12 @@ contract EventLogger is IEventLogger, Ownable {
     /**
      * @dev 이벤트 로그 이벤트 발생
      */
-    function _emitEventLogged(string memory eventType, string memory message, address indexedAddress) internal {
-        emit EventLogged(eventType, message, indexedAddress, block.timestamp);
+    function _emitEventLogged(
+        string memory eventType,
+        string memory message,
+        address indexedAddress
+    ) internal {
+        emit EventLogged(eventType, message, indexedAddress, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -87,7 +108,7 @@ contract EventLogger is IEventLogger, Ownable {
      */
     function toggleLogging() external override onlyOwner {
         loggingEnabled = !loggingEnabled;
-        emit LoggingToggled(loggingEnabled, block.timestamp);
+        emit LoggingToggled(loggingEnabled, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -102,7 +123,7 @@ contract EventLogger is IEventLogger, Ownable {
      */
     function clearLogs() external onlyOwner {
         delete eventLogs;
-        emit LogsCleared(block.timestamp);
+        emit LogsCleared(block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -115,14 +136,18 @@ contract EventLogger is IEventLogger, Ownable {
     /**
      * @dev 특정 이벤트 타입의 로그 개수 조회
      */
-    function getEventTypeCount(string memory eventType) external view returns (uint256) {
+    function getEventTypeCount(
+        string memory eventType
+    ) external view returns (uint256) {
         return eventTypeCounters[eventType];
     }
 
     /**
      * @dev 최근 로그 조회
      */
-    function getRecentLogs(uint256 count) external view returns (EventLog[] memory) {
+    function getRecentLogs(
+        uint256 count
+    ) external view returns (EventLog[] memory) {
         uint256 totalLogs = eventLogs.length;
         uint256 returnCount = count > totalLogs ? totalLogs : count;
 

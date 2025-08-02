@@ -1,61 +1,119 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "../../shared/interfaces/ITreasuryManager.sol";
-import "../../shared/utils/ContractRegistry.sol";
-import "../../shared/utils/GasOptimizer.sol";
-import "../../shared/interfaces/IOwnable.sol";
-import "../../shared/interfaces/ICryptolottoStatsAggregator.sol";
-import "../../shared/interfaces/ICryptolottoReferral.sol";
+import {Initializable} from "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
+import {ERC1967Proxy} from "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ContractRegistry} from "../../shared/utils/ContractRegistry.sol";
+import {GasOptimizer} from "../../shared/utils/GasOptimizer.sol";
+import {IOwnable} from "../../shared/interfaces/IOwnable.sol";
+import {ICryptolottoStatsAggregator} from "../../shared/interfaces/ICryptolottoStatsAggregator.sol";
+import {ICryptolottoReferral} from "../../shared/interfaces/ICryptolottoReferral.sol";
 
 using GasOptimizer for address[];
 
 /**
  * @title GameFactory
- * @dev 게임 컨트랙트 생성을 관리하는 팩토리 컨트랙트
+ * @author Cryptolotto Team
+ * @notice Factory contract for creating and managing lottery games
+ * @dev This contract handles the creation and management of different types of lottery games
  */
 contract GameFactory is Initializable, OwnableUpgradeable {
-    // Game type enum
+    using GasOptimizer for uint256;
+
+    // Custom Errors
+    error InvalidGameType();
+    error GameNotFound();
+    error GameAlreadyExists();
+
+    /**
+     * @notice Game information structure
+     * @param gameAddress The address of the game contract
+     * @param gameType The type of game (ONE_DAY or SEVEN_DAYS)
+     * @param isActive Whether the game is currently active
+     * @param createdAt Timestamp when the game was created
+     */
+    struct GameInfo {
+        address gameAddress; // 20 bytes
+        uint256 createdAt; // 32 bytes
+        GameType gameType; // 1 byte
+        bool isActive; // 1 byte
+    }
+
+    /**
+     * @notice Game types enumeration
+     */
     enum GameType {
         ONE_DAY,
         SEVEN_DAYS
     }
 
-    // Game info struct
-    struct GameInfo {
-        address gameAddress;
-        GameType gameType;
-        bool isActive;
-        uint256 createdAt;
-    }
+    /**
+     * @notice Emitted when a new game is created
+     * @param gameAddress The address of the created game
+     * @param gameType The type of game created
+     * @param timestamp The timestamp when the game was created
+     */
+    event GameCreated(
+        address indexed gameAddress,
+        GameType indexed gameType,
+        uint256 timestamp
+    );
 
-    // Events
-    event GameCreated(address indexed gameAddress, GameType gameType, uint256 timestamp);
-    event GameDeactivated(address indexed gameAddress, uint256 timestamp);
+    /**
+     * @notice Emitted when a game is deactivated
+     * @param gameAddress The address of the deactivated game
+     * @param timestamp The timestamp when the game was deactivated
+     */
+    event GameDeactivated(
+        address indexed gameAddress,
+        uint256 indexed timestamp
+    );
 
     // State variables
+    /** @notice Mapping of game addresses to their information */
     mapping(address => GameInfo) public games;
+    /** @notice Array of all game addresses */
     address[] public allGames;
 
-    // Contract addresses
+    // Dependencies
+    /** @notice Ownable contract instance */
     IOwnable public ownable;
+    /** @notice Stats aggregator contract instance */
     ICryptolottoStatsAggregator public statsAggregator;
+    /** @notice Referral system contract instance */
     ICryptolottoReferral public referralSystem;
+    /** @notice Funds distributor contract instance */
     address public fundsDistributor;
-    address public registry;
+    /** @notice Contract registry instance */
+    ContractRegistry public registry;
 
     // Implementation addresses
+    /** @notice 1-day game implementation address */
     address public oneDayImplementation;
+    /** @notice 7-days game implementation address */
     address public sevenDaysImplementation;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
+    /**
+     * @notice Constructor for the GameFactory contract
+     * @dev Disables initializers to prevent re-initialization
+     */
     constructor() {
         _disableInitializers();
     }
 
+    /**
+     * @notice Initialize the factory contract
+     * @param owner The owner of the factory contract
+     * @param ownableContract The ownable contract address
+     * @param statsContract The stats aggregator contract address
+     * @param referralContract The referral system contract address
+     * @param distributor The funds distributor contract address
+     * @param _oneDayImplementation The 1-day game implementation address
+     * @param _sevenDaysImplementation The 7-days game implementation address
+     * @param _registryContract The contract registry address
+     */
     function initialize(
         address owner,
         address ownableContract,
@@ -65,35 +123,39 @@ contract GameFactory is Initializable, OwnableUpgradeable {
         address _oneDayImplementation,
         address _sevenDaysImplementation,
         address _registryContract
-    ) public initializer {
+    ) external initializer {
         __Ownable_init(owner);
+
         ownable = IOwnable(ownableContract);
         statsAggregator = ICryptolottoStatsAggregator(statsContract);
         referralSystem = ICryptolottoReferral(referralContract);
         fundsDistributor = distributor;
         oneDayImplementation = _oneDayImplementation;
         sevenDaysImplementation = _sevenDaysImplementation;
-        registry = _registryContract;
+        registry = ContractRegistry(_registryContract);
 
         // ContractRegistry에 컨트랙트들 등록
-        ContractRegistry registryInstance = ContractRegistry(_registryContract);
         string[] memory contractNames = new string[](3);
         contractNames[0] = "TreasuryManager";
-        contractNames[1] = "CryptolottoReferral";
+        contractNames[1] = "ReferralSystem";
         contractNames[2] = "StatsAggregator";
 
         address[] memory contractAddresses = new address[](3);
-        contractAddresses[0] = address(0);
+        contractAddresses[0] = distributor;
         contractAddresses[1] = referralContract;
         contractAddresses[2] = statsContract;
 
-        registryInstance.registerBatchContracts(contractNames, contractAddresses);
+        registry.registerBatchContracts(contractNames, contractAddresses);
     }
 
     /**
-     * @dev Create a new game contract
+     * @notice Create a new game
+     * @param gameType The type of game to create
+     * @return The address of the created game contract
      */
-    function createGame(GameType gameType) external onlyOwner returns (address) {
+    function createGame(
+        GameType gameType
+    ) external onlyOwner returns (address) {
         address gameAddress;
 
         if (gameType == GameType.ONE_DAY) {
@@ -101,22 +163,27 @@ contract GameFactory is Initializable, OwnableUpgradeable {
         } else if (gameType == GameType.SEVEN_DAYS) {
             gameAddress = _create7DaysGame();
         } else {
-            revert("Invalid game type");
+            revert InvalidGameType();
         }
 
         // Register the game
-        games[gameAddress] =
-            GameInfo({gameAddress: gameAddress, gameType: gameType, isActive: true, createdAt: block.timestamp});
+        games[gameAddress] = GameInfo({
+            gameAddress: gameAddress,
+            gameType: gameType,
+            isActive: true,
+            createdAt: block.timestamp // solhint-disable-line not-rely-on-time
+        });
 
         allGames.push(gameAddress);
 
-        emit GameCreated(gameAddress, gameType, block.timestamp);
+        emit GameCreated(gameAddress, gameType, block.timestamp); // solhint-disable-line not-rely-on-time
 
         return gameAddress;
     }
 
     /**
-     * @dev Create 1-day game
+     * @notice Create 1-day game
+     * @return The address of the created 1-day game contract
      */
     function _create1DayGame() internal returns (address) {
         bytes memory initData = abi.encodeWithSelector(
@@ -136,7 +203,8 @@ contract GameFactory is Initializable, OwnableUpgradeable {
     }
 
     /**
-     * @dev Create 7-days game
+     * @notice Create 7-days game
+     * @return The address of the created 7-days game contract
      */
     function _create7DaysGame() internal returns (address) {
         bytes memory initData = abi.encodeWithSelector(
@@ -150,37 +218,44 @@ contract GameFactory is Initializable, OwnableUpgradeable {
             address(registry) // registry address
         );
 
-        ERC1967Proxy proxy = new ERC1967Proxy(sevenDaysImplementation, initData);
+        ERC1967Proxy proxy = new ERC1967Proxy(
+            sevenDaysImplementation,
+            initData
+        );
 
         return address(proxy);
     }
 
     /**
-     * @dev Deactivate a game
+     * @notice Deactivate a game
+     * @param gameAddress The address of the game to deactivate
      */
     function deactivateGame(address gameAddress) external onlyOwner {
-        require(games[gameAddress].gameAddress != address(0), "Game not found");
+        if (games[gameAddress].gameAddress == address(0)) {
+            revert GameNotFound();
+        }
         games[gameAddress].isActive = false;
-        emit GameDeactivated(gameAddress, block.timestamp);
+        emit GameDeactivated(gameAddress, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev Get all active games
+     * @notice Get all active games
+     * @return Array of active game addresses
      */
     function getActiveGames() external view returns (address[] memory) {
         uint256 activeCount = 0;
-        for (uint256 i = 0; i < allGames.length; i++) {
+        for (uint256 i = 0; i < allGames.length; ++i) {
             if (games[allGames[i]].isActive) {
-                activeCount++;
+                ++activeCount;
             }
         }
 
         address[] memory activeGames = new address[](activeCount);
         uint256 index = 0;
-        for (uint256 i = 0; i < allGames.length; i++) {
+        for (uint256 i = 0; i < allGames.length; ++i) {
             if (games[allGames[i]].isActive) {
                 activeGames[index] = allGames[i];
-                index++;
+                ++index;
             }
         }
 
@@ -188,52 +263,69 @@ contract GameFactory is Initializable, OwnableUpgradeable {
     }
 
     /**
-     * @dev Get game info
+     * @notice Get game info
+     * @param gameAddress The address of the game
+     * @return GameInfo structure containing game details
      */
-    function getGameInfo(address gameAddress) external view returns (GameInfo memory) {
+    function getGameInfo(
+        address gameAddress
+    ) external view returns (GameInfo memory) {
         return games[gameAddress];
     }
 
     /**
-     * @dev Set implementation addresses
+     * @notice Set implementation addresses
+     * @param _oneDayImplementation The 1-day game implementation address
+     * @param _sevenDaysImplementation The 7-days game implementation address
      */
-    function setImplementations(address _oneDayImplementation, address _sevenDaysImplementation) external onlyOwner {
+    function setImplementations(
+        address _oneDayImplementation,
+        address _sevenDaysImplementation
+    ) external onlyOwner {
         oneDayImplementation = _oneDayImplementation;
         sevenDaysImplementation = _sevenDaysImplementation;
     }
 
-    function getAllGames() public view returns (address[] memory) {
-        address[] storage allGamesArr = allGames;
-        uint256 length = allGamesArr.length;
-        address[] memory result = new address[](length);
-        for (uint256 i = 0; i < length; i++) {
-            result[i] = allGamesArr[i];
-        }
-        return result;
+    /**
+     * @notice Get all games
+     * @return Array of all game addresses
+     */
+    function getAllGames() external view returns (address[] memory) {
+        return allGames;
     }
 
-    function getGameCount() public view returns (uint256) {
+    /**
+     * @notice Get game count
+     * @return The total number of games
+     */
+    function getGameCount() external view returns (uint256) {
         return allGames.length;
     }
 
-    function getGamesByType(string memory /* gameType */ ) public view returns (address[] memory) {
-        address[] storage allGamesArr = allGames;
-        uint256 length = allGamesArr.length;
-        address[] memory temp = new address[](length);
+    /**
+     * @notice Get games by type
+     * @param gameType The type of games to retrieve
+     * @return Array of game addresses of the specified type
+     */
+    function getGamesByType(
+        GameType gameType
+    ) external view returns (address[] memory) {
         uint256 count = 0;
-
-        for (uint256 i = 0; i < length; i++) {
-            // 여기서는 간단한 예시로 모든 게임을 반환
-            // 실제로는 게임 타입을 체크하는 로직이 필요
-            temp[count] = allGamesArr[i];
-            count++;
+        for (uint256 i = 0; i < allGames.length; ++i) {
+            if (games[allGames[i]].gameType == gameType) {
+                ++count;
+            }
         }
 
-        address[] memory result = new address[](count);
-        for (uint256 i = 0; i < count; i++) {
-            result[i] = temp[i];
+        address[] memory gamesByType = new address[](count);
+        uint256 index = 0;
+        for (uint256 i = 0; i < allGames.length; ++i) {
+            if (games[allGames[i]].gameType == gameType) {
+                gamesByType[index] = allGames[i];
+                ++index;
+            }
         }
 
-        return result;
+        return gamesByType;
     }
 }
