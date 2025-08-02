@@ -1,0 +1,26 @@
+name: Solhint Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  solhint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Solhint
+      run: npm install -g solhint
+    
+    - name: Run Solhint
+      run: solhint contracts/**/*.sol 

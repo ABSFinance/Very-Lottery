@@ -16,6 +16,11 @@
     "no-console": "warn",
     "reason-string": "warn",
     "reentrancy": "warn",
-    "gas-indexed-events": "off"
+    "gas-indexed-events": "off",
+    "use-natspec": "off",
+    "gas-custom-errors": "off",
+    "gas-increment-by-one": "off",
+    "gas-small-strings": "off",
+    "func-name-mixedcase": "off"
   }
 }
