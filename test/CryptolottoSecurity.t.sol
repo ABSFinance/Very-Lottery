@@ -40,10 +40,7 @@ contract CryptolottoSecurity is Test {
 
         // 오버플로우 방지 확인 (실제 오버플로우를 발생시키지 않음)
         assertTrue(maxValue > 0, "Max value should be positive");
-        assertTrue(
-            maxValue == type(uint256).max,
-            "Max value should be correct"
-        );
+        assertTrue(maxValue == type(uint256).max, "Max value should be correct");
 
         // 언더플로우 방지 확인
         uint256 minValue = 0;
@@ -57,10 +54,7 @@ contract CryptolottoSecurity is Test {
         try lottery.emergencyPause("Test") {
             assertTrue(true, "Access control test completed");
         } catch {
-            assertTrue(
-                true,
-                "Access control should prevent unauthorized access"
-            );
+            assertTrue(true, "Access control should prevent unauthorized access");
         }
     }
 

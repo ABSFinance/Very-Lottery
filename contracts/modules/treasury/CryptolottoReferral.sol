@@ -14,12 +14,7 @@ contract CryptolottoReferral {
      * @param amount 보상 금액
      * @param timestamp 시간
      */
-    event ReferralRewardPaid(
-        address indexed referrer,
-        address indexed player,
-        uint256 amount,
-        uint256 timestamp
-    );
+    event ReferralRewardPaid(address indexed referrer, address indexed player, uint256 amount, uint256 timestamp);
 
     /**
      * @dev 리퍼럴 통계 업데이트 이벤트
@@ -29,10 +24,7 @@ contract CryptolottoReferral {
      * @param timestamp 시간
      */
     event ReferralStatsUpdated(
-        address indexed referrer,
-        uint256 totalReferrals,
-        uint256 totalRewards,
-        uint256 timestamp
+        address indexed referrer, uint256 totalReferrals, uint256 totalRewards, uint256 timestamp
     );
 
     /**
@@ -67,11 +59,7 @@ contract CryptolottoReferral {
     /**
      * @dev 보상 비율 변경 이벤트
      */
-    event ReferralRewardPercentUpdated(
-        uint256 oldPercent,
-        uint256 newPercent,
-        uint256 timestamp
-    );
+    event ReferralRewardPercentUpdated(uint256 oldPercent, uint256 newPercent, uint256 timestamp);
 
     /**
      * @dev 생성자
@@ -107,11 +95,7 @@ contract CryptolottoReferral {
         require(newPercent <= 20, "Reward percent cannot exceed 20%");
         uint256 oldPercent = referralRewardPercent;
         referralRewardPercent = newPercent;
-        emit ReferralRewardPercentUpdated(
-            oldPercent,
-            newPercent,
-            block.timestamp
-        );
+        emit ReferralRewardPercentUpdated(oldPercent, newPercent, block.timestamp);
     }
 
     /**
@@ -120,10 +104,7 @@ contract CryptolottoReferral {
      * @param ticketAmount 티켓 구매 금액
      * @return 보상 금액
      */
-    function processReferralReward(
-        address referrer,
-        uint256 ticketAmount
-    ) external payable returns (uint256) {
+    function processReferralReward(address referrer, uint256 ticketAmount) external payable returns (uint256) {
         // 리퍼러가 유효한 주소인지 확인
         require(referrer != address(0), "Invalid referrer address");
         require(referrer != msg.sender, "Cannot refer yourself");
@@ -135,7 +116,7 @@ contract CryptolottoReferral {
         // 보상이 0보다 큰 경우에만 처리
         if (rewardAmount > 0) {
             // 리퍼러에게 보상 지급
-            (bool success, ) = payable(referrer).call{value: rewardAmount}("");
+            (bool success,) = payable(referrer).call{value: rewardAmount}("");
             require(success, "Referral reward transfer failed");
 
             // 리퍼러 통계 업데이트
@@ -145,18 +126,8 @@ contract CryptolottoReferral {
             stats.lastRewardTime = block.timestamp;
 
             // 이벤트 발생
-            emit ReferralRewardPaid(
-                referrer,
-                msg.sender,
-                rewardAmount,
-                block.timestamp
-            );
-            emit ReferralStatsUpdated(
-                referrer,
-                stats.totalReferrals,
-                stats.totalRewards,
-                block.timestamp
-            );
+            emit ReferralRewardPaid(referrer, msg.sender, rewardAmount, block.timestamp);
+            emit ReferralStatsUpdated(referrer, stats.totalReferrals, stats.totalRewards, block.timestamp);
         }
 
         return rewardAmount;
@@ -169,16 +140,10 @@ contract CryptolottoReferral {
      * @return totalRewards 총 보상 금액
      * @return lastRewardTime 마지막 보상 시간
      */
-    function getReferralStats(
-        address referrer
-    )
+    function getReferralStats(address referrer)
         external
         view
-        returns (
-            uint256 totalReferrals,
-            uint256 totalRewards,
-            uint256 lastRewardTime
-        )
+        returns (uint256 totalReferrals, uint256 totalRewards, uint256 lastRewardTime)
     {
         ReferralStats storage stats = referralStats[referrer];
         return (stats.totalReferrals, stats.totalRewards, stats.lastRewardTime);
@@ -199,7 +164,7 @@ contract CryptolottoReferral {
         uint256 balance = address(this).balance;
         require(balance > 0, "No balance to withdraw");
 
-        (bool success, ) = payable(owner).call{value: balance}("");
+        (bool success,) = payable(owner).call{value: balance}("");
         require(success, "Withdrawal failed");
     }
 

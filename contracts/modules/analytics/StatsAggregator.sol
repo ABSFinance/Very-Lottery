@@ -19,20 +19,20 @@ contract StatsAggregator is Ownable {
      */
     event Winner(
         address indexed winner,
-        uint game,
-        uint players,
-        uint amount,
+        uint256 game,
+        uint256 players,
+        uint256 amount,
         uint8 gameType,
-        uint winnerIndex,
-        uint timestamp
+        uint256 winnerIndex,
+        uint256 timestamp
     );
 
     /**
      * @dev Store winner statistics
      */
-    mapping(address => uint) public winnerCount;
-    mapping(uint => address) public gameWinners;
-    mapping(address => uint) public totalWinnings;
+    mapping(address => uint256) public winnerCount;
+    mapping(uint256 => address) public gameWinners;
+    mapping(address => uint256) public totalWinnings;
 
     // Top player 집계를 위한 상태 변수
     address[] public allPlayers;
@@ -50,11 +50,11 @@ contract StatsAggregator is Ownable {
      */
     function newWinner(
         address winner,
-        uint game,
-        uint players,
-        uint amount,
+        uint256 game,
+        uint256 players,
+        uint256 amount,
         uint8 gameType,
-        uint winnerIndex
+        uint256 winnerIndex
     ) public {
         winnerCount[winner]++;
         gameWinners[game] = winner;
@@ -79,49 +79,35 @@ contract StatsAggregator is Ownable {
         // playerScores에 당첨 금액 누적
         playerScores[winner] += amount;
 
-        emit Winner(
-            winner,
-            game,
-            players,
-            amount,
-            gameType,
-            winnerIndex,
-            block.timestamp
-        );
+        emit Winner(winner, game, players, amount, gameType, winnerIndex, block.timestamp);
     }
 
     /**
      * @dev Get winner count for address
      */
-    function getWinnerCount(address player) public view returns (uint) {
+    function getWinnerCount(address player) public view returns (uint256) {
         return winnerCount[player];
     }
 
     /**
      * @dev Get total winnings for address
      */
-    function getTotalWinnings(address player) public view returns (uint) {
+    function getTotalWinnings(address player) public view returns (uint256) {
         return totalWinnings[player];
     }
 
     /**
      * @dev Get winner of specific game
      */
-    function getGameWinner(uint game) public view returns (address) {
+    function getGameWinner(uint256 game) public view returns (address) {
         return gameWinners[game];
     }
 
     /**
      * @dev Get comprehensive player statistics
      */
-    function getPlayerStats(
-        address player
-    ) public view returns (uint wins, uint totalWon, bool hasWon) {
-        return (
-            winnerCount[player],
-            totalWinnings[player],
-            winnerCount[player] > 0
-        );
+    function getPlayerStats(address player) public view returns (uint256 wins, uint256 totalWon, bool hasWon) {
+        return (winnerCount[player], totalWinnings[player], winnerCount[player] > 0);
     }
 
     /**
@@ -131,13 +117,7 @@ contract StatsAggregator is Ownable {
      * @return topPlayers 상위 플레이어 배열
      * @return scores 플레이어 점수 배열
      */
-    function getTopPlayers(
-        uint256 count
-    )
-        public
-        view
-        returns (address[] memory topPlayers, uint256[] memory scores)
-    {
+    function getTopPlayers(uint256 count) public view returns (address[] memory topPlayers, uint256[] memory scores) {
         address[] storage players = allPlayers;
         uint256 length = players.length;
         uint256 found = 0;
@@ -168,9 +148,7 @@ contract StatsAggregator is Ownable {
      * @param count 조회할 승자 수
      * @return topWinners 상위 승자 배열
      */
-    function getTopWinners(
-        uint256 count
-    ) public view returns (address[] memory topWinners) {
+    function getTopWinners(uint256 count) public view returns (address[] memory topWinners) {
         // 가스 최적화를 위해 고정 크기 배열 사용
         topWinners = new address[](count);
         uint256 found = 0;
@@ -196,15 +174,10 @@ contract StatsAggregator is Ownable {
      * @return winnerCounts 승자 횟수 배열
      * @return totalWinningsArray 총 상금 배열
      */
-    function getBatchWinnerStats(
-        address[] memory players
-    )
+    function getBatchWinnerStats(address[] memory players)
         external
         view
-        returns (
-            uint256[] memory winnerCounts,
-            uint256[] memory totalWinningsArray
-        )
+        returns (uint256[] memory winnerCounts, uint256[] memory totalWinningsArray)
     {
         // 가스 최적화된 중복 제거
         address[] memory uniquePlayers = players.removeDuplicatesFromMemory();
@@ -227,16 +200,10 @@ contract StatsAggregator is Ownable {
      * @return scores 점수 배열
      * @return winRates 승률 배열
      */
-    function getTopPlayerAnalysis(
-        uint256 count
-    )
+    function getTopPlayerAnalysis(uint256 count)
         external
         view
-        returns (
-            address[] memory players,
-            uint256[] memory scores,
-            uint256[] memory winRates
-        )
+        returns (address[] memory players, uint256[] memory scores, uint256[] memory winRates)
     {
         (players, scores) = getTopPlayers(count);
         winRates = new uint256[](count);

@@ -7,11 +7,7 @@ interface IAdToken {
     event RewardUpdated(uint256 newReward, uint256 timestamp);
     event EmergencyPaused(address indexed by, uint256 timestamp);
     event EmergencyResumed(address indexed by, uint256 timestamp);
-    event MaxDailyRewardUpdated(
-        uint256 oldMax,
-        uint256 newMax,
-        uint256 timestamp
-    );
+    event MaxDailyRewardUpdated(uint256 oldMax, uint256 newMax, uint256 timestamp);
 
     // ERC20 functions
     function totalSupply() external view returns (uint256);
@@ -20,18 +16,11 @@ interface IAdToken {
 
     function transfer(address to, uint256 amount) external returns (bool);
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     function approve(address spender, uint256 amount) external returns (bool);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 
     // ERC20Burnable functions
     function burn(uint256 amount) external;
@@ -64,9 +53,7 @@ interface IAdToken {
 
     function lastRewardReset(address viewer) external view returns (uint256);
 
-    function getAdStats(
-        address viewer
-    )
+    function getAdStats(address viewer)
         external
         view
         returns (

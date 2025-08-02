@@ -16,16 +16,8 @@ contract StorageManager is Ownable, StorageAccess {
 
     // ============ EVENTS ============
     event StorageInitialized(uint256 version, uint256 timestamp);
-    event StorageMigrated(
-        uint256 fromVersion,
-        uint256 toVersion,
-        uint256 timestamp
-    );
-    event StorageOptimized(
-        string operation,
-        uint256 gasSaved,
-        uint256 timestamp
-    );
+    event StorageMigrated(uint256 fromVersion, uint256 toVersion, uint256 timestamp);
+    event StorageOptimized(string operation, uint256 gasSaved, uint256 timestamp);
 
     // ============ STORAGE VERSIONING ============
     uint256 public currentVersion = 1;
@@ -75,10 +67,7 @@ contract StorageManager is Ownable, StorageAccess {
     /**
      * @dev 접근 권한 부여
      */
-    function grantAccess(
-        address user,
-        string[] memory permissions
-    ) external onlyOwner {
+    function grantAccess(address user, string[] memory permissions) external onlyOwner {
         authorizedAccess[user] = true;
         accessPermissions[user] = permissions;
     }
@@ -94,17 +83,12 @@ contract StorageManager is Ownable, StorageAccess {
     /**
      * @dev 접근 권한 확인
      */
-    function hasPermission(
-        address user,
-        string memory permission
-    ) public view returns (bool) {
+    function hasPermission(address user, string memory permission) public view returns (bool) {
         if (!authorizedAccess[user]) return false;
 
         string[] memory permissions = accessPermissions[user];
         for (uint256 i = 0; i < permissions.length; i++) {
-            if (
-                keccak256(bytes(permissions[i])) == keccak256(bytes(permission))
-            ) {
+            if (keccak256(bytes(permissions[i])) == keccak256(bytes(permission))) {
                 return true;
             }
         }
@@ -134,10 +118,8 @@ contract StorageManager is Ownable, StorageAccess {
     function optimizeUserStorage(address user) external {
         require(hasPermission(msg.sender, "OPTIMIZE"), "No permission");
 
-        StorageLayout.AnalyticsStorage
-            storage analyticsStorage = getAnalyticsStorage();
-        StorageLayout.UserAnalytics storage userAnalytics = analyticsStorage
-            .userAnalytics[user];
+        StorageLayout.AnalyticsStorage storage analyticsStorage = getAnalyticsStorage();
+        StorageLayout.UserAnalytics storage userAnalytics = analyticsStorage.userAnalytics[user];
 
         // 사용자 데이터 정리
         if (userAnalytics.lastActivity == 0) {
@@ -155,20 +137,10 @@ contract StorageManager is Ownable, StorageAccess {
     function getGameStats()
         external
         view
-        returns (
-            uint256 totalGames,
-            uint256 totalJackpot,
-            uint256 totalPlayers,
-            bool isActive
-        )
+        returns (uint256 totalGames, uint256 totalJackpot, uint256 totalPlayers, bool isActive)
     {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        return (
-            gameStorage.totalGames,
-            gameStorage.totalJackpot,
-            gameStorage.totalPlayers,
-            gameStorage.isActive
-        );
+        return (gameStorage.totalGames, gameStorage.totalJackpot, gameStorage.totalPlayers, gameStorage.isActive);
     }
 
     /**
@@ -177,19 +149,10 @@ contract StorageManager is Ownable, StorageAccess {
     function getTreasuryStats()
         external
         view
-        returns (
-            uint256 totalDeposits,
-            uint256 totalWithdrawals,
-            uint256 totalFees
-        )
+        returns (uint256 totalDeposits, uint256 totalWithdrawals, uint256 totalFees)
     {
-        StorageLayout.TreasuryStorage
-            storage treasuryStorage = getTreasuryStorage();
-        return (
-            treasuryStorage.totalDeposits,
-            treasuryStorage.totalWithdrawals,
-            treasuryStorage.totalFees
-        );
+        StorageLayout.TreasuryStorage storage treasuryStorage = getTreasuryStorage();
+        return (treasuryStorage.totalDeposits, treasuryStorage.totalWithdrawals, treasuryStorage.totalFees);
     }
 
     /**
@@ -200,8 +163,7 @@ contract StorageManager is Ownable, StorageAccess {
         view
         returns (uint256 totalUsers, uint256 totalWinners, uint256 totalVolume)
     {
-        StorageLayout.AnalyticsStorage
-            storage analyticsStorage = getAnalyticsStorage();
+        StorageLayout.AnalyticsStorage storage analyticsStorage = getAnalyticsStorage();
         return (
             analyticsStorage.allPlayers.length,
             0, // winnerCount는 mapping이므로 별도로 계산 필요
@@ -229,12 +191,7 @@ contract StorageManager is Ownable, StorageAccess {
     function getStorageHealth()
         external
         view
-        returns (
-            bool isInitialized,
-            uint256 version,
-            uint256 totalSlots,
-            uint256 usedSlots
-        )
+        returns (bool isInitialized, uint256 version, uint256 totalSlots, uint256 usedSlots)
     {
         return (
             isStorageInitialized(),

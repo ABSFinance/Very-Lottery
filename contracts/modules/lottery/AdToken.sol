@@ -39,11 +39,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     event RewardUpdated(uint256 newReward, uint256 timestamp);
     event EmergencyPaused(address indexed by, uint256 timestamp);
     event EmergencyResumed(address indexed by, uint256 timestamp);
-    event MaxDailyRewardUpdated(
-        uint256 oldMax,
-        uint256 newMax,
-        uint256 timestamp
-    );
+    event MaxDailyRewardUpdated(uint256 oldMax, uint256 newMax, uint256 timestamp);
 
     /**
      * @dev Constructor that gives msg.sender all of existing tokens.
@@ -86,23 +82,14 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
         require(!emergencyPaused, "Contract is emergency paused");
         require(viewer != address(0), "Invalid viewer address");
         require(viewer != address(this), "Cannot watch ad for contract");
-        require(
-            balanceOf(msg.sender) >= adReward,
-            "Insufficient tokens for reward"
-        );
+        require(balanceOf(msg.sender) >= adReward, "Insufficient tokens for reward");
 
         // 최소 1시간 간격으로 광고 시청 가능
-        require(
-            block.timestamp >= lastAdWatchTime[viewer] + 3600,
-            "Must wait 1 hour between ads"
-        );
+        require(block.timestamp >= lastAdWatchTime[viewer] + 3600, "Must wait 1 hour between ads");
 
         // 일일 보상 한도 확인
         _resetDailyRewardIfNeeded(viewer);
-        require(
-            dailyRewards[viewer] + adReward <= maxRewardPerDay,
-            "Daily reward limit exceeded"
-        );
+        require(dailyRewards[viewer] + adReward <= maxRewardPerDay, "Daily reward limit exceeded");
 
         // 토큰 전송
         _transfer(msg.sender, viewer, adReward);
@@ -141,9 +128,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     /**
      * @dev 사용자 통계 조회
      */
-    function getUserStats(
-        address user
-    )
+    function getUserStats(address user)
         external
         view
         returns (
@@ -195,10 +180,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @dev 긴급 상황에서 토큰 인출
      */
     function emergencyWithdraw(address to) external onlyOwner {
-        require(
-            emergencyPaused,
-            "Contract must be paused for emergency withdrawal"
-        );
+        require(emergencyPaused, "Contract must be paused for emergency withdrawal");
         require(to != address(0), "Invalid recipient address");
         require(to != address(this), "Cannot withdraw to self");
 
@@ -212,10 +194,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @dev 토큰 소각 (Ad Lottery용)
      */
     function burnForLottery(address from, uint256 amount) external {
-        require(
-            msg.sender == owner() || isAuthorizedBurner(msg.sender),
-            "Not authorized to burn"
-        );
+        require(msg.sender == owner() || isAuthorizedBurner(msg.sender), "Not authorized to burn");
         require(from != address(0), "Invalid from address");
         require(from != address(this), "Cannot burn from self");
         require(amount > 0, "Amount must be greater than 0");
@@ -235,11 +214,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     /**
      * @dev 토큰 전송 전 검증 (ERC20Burnable과 호환)
      */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 /* amount */
-    ) internal virtual {
+    function _beforeTokenTransfer(address from, address to, uint256 /* amount */ ) internal virtual {
         // 긴급 정지 확인
         require(!emergencyPaused, "Token transfers paused");
         require(from != address(0) || to != address(0), "Invalid transfer");

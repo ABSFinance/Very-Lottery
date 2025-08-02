@@ -6,6 +6,7 @@ interface ICircuitBreaker {
         CLOSED, // Normal operation
         OPEN, // Circuit is open, operations are blocked
         HALF_OPEN // Testing if system is ready to close
+
     }
 
     struct Circuit {
@@ -17,35 +18,17 @@ interface ICircuitBreaker {
         bool isActive;
     }
 
-    function createCircuit(
-        string memory circuitName,
-        uint256 threshold,
-        uint256 timeout
-    ) external;
+    function createCircuit(string memory circuitName, uint256 threshold, uint256 timeout) external;
 
-    function createAddressCircuit(
-        address targetAddress,
-        uint256 threshold,
-        uint256 timeout
-    ) external;
+    function createAddressCircuit(address targetAddress, uint256 threshold, uint256 timeout) external;
 
-    function createFunctionCircuit(
-        string memory functionName,
-        uint256 threshold,
-        uint256 timeout
-    ) external;
+    function createFunctionCircuit(string memory functionName, uint256 threshold, uint256 timeout) external;
 
-    function checkCircuit(
-        string memory circuitName
-    ) external view returns (bool);
+    function checkCircuit(string memory circuitName) external view returns (bool);
 
-    function checkAddressCircuit(
-        address targetAddress
-    ) external view returns (bool);
+    function checkAddressCircuit(address targetAddress) external view returns (bool);
 
-    function checkFunctionCircuit(
-        string memory functionName
-    ) external view returns (bool);
+    function checkFunctionCircuit(string memory functionName) external view returns (bool);
 
     function recordFailure(string memory circuitName) external;
 
@@ -61,9 +44,7 @@ interface ICircuitBreaker {
 
     function toggleCircuitBreaker() external;
 
-    function getCircuitInfo(
-        string memory circuitName
-    )
+    function getCircuitInfo(string memory circuitName)
         external
         view
         returns (

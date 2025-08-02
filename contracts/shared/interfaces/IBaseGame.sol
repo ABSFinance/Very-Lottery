@@ -27,28 +27,10 @@ interface IBaseGame {
     // 이벤트들
     event GameStarted(uint256 indexed gameNumber, uint256 timestamp);
     event GameEnded(uint256 indexed gameNumber, uint256 timestamp);
-    event TicketPurchased(
-        address indexed player,
-        uint256 indexed gameNumber,
-        uint256 ticketCount,
-        uint256 totalAmount
-    );
-    event WinnerSelected(
-        address indexed winner,
-        uint256 indexed gameNumber,
-        uint256 jackpot,
-        uint256 timestamp
-    );
-    event GameStateChanged(
-        uint256 indexed gameNumber,
-        GameState state,
-        uint256 timestamp
-    );
-    event TicketPriceChanged(
-        uint256 oldPrice,
-        uint256 newPrice,
-        uint256 timestamp
-    );
+    event TicketPurchased(address indexed player, uint256 indexed gameNumber, uint256 ticketCount, uint256 totalAmount);
+    event WinnerSelected(address indexed winner, uint256 indexed gameNumber, uint256 jackpot, uint256 timestamp);
+    event GameStateChanged(uint256 indexed gameNumber, GameState state, uint256 timestamp);
+    event TicketPriceChanged(uint256 oldPrice, uint256 newPrice, uint256 timestamp);
 
     // 기본 게임 함수들
     function buyTicket(address partner) external payable;
@@ -105,9 +87,7 @@ interface IBaseGame {
 
     function playerTicketCount(address player) external view returns (uint256);
 
-    function gameHistory(
-        uint256 gameNumber
-    ) external view returns (Game memory);
+    function gameHistory(uint256 gameNumber) external view returns (Game memory);
 
     function newPrice() external view returns (uint256);
 

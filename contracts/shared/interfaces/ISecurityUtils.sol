@@ -10,25 +10,12 @@ interface ISecurityUtils {
 
     function recordInteraction(address user) external returns (bool);
 
-    function updateRateLimits(
-        uint256 newMinInterval,
-        uint256 newMaxInteractions
-    ) external;
+    function updateRateLimits(uint256 newMinInterval, uint256 newMaxInteractions) external;
 
-    function detectSuspiciousActivity(
-        address user,
-        string memory reason
-    ) external;
+    function detectSuspiciousActivity(address user, string memory reason) external;
 
-    function getUserStats(
-        address user
-    )
+    function getUserStats(address user)
         external
         view
-        returns (
-            bool isBlacklisted,
-            uint256 lastInteraction,
-            uint256 interactionCount,
-            bool canInteract
-        );
+        returns (bool isBlacklisted, uint256 lastInteraction, uint256 interactionCount, bool canInteract);
 }

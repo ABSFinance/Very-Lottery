@@ -167,13 +167,9 @@ contract StorageLayout {
     // ============ STORAGE SLOTS ============
     // 각 스토리지 영역을 위한 고유 슬롯
     bytes32 public constant GAME_STORAGE_SLOT = keccak256("game.storage");
-    bytes32 public constant TREASURY_STORAGE_SLOT =
-        keccak256("treasury.storage");
-    bytes32 public constant ANALYTICS_STORAGE_SLOT =
-        keccak256("analytics.storage");
-    bytes32 public constant REFERRAL_STORAGE_SLOT =
-        keccak256("referral.storage");
-    bytes32 public constant SECURITY_STORAGE_SLOT =
-        keccak256("security.storage");
+    bytes32 public constant TREASURY_STORAGE_SLOT = keccak256("treasury.storage");
+    bytes32 public constant ANALYTICS_STORAGE_SLOT = keccak256("analytics.storage");
+    bytes32 public constant REFERRAL_STORAGE_SLOT = keccak256("referral.storage");
+    bytes32 public constant SECURITY_STORAGE_SLOT = keccak256("security.storage");
     bytes32 public constant CONFIG_STORAGE_SLOT = keccak256("config.storage");
 }

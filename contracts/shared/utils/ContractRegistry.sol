@@ -33,15 +33,8 @@ contract ContractRegistry is Ownable {
     }
 
     // Events
-    event ContractRegistered(
-        string indexed name,
-        address indexed contractAddress
-    );
-    event ContractUpdated(
-        string indexed name,
-        address indexed oldAddress,
-        address indexed newAddress
-    );
+    event ContractRegistered(string indexed name, address indexed contractAddress);
+    event ContractUpdated(string indexed name, address indexed oldAddress, address indexed newAddress);
     event ContractRemoved(string indexed name, address indexed contractAddress);
     event BatchContractsRegistered(string[] names, address[] addresses);
 
@@ -50,10 +43,7 @@ contract ContractRegistry is Ownable {
     /**
      * @dev Register a new contract
      */
-    function registerContract(
-        string memory name,
-        address contractAddress
-    ) external onlyOwner {
+    function registerContract(string memory name, address contractAddress) external onlyOwner {
         require(contractAddress != address(0), "Invalid contract address");
         require(bytes(name).length > 0, "Invalid contract name");
         require(contracts[name] == address(0), "Contract already registered");
@@ -67,20 +57,14 @@ contract ContractRegistry is Ownable {
     /**
      * @dev Register multiple contracts at once
      */
-    function registerBatchContracts(
-        string[] memory names,
-        address[] memory addresses
-    ) external onlyOwner {
+    function registerBatchContracts(string[] memory names, address[] memory addresses) external onlyOwner {
         require(names.length == addresses.length, "Array length mismatch");
         require(names.length > 0, "Empty arrays");
 
         for (uint256 i = 0; i < names.length; i++) {
             require(addresses[i] != address(0), "Invalid contract address");
             require(bytes(names[i]).length > 0, "Invalid contract name");
-            require(
-                contracts[names[i]] == address(0),
-                "Contract already registered"
-            );
+            require(contracts[names[i]] == address(0), "Contract already registered");
 
             contracts[names[i]] = addresses[i];
             contractNames[addresses[i]] = names[i];
@@ -92,10 +76,7 @@ contract ContractRegistry is Ownable {
     /**
      * @dev Update an existing contract address
      */
-    function updateContract(
-        string memory name,
-        address newAddress
-    ) external onlyOwner {
+    function updateContract(string memory name, address newAddress) external onlyOwner {
         require(newAddress != address(0), "Invalid contract address");
         require(contracts[name] != address(0), "Contract not registered");
 
@@ -132,9 +113,7 @@ contract ContractRegistry is Ownable {
     /**
      * @dev Get multiple contract addresses
      */
-    function getContracts(
-        string[] memory names
-    ) external view returns (address[] memory) {
+    function getContracts(string[] memory names) external view returns (address[] memory) {
         address[] memory addresses = new address[](names.length);
         for (uint256 i = 0; i < names.length; i++) {
             addresses[i] = contracts[names[i]];
@@ -152,9 +131,7 @@ contract ContractRegistry is Ownable {
     /**
      * @dev Get contract name by address
      */
-    function getContractName(
-        address contractAddress
-    ) external view returns (string memory) {
+    function getContractName(address contractAddress) external view returns (string memory) {
         return contractNames[contractAddress];
     }
 

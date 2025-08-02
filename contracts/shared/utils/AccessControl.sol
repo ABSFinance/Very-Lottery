@@ -31,20 +31,14 @@ contract AdvancedAccessControl is AccessControl, Pausable {
     }
 
     // 역할 관리 함수들
-    function grantRole(
-        bytes32 role,
-        address account
-    ) public override onlyRole(getRoleAdmin(role)) {
+    function grantRole(bytes32 role, address account) public override onlyRole(getRoleAdmin(role)) {
         super.grantRole(role, account);
         roleMembers[role][account] = true;
         userRoles[account].push(role);
         emit RoleGranted(role, account, msg.sender);
     }
 
-    function revokeRole(
-        bytes32 role,
-        address account
-    ) public override onlyRole(getRoleAdmin(role)) {
+    function revokeRole(bytes32 role, address account) public override onlyRole(getRoleAdmin(role)) {
         super.revokeRole(role, account);
         roleMembers[role][account] = false;
         _removeUserRole(account, role);
@@ -74,49 +68,32 @@ contract AdvancedAccessControl is AccessControl, Pausable {
     }
 
     // 역할 확인 함수들
-    function hasRole(
-        bytes32 role,
-        address account
-    ) public view override returns (bool) {
+    function hasRole(bytes32 role, address account) public view override returns (bool) {
         return roleMembers[role][account];
     }
 
-    function getUserRoles(
-        address user
-    ) external view returns (bytes32[] memory) {
+    function getUserRoles(address user) external view returns (bytes32[] memory) {
         return userRoles[user];
     }
 
     // 수정자들
     modifier onlyAdmin() {
-        require(
-            hasRole(ADMIN_ROLE, msg.sender),
-            "AccessControl: admin role required"
-        );
+        require(hasRole(ADMIN_ROLE, msg.sender), "AccessControl: admin role required");
         _;
     }
 
     modifier onlyOperator() {
-        require(
-            hasRole(OPERATOR_ROLE, msg.sender),
-            "AccessControl: operator role required"
-        );
+        require(hasRole(OPERATOR_ROLE, msg.sender), "AccessControl: operator role required");
         _;
     }
 
     modifier onlyEmergency() {
-        require(
-            hasRole(EMERGENCY_ROLE, msg.sender),
-            "AccessControl: emergency role required"
-        );
+        require(hasRole(EMERGENCY_ROLE, msg.sender), "AccessControl: emergency role required");
         _;
     }
 
     modifier onlyUpgrader() {
-        require(
-            hasRole(UPGRADER_ROLE, msg.sender),
-            "AccessControl: upgrader role required"
-        );
+        require(hasRole(UPGRADER_ROLE, msg.sender), "AccessControl: upgrader role required");
         _;
     }
 }

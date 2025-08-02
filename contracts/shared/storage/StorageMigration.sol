@@ -12,16 +12,8 @@ import "./StorageAccess.sol";
  */
 contract StorageMigration is Ownable, StorageAccess {
     // ============ MIGRATION EVENTS ============
-    event MigrationStarted(
-        uint256 fromVersion,
-        uint256 toVersion,
-        uint256 timestamp
-    );
-    event MigrationCompleted(
-        uint256 version,
-        uint256 recordsMigrated,
-        uint256 timestamp
-    );
+    event MigrationStarted(uint256 fromVersion, uint256 toVersion, uint256 timestamp);
+    event MigrationCompleted(uint256 version, uint256 recordsMigrated, uint256 timestamp);
     event MigrationFailed(uint256 version, string reason, uint256 timestamp);
     event RollbackCompleted(uint256 version, uint256 timestamp);
 
@@ -72,19 +64,12 @@ contract StorageMigration is Ownable, StorageAccess {
      */
     function startMigration(uint256 targetVersion) external onlyOwner {
         require(!isMigrationInProgress, "Migration already in progress");
-        require(
-            migrationPlans[targetVersion].exists,
-            "Migration plan not found"
-        );
+        require(migrationPlans[targetVersion].exists, "Migration plan not found");
 
         isMigrationInProgress = true;
         currentMigrationVersion = targetVersion;
 
-        emit MigrationStarted(
-            migrationPlans[targetVersion].fromVersion,
-            targetVersion,
-            block.timestamp
-        );
+        emit MigrationStarted(migrationPlans[targetVersion].fromVersion, targetVersion, block.timestamp);
     }
 
     // ============ MIGRATION OPERATIONS ============
@@ -119,16 +104,11 @@ contract StorageMigration is Ownable, StorageAccess {
     /**
      * @dev 재무 데이터 마이그레이션
      */
-    function migrateTreasuryData(
-        string memory treasuryName
-    ) external onlyOwner {
+    function migrateTreasuryData(string memory treasuryName) external onlyOwner {
         require(isMigrationInProgress, "No migration in progress");
 
-        StorageLayout.TreasuryStorage
-            storage treasuryStorage = getTreasuryStorage();
-        StorageLayout.Treasury storage treasury = treasuryStorage.treasuries[
-            treasuryName
-        ];
+        StorageLayout.TreasuryStorage storage treasuryStorage = getTreasuryStorage();
+        StorageLayout.Treasury storage treasury = treasuryStorage.treasuries[treasuryName];
 
         // 재무 데이터 검증
         if (treasury.totalBalance < treasury.reservedBalance) {
@@ -146,17 +126,13 @@ contract StorageMigration is Ownable, StorageAccess {
     function migrateAnalyticsData() external onlyOwner {
         require(isMigrationInProgress, "No migration in progress");
 
-        StorageLayout.AnalyticsStorage
-            storage analyticsStorage = getAnalyticsStorage();
+        StorageLayout.AnalyticsStorage storage analyticsStorage = getAnalyticsStorage();
 
         // 승자 데이터 정리
         address[] storage allPlayers = analyticsStorage.allPlayers;
         for (uint256 i = 0; i < allPlayers.length; i++) {
             address player = allPlayers[i];
-            if (
-                analyticsStorage.winnerCount[player] == 0 &&
-                analyticsStorage.totalWinnings[player] == 0
-            ) {
+            if (analyticsStorage.winnerCount[player] == 0 && analyticsStorage.totalWinnings[player] == 0) {
                 // 비활성 플레이어 제거
                 allPlayers[i] = allPlayers[allPlayers.length - 1];
                 allPlayers.pop();
@@ -179,17 +155,12 @@ contract StorageMigration is Ownable, StorageAccess {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         recordsMigrated += gameStorage.totalGames;
 
-        StorageLayout.AnalyticsStorage
-            storage analyticsStorage = getAnalyticsStorage();
+        StorageLayout.AnalyticsStorage storage analyticsStorage = getAnalyticsStorage();
         recordsMigrated += analyticsStorage.allPlayers.length;
 
         isMigrationInProgress = false;
 
-        emit MigrationCompleted(
-            currentMigrationVersion,
-            recordsMigrated,
-            block.timestamp
-        );
+        emit MigrationCompleted(currentMigrationVersion, recordsMigrated, block.timestamp);
     }
 
     /**
@@ -210,10 +181,7 @@ contract StorageMigration is Ownable, StorageAccess {
      */
     function rollbackMigration(uint256 targetVersion) external onlyOwner {
         require(!isMigrationInProgress, "Migration in progress");
-        require(
-            migrationPlans[targetVersion].isReversible,
-            "Migration not reversible"
-        );
+        require(migrationPlans[targetVersion].isReversible, "Migration not reversible");
 
         // 롤백 로직 구현
         // 이전 버전으로 데이터 복원
@@ -229,29 +197,20 @@ contract StorageMigration is Ownable, StorageAccess {
     function getMigrationStatus()
         external
         view
-        returns (
-            bool inProgress,
-            uint256 currentVersion,
-            uint256 targetVersion,
-            uint256 estimatedGas
-        )
+        returns (bool inProgress, uint256 currentVersion, uint256 targetVersion, uint256 estimatedGas)
     {
         return (
             isMigrationInProgress,
             currentMigrationVersion,
             isMigrationInProgress ? currentMigrationVersion : 0,
-            isMigrationInProgress
-                ? migrationPlans[currentMigrationVersion].estimatedGas
-                : 0
+            isMigrationInProgress ? migrationPlans[currentMigrationVersion].estimatedGas : 0
         );
     }
 
     /**
      * @dev 마이그레이션 계획 조회
      */
-    function getMigrationPlan(
-        uint256 version
-    )
+    function getMigrationPlan(uint256 version)
         external
         view
         returns (
@@ -264,13 +223,6 @@ contract StorageMigration is Ownable, StorageAccess {
         )
     {
         MigrationPlan storage plan = migrationPlans[version];
-        return (
-            plan.exists,
-            plan.fromVersion,
-            plan.toVersion,
-            plan.operations,
-            plan.isReversible,
-            plan.estimatedGas
-        );
+        return (plan.exists, plan.fromVersion, plan.toVersion, plan.operations, plan.isReversible, plan.estimatedGas);
     }
 }

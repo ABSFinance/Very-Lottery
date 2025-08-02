@@ -26,10 +26,7 @@ library GasOptimizer {
     /**
      * @dev 배열에서 특정 요소 제거 (가스 최적화)
      */
-    function removeElement(
-        address[] storage array,
-        address element
-    ) internal returns (bool) {
+    function removeElement(address[] storage array, address element) internal returns (bool) {
         uint256 length = array.length;
         for (uint256 i = 0; i < length; i++) {
             if (array[i] == element) {
@@ -53,9 +50,7 @@ library GasOptimizer {
     /**
      * @dev 배열 정렬 (가스 최적화)
      */
-    function sortAddresses(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function sortAddresses(address[] memory array) internal pure returns (address[] memory) {
         address[] memory sorted = _copyArray(array);
         _sortArray(sorted);
         return sorted;
@@ -64,9 +59,7 @@ library GasOptimizer {
     /**
      * @dev 배열 복사
      */
-    function _copyArray(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function _copyArray(address[] memory array) internal pure returns (address[] memory) {
         address[] memory sorted = new address[](array.length);
         for (uint256 i = 0; i < array.length; i++) {
             sorted[i] = array[i];
@@ -90,11 +83,7 @@ library GasOptimizer {
     /**
      * @dev 요소 교환
      */
-    function _swapElements(
-        address[] memory sorted,
-        uint256 i,
-        uint256 j
-    ) internal pure {
+    function _swapElements(address[] memory sorted, uint256 i, uint256 j) internal pure {
         address temp = sorted[i];
         sorted[i] = sorted[j];
         sorted[j] = temp;
@@ -103,10 +92,7 @@ library GasOptimizer {
     /**
      * @dev 배열에서 특정 요소 검색 (가스 최적화)
      */
-    function findElement(
-        address[] memory array,
-        address element
-    ) internal pure returns (bool, uint256) {
+    function findElement(address[] memory array, address element) internal pure returns (bool, uint256) {
         for (uint256 i = 0; i < array.length; i++) {
             if (array[i] == element) {
                 return (true, i);
@@ -118,15 +104,8 @@ library GasOptimizer {
     /**
      * @dev 배열 슬라이스 (가스 최적화)
      */
-    function sliceArray(
-        address[] memory array,
-        uint256 start,
-        uint256 end
-    ) internal pure returns (address[] memory) {
-        require(
-            start <= end && end <= array.length,
-            "Invalid slice parameters"
-        );
+    function sliceArray(address[] memory array, uint256 start, uint256 end) internal pure returns (address[] memory) {
+        require(start <= end && end <= array.length, "Invalid slice parameters");
 
         address[] memory result = new address[](end - start);
         for (uint256 i = start; i < end; i++) {
@@ -139,10 +118,7 @@ library GasOptimizer {
     /**
      * @dev 배열 병합 (가스 최적화)
      */
-    function mergeArrays(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function mergeArrays(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory result = new address[](array1.length + array2.length);
 
         for (uint256 i = 0; i < array1.length; i++) {
@@ -159,10 +135,7 @@ library GasOptimizer {
     /**
      * @dev 배열 교집합 (가스 최적화)
      */
-    function intersection(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function intersection(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory temp = new address[](array1.length);
         uint256 count = 0;
 
@@ -187,10 +160,7 @@ library GasOptimizer {
     /**
      * @dev 배열 합집합 (가스 최적화)
      */
-    function union(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function union(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory temp = new address[](array1.length + array2.length);
         uint256 count = 0;
 
@@ -226,10 +196,7 @@ library GasOptimizer {
     /**
      * @dev 배열 차집합 (가스 최적화)
      */
-    function difference(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function difference(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory temp = new address[](array1.length);
         uint256 count = 0;
 
@@ -258,10 +225,7 @@ library GasOptimizer {
     /**
      * @dev 배열 섞기 (가스 최적화)
      */
-    function shuffleArray(
-        address[] memory array,
-        uint256 seed
-    ) internal pure returns (address[] memory) {
+    function shuffleArray(address[] memory array, uint256 seed) internal pure returns (address[] memory) {
         address[] memory result = new address[](array.length);
 
         // Copy array
@@ -283,10 +247,7 @@ library GasOptimizer {
     /**
      * @dev 배열 회전 (가스 최적화)
      */
-    function rotateArray(
-        address[] memory array,
-        uint256 positions
-    ) internal pure returns (address[] memory) {
+    function rotateArray(address[] memory array, uint256 positions) internal pure returns (address[] memory) {
         if (array.length == 0) return array;
 
         uint256 actualPositions = positions % array.length;
@@ -305,9 +266,7 @@ library GasOptimizer {
     /**
      * @dev 배열 역순 (가스 최적화)
      */
-    function reverseArray(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function reverseArray(address[] memory array) internal pure returns (address[] memory) {
         address[] memory result = new address[](array.length);
 
         for (uint256 i = 0; i < array.length; i++) {
@@ -320,9 +279,7 @@ library GasOptimizer {
     /**
      * @dev 배열 중복 제거 (메모리 배열용)
      */
-    function removeDuplicatesFromMemory(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function removeDuplicatesFromMemory(address[] memory array) internal pure returns (address[] memory) {
         if (array.length <= 1) return array;
 
         address[] memory temp = new address[](array.length);

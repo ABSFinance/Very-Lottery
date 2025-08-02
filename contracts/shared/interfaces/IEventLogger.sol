@@ -13,12 +13,8 @@ interface IEventLogger {
      * @param indexedAddress 인덱싱된 주소
      * @param data 추가 데이터
      */
-    function logEvent(
-        string memory eventType,
-        string memory message,
-        address indexedAddress,
-        bytes memory data
-    ) external;
+    function logEvent(string memory eventType, string memory message, address indexedAddress, bytes memory data)
+        external;
 
     /**
      * @dev 로깅 활성화/비활성화 토글

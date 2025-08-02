@@ -10,50 +10,26 @@ interface IRateLimiter {
         bool isActive;
     }
 
-    function setUserRateLimit(
-        address user,
-        uint256 maxRequests,
-        uint256 timeWindow
-    ) external;
+    function setUserRateLimit(address user, uint256 maxRequests, uint256 timeWindow) external;
 
-    function setFunctionRateLimit(
-        string memory functionName,
-        uint256 maxRequests,
-        uint256 timeWindow
-    ) external;
+    function setFunctionRateLimit(string memory functionName, uint256 maxRequests, uint256 timeWindow) external;
 
-    function setUserFunctionRateLimit(
-        address user,
-        string memory functionName,
-        uint256 maxRequests,
-        uint256 timeWindow
-    ) external;
+    function setUserFunctionRateLimit(address user, string memory functionName, uint256 maxRequests, uint256 timeWindow)
+        external;
 
-    function checkRateLimit(
-        address user,
-        string memory functionName
-    ) external returns (bool);
+    function checkRateLimit(address user, string memory functionName) external returns (bool);
 
     function disableUserRateLimit(address user) external;
 
     function disableFunctionRateLimit(string memory functionName) external;
 
-    function disableUserFunctionRateLimit(
-        address user,
-        string memory functionName
-    ) external;
+    function disableUserFunctionRateLimit(address user, string memory functionName) external;
 
     function toggleRateLimiting() external;
 
-    function updateDefaultSettings(
-        uint256 newMaxRequests,
-        uint256 newTimeWindow
-    ) external;
+    function updateDefaultSettings(uint256 newMaxRequests, uint256 newTimeWindow) external;
 
-    function getRateLimitInfo(
-        address user,
-        string memory functionName
-    )
+    function getRateLimitInfo(address user, string memory functionName)
         external
         view
         returns (

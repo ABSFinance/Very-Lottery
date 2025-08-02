@@ -2,26 +2,13 @@
 pragma solidity ^0.8.19;
 
 interface ITreasuryManager {
-    function createTreasury(
-        string memory treasuryName,
-        uint256 initialBalance
-    ) external;
+    function createTreasury(string memory treasuryName, uint256 initialBalance) external;
 
-    function depositFunds(
-        string memory treasuryName,
-        address user,
-        uint256 amount
-    ) external;
+    function depositFunds(string memory treasuryName, address user, uint256 amount) external;
 
-    function withdrawFunds(
-        string memory treasuryName,
-        address user,
-        uint256 amount
-    ) external;
+    function withdrawFunds(string memory treasuryName, address user, uint256 amount) external;
 
-    function getTreasuryInfo(
-        string memory treasuryName
-    )
+    function getTreasuryInfo(string memory treasuryName)
         external
         view
         returns (
@@ -38,7 +25,5 @@ interface ITreasuryManager {
 
     function removeAuthorizedContract(address contractAddress) external;
 
-    function authorizedContracts(
-        address contractAddress
-    ) external view returns (bool);
+    function authorizedContracts(address contractAddress) external view returns (bool);
 }

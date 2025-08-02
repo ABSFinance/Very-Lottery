@@ -12,12 +12,12 @@ contract FundsDistributor {
     /**
      * @dev Commission received event
      */
-    event CommissionReceived(uint amount, uint time);
+    event CommissionReceived(uint256 amount, uint256 time);
 
     /**
      * @dev Funds withdrawn event
      */
-    event FundsWithdrawn(address to, uint amount, uint timestamp);
+    event FundsWithdrawn(address to, uint256 amount, uint256 timestamp);
 
     /**
      * @dev Owner changed event
@@ -90,10 +90,10 @@ contract FundsDistributor {
      * @dev Withdraw funds to owner
      */
     function withdrawFunds() public onlyOwner nonReentrant whenNotPaused {
-        uint amount = address(this).balance;
+        uint256 amount = address(this).balance;
         require(amount > 0, "No funds to withdraw");
 
-        (bool success, ) = payable(owner).call{value: amount}("");
+        (bool success,) = payable(owner).call{value: amount}("");
         require(success, "Transfer failed");
 
         emit FundsWithdrawn(owner, amount, block.timestamp);
@@ -102,13 +102,11 @@ contract FundsDistributor {
     /**
      * @dev Withdraw specific amount
      */
-    function withdrawAmount(
-        uint amount
-    ) public onlyOwner nonReentrant whenNotPaused {
+    function withdrawAmount(uint256 amount) public onlyOwner nonReentrant whenNotPaused {
         require(amount > 0, "Amount must be greater than 0");
         require(amount <= address(this).balance, "Insufficient balance");
 
-        (bool success, ) = payable(owner).call{value: amount}("");
+        (bool success,) = payable(owner).call{value: amount}("");
         require(success, "Transfer failed");
 
         emit FundsWithdrawn(owner, amount, block.timestamp);
@@ -130,7 +128,7 @@ contract FundsDistributor {
     /**
      * @dev Get contract balance
      */
-    function getBalance() public view returns (uint) {
+    function getBalance() public view returns (uint256) {
         return address(this).balance;
     }
 

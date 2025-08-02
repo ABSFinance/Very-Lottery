@@ -56,50 +56,24 @@ interface IAnalyticsEngine {
         uint256 systemFees
     ) external;
 
-    function updateDailyStats(
-        uint256 day,
-        uint256 volume,
-        uint256 transactions,
-        uint256 users
-    ) external;
+    function updateDailyStats(uint256 day, uint256 volume, uint256 transactions, uint256 users) external;
 
     function toggleAnalytics() external;
 
-    function getUserAnalytics(
-        address user
-    ) external view returns (UserAnalytics memory);
+    function getUserAnalytics(address user) external view returns (UserAnalytics memory);
 
-    function getGameAnalytics(
-        uint8 gameType
-    ) external view returns (GameAnalytics memory);
+    function getGameAnalytics(uint8 gameType) external view returns (GameAnalytics memory);
 
-    function getSystemAnalytics()
+    function getSystemAnalytics() external view returns (SystemAnalytics memory);
+
+    function getDailyStats(uint256 day) external view returns (uint256 volume, uint256 transactions, uint256 users);
+
+    function getPeriodStats(uint256 startDay, uint256 endDay)
         external
         view
-        returns (SystemAnalytics memory);
+        returns (uint256 totalVolume, uint256 totalTransactions, uint256 totalUsers);
 
-    function getDailyStats(
-        uint256 day
-    )
-        external
-        view
-        returns (uint256 volume, uint256 transactions, uint256 users);
-
-    function getPeriodStats(
-        uint256 startDay,
-        uint256 endDay
-    )
-        external
-        view
-        returns (
-            uint256 totalVolume,
-            uint256 totalTransactions,
-            uint256 totalUsers
-        );
-
-    function getTopUsers(
-        uint256 count
-    ) external view returns (address[] memory);
+    function getTopUsers(uint256 count) external view returns (address[] memory);
 
     function getAnalyticsStats()
         external

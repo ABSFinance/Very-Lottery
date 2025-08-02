@@ -17,11 +17,7 @@ interface IMonitoringSystem {
         bool isResolved;
     }
 
-    function updateMetrics(
-        uint256 transactions,
-        uint256 volume,
-        uint256 users
-    ) external;
+    function updateMetrics(uint256 transactions, uint256 volume, uint256 users) external;
 
     function createAlert(string memory message, uint256 severity) external;
 
@@ -40,16 +36,8 @@ interface IMonitoringSystem {
     function getSystemStats()
         external
         view
-        returns (
-            SystemMetrics memory metrics,
-            uint256 totalAlerts,
-            uint256 activeAlerts,
-            uint256 monitoredContracts
-        );
+        returns (SystemMetrics memory metrics, uint256 totalAlerts, uint256 activeAlerts, uint256 monitoredContracts);
 
-    function updateThresholds(
-        uint256 newMinTransactions,
-        uint256 newMaxResponseTime,
-        uint256 newHealthCheckInterval
-    ) external;
+    function updateThresholds(uint256 newMinTransactions, uint256 newMaxResponseTime, uint256 newHealthCheckInterval)
+        external;
 }

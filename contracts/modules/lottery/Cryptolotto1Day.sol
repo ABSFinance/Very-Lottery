@@ -51,10 +51,10 @@ contract Cryptolotto1Day is BaseGame {
 
     function initialize(
         address owner,
-        address /* distributor */,
-        address /* statsA */,
-        address /* referralSystem */,
-        address /* _treasuryManager */,
+        address, /* distributor */
+        address, /* statsA */
+        address, /* referralSystem */
+        address, /* _treasuryManager */
         string memory /* _treasuryName */
     ) public initializer {
         require(owner != address(0), "Invalid owner address");
@@ -76,10 +76,7 @@ contract Cryptolotto1Day is BaseGame {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         require(gameStorage.isActive, "Game is not active");
         require(ticketCount > 0, "Ticket count must be greater than 0");
-        require(
-            msg.value == gameStorage.ticketPrice * ticketCount,
-            "Incorrect amount sent"
-        );
+        require(msg.value == gameStorage.ticketPrice * ticketCount, "Incorrect amount sent");
 
         // 현재 게임 정보 가져오기
         uint256 currentGameId = gameStorage.totalGames;
@@ -91,15 +88,11 @@ contract Cryptolotto1Day is BaseGame {
             game = gameStorage.games[currentGameId];
         }
 
-        require(
-            game.state == StorageLayout.GameState.ACTIVE,
-            "Game not active"
-        );
+        require(game.state == StorageLayout.GameState.ACTIVE, "Game not active");
 
         // 최대 티켓 수 확인
         require(
-            gameStorage.playerTicketCount[msg.sender] + ticketCount <=
-                gameStorage.maxTicketsPerPlayer,
+            gameStorage.playerTicketCount[msg.sender] + ticketCount <= gameStorage.maxTicketsPerPlayer,
             "Exceeds maximum tickets per player"
         );
 
@@ -110,18 +103,13 @@ contract Cryptolotto1Day is BaseGame {
         _transferToTreasury(msg.value);
 
         // 추천 시스템 처리
-        for (uint i = 0; i < ticketCount; i++) {
+        for (uint256 i = 0; i < ticketCount; i++) {
             _processReferralSystem(partner, msg.sender);
         }
 
         // 이벤트 발생
-        for (uint i = 0; i < ticketCount; i++) {
-            emit TicketPurchased(
-                msg.sender,
-                game.gameNumber,
-                game.players.length - 1 + i,
-                block.timestamp
-            );
+        for (uint256 i = 0; i < ticketCount; i++) {
+            emit TicketPurchased(msg.sender, game.gameNumber, game.players.length - 1 + i, block.timestamp);
         }
     }
 
@@ -130,35 +118,24 @@ contract Cryptolotto1Day is BaseGame {
      */
     function _pickWinner() internal view override returns (address) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
         StorageLayout.Game storage game = gameStorage.games[currentGameId];
         require(game.players.length > 0, "No players in game");
 
-        uint256 randomIndex = enhancedRandomNumberSecure(
-            0,
-            game.players.length - 1,
-            block.timestamp
-        );
+        uint256 randomIndex = enhancedRandomNumberSecure(0, game.players.length - 1, block.timestamp);
         return game.players[randomIndex];
     }
 
     /**
      * @dev 승자 지급 처리
      */
-    function _processWinnerPayout(
-        address winner,
-        uint256 amount
-    ) internal override {
+    function _processWinnerPayout(address winner, uint256 amount) internal override {
         if (address(registry) == address(0)) {
             emit TreasuryOperationFailed("payout", block.timestamp);
             return;
         }
 
-        try registry.getContract(treasuryName) returns (
-            address treasuryAddress
-        ) {
+        try registry.getContract(treasuryName) returns (address treasuryAddress) {
             if (treasuryAddress != address(0)) {
                 ITreasuryManager treasury = ITreasuryManager(treasuryAddress);
                 treasury.withdrawFunds(treasuryName, winner, amount);
@@ -166,7 +143,7 @@ contract Cryptolotto1Day is BaseGame {
             } else {
                 emit ContractNotFound(treasuryName, block.timestamp);
             }
-        } catch Error(string memory /* reason */) {
+        } catch Error(string memory) /* reason */ {
             emit TreasuryOperationFailed("payout", block.timestamp);
         } catch {
             emit TreasuryOperationFailed("payout", block.timestamp);
@@ -178,99 +155,63 @@ contract Cryptolotto1Day is BaseGame {
      */
     function _processFounderDistribution(uint256 amount) internal override {
         if (address(registry) == address(0)) {
-            emit DistributorError(
-                "getContract",
-                "Registry not initialized",
-                block.timestamp
-            );
+            emit DistributorError("getContract", "Registry not initialized", block.timestamp);
             return;
         }
 
-        try registry.getContract("FundsDistributor") returns (
-            address distributorAddress
-        ) {
+        try registry.getContract("FundsDistributor") returns (address distributorAddress) {
             if (distributorAddress == address(0)) {
-                emit DistributorError(
-                    "getContract",
-                    "Distributor contract not found",
-                    block.timestamp
-                );
+                emit DistributorError("getContract", "Distributor contract not found", block.timestamp);
                 return;
             }
 
             try IFundsDistributor(distributorAddress).withdrawAmount(amount) {
                 // 성공적으로 처리됨
             } catch Error(string memory reason) {
-                emit DistributorError(
-                    "withdrawAmount",
-                    reason,
-                    block.timestamp
-                );
+                emit DistributorError("withdrawAmount", reason, block.timestamp);
             } catch {
-                emit DistributorError(
-                    "withdrawAmount",
-                    "Unknown error",
-                    block.timestamp
-                );
+                emit DistributorError("withdrawAmount", "Unknown error", block.timestamp);
             }
         } catch Error(string memory reason) {
             emit DistributorError("getContract", reason, block.timestamp);
         } catch {
-            emit DistributorError(
-                "getContract",
-                "Unknown registry error",
-                block.timestamp
-            );
+            emit DistributorError("getContract", "Unknown registry error", block.timestamp);
         }
     }
 
     /**
      * @dev 게임 통계 업데이트
      */
-    function _updateGameStats(
-        address winner,
-        uint256 playerCount,
-        uint256 amount,
-        uint256 winnerIndex
-    ) internal override {
+    function _updateGameStats(address winner, uint256, /* playerCount */ uint256 amount, uint256 winnerIndex)
+        internal
+        override
+    {
         if (address(registry) == address(0)) {
-            emit StatsError(
-                "getContract",
-                "Registry not initialized",
-                block.timestamp
-            );
+            emit StatsError("getContract", "Registry not initialized", block.timestamp);
             return;
         }
 
-        try registry.getContract("StatsAggregator") returns (
-            address statsAddress
-        ) {
+        try registry.getContract("StatsAggregator") returns (address statsAddress) {
             if (statsAddress == address(0)) {
-                emit StatsError(
-                    "getContract",
-                    "Stats contract not found",
-                    block.timestamp
-                );
+                emit StatsError("getContract", "Stats contract not found", block.timestamp);
                 return;
             }
 
             uint256 gameNumber = getCurrentGameNumber();
-            uint256 startTime = getCurrentGameStartTime();
-            uint256 endTime = getCurrentGameEndTime();
-            uint256 jackpot = getCurrentGameJackpot();
+            // uint256 startTime = getCurrentGameStartTime();
+            // uint256 endTime = getCurrentGameEndTime();
+            // uint256 jackpot = getCurrentGameJackpot();
             uint256 gamePlayerCount = getCurrentGamePlayerCount();
-            StorageLayout.GameState state = getCurrentGameState();
+            // StorageLayout.GameState state = getCurrentGameState();
 
-            try
-                ICryptolottoStatsAggregator(statsAddress).newWinner(
-                    winner,
-                    gameNumber,
-                    gamePlayerCount,
-                    amount,
-                    1, // 1일 게임 타입
-                    winnerIndex
-                )
-            {
+            try ICryptolottoStatsAggregator(statsAddress).newWinner(
+                winner,
+                gameNumber,
+                gamePlayerCount,
+                amount,
+                1, // 1일 게임 타입
+                winnerIndex
+            ) {
                 // 성공적으로 처리됨
             } catch Error(string memory reason) {
                 emit StatsError("newWinner", reason, block.timestamp);
@@ -280,11 +221,7 @@ contract Cryptolotto1Day is BaseGame {
         } catch Error(string memory reason) {
             emit StatsError("getContract", reason, block.timestamp);
         } catch {
-            emit StatsError(
-                "getContract",
-                "Unknown registry error",
-                block.timestamp
-            );
+            emit StatsError("getContract", "Unknown registry error", block.timestamp);
         }
     }
 
@@ -292,29 +229,18 @@ contract Cryptolotto1Day is BaseGame {
      * @dev 게임 성능 메트릭 기록
      * @notice 게임 성능을 추적하기 위한 메트릭 기록
      */
-    function _recordPerformanceMetrics(
-        uint256 gameNumber,
-        uint256 gasUsed,
-        uint256 playerCount,
-        uint256 jackpot
-    ) internal override {
-        emit GamePerformanceMetrics(
-            gameNumber,
-            gasUsed,
-            playerCount,
-            jackpot,
-            block.timestamp
-        );
+    function _recordPerformanceMetrics(uint256 gameNumber, uint256 gasUsed, uint256, /* playerCount */ uint256 jackpot)
+        internal
+        override
+    {
+        emit GamePerformanceMetrics(gameNumber, gasUsed, jackpot, jackpot, block.timestamp);
     }
 
     /**
      * @dev 보안 이벤트 기록
      * @notice 보안 관련 이벤트를 기록합니다
      */
-    function _recordSecurityEvent(
-        address player,
-        string memory eventType
-    ) internal override {
+    function _recordSecurityEvent(address player, string memory eventType) internal override {
         emit GameSecurityEvent(player, eventType, block.timestamp);
     }
 
@@ -324,9 +250,7 @@ contract Cryptolotto1Day is BaseGame {
      */
     function _endGame() internal {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
         StorageLayout.Game storage game = gameStorage.games[currentGameId];
 
         // 게임 상태를 ENDED로 변경
@@ -336,12 +260,7 @@ contract Cryptolotto1Day is BaseGame {
         _pickWinner();
 
         // 성능 메트릭 기록
-        _recordPerformanceMetrics(
-            game.gameNumber,
-            gasleft(),
-            game.players.length,
-            game.jackpot
-        );
+        _recordPerformanceMetrics(game.gameNumber, gasleft(), game.players.length, game.jackpot);
 
         // 새 게임 시작 준비
         _startNewGame();
@@ -393,9 +312,7 @@ contract Cryptolotto1Day is BaseGame {
     /**
      * @dev 플레이어 정보 조회
      */
-    function getPlayerInfo(
-        address player
-    ) public view returns (uint256 ticketsInCurrentGame, bool isInCurrentGame) {
+    function getPlayerInfo(address player) public view returns (uint256 ticketsInCurrentGame, bool isInCurrentGame) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         uint256 currentGameId = gameStorage.totalGames;
         StorageLayout.Game storage game = gameStorage.games[currentGameId];
@@ -403,7 +320,7 @@ contract Cryptolotto1Day is BaseGame {
         bool inGame = false;
         address[] storage players = game.players;
         uint256 length = players.length;
-        for (uint i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; i++) {
             if (players[i] == player) {
                 inGame = true;
                 break;
@@ -443,10 +360,7 @@ contract Cryptolotto1Day is BaseGame {
      */
     function setTestMode(bool enabled) external onlyOwner {
         testMode = enabled;
-        _recordSecurityEvent(
-            msg.sender,
-            enabled ? "Test Mode Enabled" : "Test Mode Disabled"
-        );
+        _recordSecurityEvent(msg.sender, enabled ? "Test Mode Enabled" : "Test Mode Disabled");
     }
 
     /**

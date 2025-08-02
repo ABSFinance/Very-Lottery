@@ -63,10 +63,7 @@ library StorageOptimizer {
     /**
      * @dev 효율적인 배열 추가 (중복 체크 포함)
      */
-    function addUniquePlayer(
-        address[] storage players,
-        address player
-    ) internal returns (bool) {
+    function addUniquePlayer(address[] storage players, address player) internal returns (bool) {
         uint256 length = players.length;
         for (uint256 i = 0; i < length; i++) {
             if (players[i] == player) {
@@ -139,11 +136,10 @@ library StorageOptimizer {
     /**
      * @dev 새로운 플레이어인 경우에만 추가
      */
-    function _addPlayerIfNew(
-        address[] storage players,
-        mapping(address => bool) storage playerMap,
-        address player
-    ) internal returns (bool) {
+    function _addPlayerIfNew(address[] storage players, mapping(address => bool) storage playerMap, address player)
+        internal
+        returns (bool)
+    {
         if (!playerMap[player]) {
             players.push(player);
             playerMap[player] = true;
@@ -175,11 +171,10 @@ library StorageOptimizer {
     /**
      * @dev 플레이어 찾기 및 제거
      */
-    function _findAndRemovePlayer(
-        address[] storage players,
-        mapping(address => bool) storage playerMap,
-        address player
-    ) internal returns (bool) {
+    function _findAndRemovePlayer(address[] storage players, mapping(address => bool) storage playerMap, address player)
+        internal
+        returns (bool)
+    {
         uint256 length = players.length;
         for (uint256 i = 0; i < length; i++) {
             if (players[i] == player) {
@@ -211,10 +206,11 @@ library StorageOptimizer {
      * @param player 확인할 플레이어
      * @return exists 플레이어 존재 여부
      */
-    function isPlayerExists(
-        mapping(address => bool) storage playerMap,
-        address player
-    ) internal view returns (bool exists) {
+    function isPlayerExists(mapping(address => bool) storage playerMap, address player)
+        internal
+        view
+        returns (bool exists)
+    {
         return playerMap[player];
     }
 
@@ -222,9 +218,11 @@ library StorageOptimizer {
      * @dev 플레이어 수 계산 (mapping 기반)
      * @return count 고유한 플레이어 수
      */
-    function getUniquePlayerCount(
-        mapping(address => bool) storage /* playerMap */
-    ) internal pure returns (uint256 count) {
+    function getUniquePlayerCount(mapping(address => bool) storage /* playerMap */ )
+        internal
+        pure
+        returns (uint256 count)
+    {
         // mapping의 모든 키를 순회하는 것은 비효율적이므로
         // 별도의 카운터를 유지하는 것이 좋습니다
         // 이 함수는 현재 mapping만으로는 정확한 카운트를 제공할 수 없습니다
@@ -264,10 +262,7 @@ library StorageOptimizer {
     /**
      * @dev 스토리지 접근 최적화 (캐싱)
      */
-    function getCachedGameData(
-        mapping(uint256 => StorageLayout.Game) storage games,
-        uint256 gameId
-    )
+    function getCachedGameData(mapping(uint256 => StorageLayout.Game) storage games, uint256 gameId)
         internal
         view
         returns (
@@ -280,14 +275,7 @@ library StorageOptimizer {
         )
     {
         StorageLayout.Game storage game = games[gameId];
-        return (
-            game.gameNumber,
-            game.startTime,
-            game.endTime,
-            game.jackpot,
-            game.playerCount,
-            game.state
-        );
+        return (game.gameNumber, game.startTime, game.endTime, game.jackpot, game.playerCount, game.state);
     }
 
     /**

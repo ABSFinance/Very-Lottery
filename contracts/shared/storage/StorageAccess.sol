@@ -23,11 +23,7 @@ contract StorageAccess {
     /**
      * @dev 게임 스토리지 접근
      */
-    function getGameStorage()
-        internal
-        pure
-        returns (StorageLayout.GameStorage storage s)
-    {
+    function getGameStorage() internal pure returns (StorageLayout.GameStorage storage s) {
         bytes32 slot = GAME_STORAGE_SLOT;
         assembly {
             s.slot := slot
@@ -37,11 +33,7 @@ contract StorageAccess {
     /**
      * @dev 재무 스토리지 접근
      */
-    function getTreasuryStorage()
-        internal
-        pure
-        returns (StorageLayout.TreasuryStorage storage s)
-    {
+    function getTreasuryStorage() internal pure returns (StorageLayout.TreasuryStorage storage s) {
         bytes32 slot = TREASURY_STORAGE_SLOT;
         assembly {
             s.slot := slot
@@ -51,11 +43,7 @@ contract StorageAccess {
     /**
      * @dev 분석 스토리지 접근
      */
-    function getAnalyticsStorage()
-        internal
-        pure
-        returns (StorageLayout.AnalyticsStorage storage s)
-    {
+    function getAnalyticsStorage() internal pure returns (StorageLayout.AnalyticsStorage storage s) {
         bytes32 slot = ANALYTICS_STORAGE_SLOT;
         assembly {
             s.slot := slot
@@ -65,11 +53,7 @@ contract StorageAccess {
     /**
      * @dev 추천 스토리지 접근
      */
-    function getReferralStorage()
-        internal
-        pure
-        returns (StorageLayout.ReferralStorage storage s)
-    {
+    function getReferralStorage() internal pure returns (StorageLayout.ReferralStorage storage s) {
         bytes32 slot = REFERRAL_STORAGE_SLOT;
         assembly {
             s.slot := slot
@@ -79,11 +63,7 @@ contract StorageAccess {
     /**
      * @dev 보안 스토리지 접근
      */
-    function getSecurityStorage()
-        internal
-        pure
-        returns (StorageLayout.SecurityStorage storage s)
-    {
+    function getSecurityStorage() internal pure returns (StorageLayout.SecurityStorage storage s) {
         bytes32 slot = SECURITY_STORAGE_SLOT;
         assembly {
             s.slot := slot
@@ -93,11 +73,7 @@ contract StorageAccess {
     /**
      * @dev 설정 스토리지 접근
      */
-    function getConfigStorage()
-        internal
-        pure
-        returns (StorageLayout.ConfigStorage storage s)
-    {
+    function getConfigStorage() internal pure returns (StorageLayout.ConfigStorage storage s) {
         bytes32 slot = CONFIG_STORAGE_SLOT;
         assembly {
             s.slot := slot

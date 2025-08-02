@@ -55,53 +55,25 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
     uint256 public lastUpdateTime;
 
     // Events
-    event UserAnalyticsUpdated(
-        address indexed user,
-        uint256 transactions,
-        uint256 volume,
-        uint256 timestamp
-    );
+    event UserAnalyticsUpdated(address indexed user, uint256 transactions, uint256 volume, uint256 timestamp);
     event GameAnalyticsUpdated(
-        uint8 indexed gameType,
-        uint256 games,
-        uint256 players,
-        uint256 volume,
-        uint256 timestamp
+        uint8 indexed gameType, uint256 games, uint256 players, uint256 volume, uint256 timestamp
     );
-    event SystemAnalyticsUpdated(
-        uint256 totalGames,
-        uint256 totalPlayers,
-        uint256 totalVolume,
-        uint256 timestamp
-    );
+    event SystemAnalyticsUpdated(uint256 totalGames, uint256 totalPlayers, uint256 totalVolume, uint256 timestamp);
     event AnalyticsToggled(bool enabled, uint256 timestamp);
 
     // 추가된 이벤트들
     event PlayerAnalyticsUpdated(
-        address indexed player,
-        uint256 gamesPlayed,
-        uint256 totalSpent,
-        uint256 totalWon,
-        uint256 timestamp
+        address indexed player, uint256 gamesPlayed, uint256 totalSpent, uint256 totalWon, uint256 timestamp
     );
     event GameAnalyticsCompleted(
-        uint256 indexed gameNumber,
-        uint256 playerCount,
-        uint256 jackpot,
-        address winner,
-        uint256 timestamp
+        uint256 indexed gameNumber, uint256 playerCount, uint256 jackpot, address winner, uint256 timestamp
     );
     event RevenueAnalyticsUpdated(
-        uint256 dailyRevenue,
-        uint256 weeklyRevenue,
-        uint256 monthlyRevenue,
-        uint256 timestamp
+        uint256 dailyRevenue, uint256 weeklyRevenue, uint256 monthlyRevenue, uint256 timestamp
     );
     event PerformanceMetricsUpdated(
-        uint256 avgGameDuration,
-        uint256 avgPlayersPerGame,
-        uint256 avgJackpot,
-        uint256 timestamp
+        uint256 avgGameDuration, uint256 avgPlayersPerGame, uint256 avgJackpot, uint256 timestamp
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -160,13 +132,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
         analytics.totalWinnings = totalWinnings;
         analytics.lastGameTime = block.timestamp;
 
-        emit GameAnalyticsUpdated(
-            gameType,
-            totalGames,
-            totalPlayers,
-            totalVolume,
-            block.timestamp
-        );
+        emit GameAnalyticsUpdated(gameType, totalGames, totalPlayers, totalVolume, block.timestamp);
     }
 
     /**
@@ -191,23 +157,13 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
 
         lastUpdateTime = block.timestamp;
 
-        emit SystemAnalyticsUpdated(
-            totalUsers,
-            totalVolume,
-            totalTransactions,
-            block.timestamp
-        );
+        emit SystemAnalyticsUpdated(totalUsers, totalVolume, totalTransactions, block.timestamp);
     }
 
     /**
      * @dev 일일 통계 업데이트
      */
-    function updateDailyStats(
-        uint256 day,
-        uint256 volume,
-        uint256 transactions,
-        uint256 users
-    ) external onlyOwner {
+    function updateDailyStats(uint256 day, uint256 volume, uint256 transactions, uint256 users) external onlyOwner {
         require(analyticsEnabled, "Analytics is disabled");
 
         dailyVolume[day] = volume;
@@ -226,59 +182,38 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
     /**
      * @dev 사용자 분석 조회
      */
-    function getUserAnalytics(
-        address user
-    ) external view returns (UserAnalytics memory) {
+    function getUserAnalytics(address user) external view returns (UserAnalytics memory) {
         return userAnalytics[user];
     }
 
     /**
      * @dev 게임 분석 조회
      */
-    function getGameAnalytics(
-        uint8 gameType
-    ) external view returns (GameAnalytics memory) {
+    function getGameAnalytics(uint8 gameType) external view returns (GameAnalytics memory) {
         return gameAnalytics[gameType];
     }
 
     /**
      * @dev 시스템 분석 조회
      */
-    function getSystemAnalytics()
-        external
-        view
-        returns (SystemAnalytics memory)
-    {
+    function getSystemAnalytics() external view returns (SystemAnalytics memory) {
         return systemAnalytics;
     }
 
     /**
      * @dev 일일 통계 조회
      */
-    function getDailyStats(
-        uint256 day
-    )
-        external
-        view
-        returns (uint256 volume, uint256 transactions, uint256 users)
-    {
+    function getDailyStats(uint256 day) external view returns (uint256 volume, uint256 transactions, uint256 users) {
         return (dailyVolume[day], dailyTransactions[day], dailyUsers[day]);
     }
 
     /**
      * @dev 기간별 통계 조회
      */
-    function getPeriodStats(
-        uint256 startDay,
-        uint256 endDay
-    )
+    function getPeriodStats(uint256 startDay, uint256 endDay)
         external
         view
-        returns (
-            uint256 totalVolume,
-            uint256 totalTransactions,
-            uint256 totalUsers
-        )
+        returns (uint256 totalVolume, uint256 totalTransactions, uint256 totalUsers)
     {
         uint256 volume = 0;
         uint256 transactions = 0;
@@ -297,9 +232,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @dev Get top users by activity
      * @return Array of top user addresses
      */
-    function getTopUsers(
-        uint256 /* limit */
-    ) external pure returns (address[] memory) {
+    function getTopUsers(uint256 /* limit */ ) external pure returns (address[] memory) {
         // 실제 구현에서는 상위 사용자 목록을 반환
         return new address[](0);
     }
@@ -310,9 +243,11 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return activeUsers 활성 사용자 수
      * @return totalVolume 총 거래량
      */
-    function analyzeUserActivity(
-        address[] memory users
-    ) external view returns (uint256 activeUsers, uint256 totalVolume) {
+    function analyzeUserActivity(address[] memory users)
+        external
+        view
+        returns (uint256 activeUsers, uint256 totalVolume)
+    {
         // 가스 최적화된 중복 제거
         address[] memory uniqueUsers = users.removeDuplicatesFromMemory();
 
@@ -333,13 +268,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
     function getAnalyticsStats()
         external
         view
-        returns (
-            bool enabled,
-            uint256 updateTime,
-            uint256 totalUsers,
-            uint256 totalVolume,
-            uint256 totalTransactions
-        )
+        returns (bool enabled, uint256 updateTime, uint256 totalUsers, uint256 totalVolume, uint256 totalTransactions)
     {
         return (
             analyticsEnabled,
@@ -356,9 +285,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return volumes 각 게임 타입별 거래량
      * @return players 각 게임 타입별 플레이어 수
      */
-    function compareGameTypes(
-        uint8[] memory gameTypes
-    )
+    function compareGameTypes(uint8[] memory gameTypes)
         external
         view
         returns (uint256[] memory volumes, uint256[] memory players)
@@ -382,10 +309,11 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return activeUsers 활성 사용자 수
      * @return totalVolume 총 거래량
      */
-    function analyzeUserActivityByPeriod(
-        address[] memory users,
-        uint256 dayCount
-    ) external view returns (uint256 activeUsers, uint256 totalVolume) {
+    function analyzeUserActivityByPeriod(address[] memory users, uint256 dayCount)
+        external
+        view
+        returns (uint256 activeUsers, uint256 totalVolume)
+    {
         // 가스 최적화된 중복 제거
         address[] memory uniqueUsers = users.removeDuplicatesFromMemory();
         uint256 cutoffTime = block.timestamp - (dayCount * 1 days);

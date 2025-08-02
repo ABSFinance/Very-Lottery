@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 interface IFundsDistributor {
     function withdrawFunds() external;
 
-    function withdrawAmount(uint amount) external;
+    function withdrawAmount(uint256 amount) external;
 
     function changeOwner(address newOwner) external;
 
@@ -12,5 +12,5 @@ interface IFundsDistributor {
 
     function unpause() external;
 
-    function getBalance() external view returns (uint);
+    function getBalance() external view returns (uint256);
 }

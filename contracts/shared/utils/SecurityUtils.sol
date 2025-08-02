@@ -22,16 +22,9 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
     event AddressBlacklisted(address indexed target, uint256 timestamp);
     event AddressWhitelisted(address indexed target, uint256 timestamp);
     event RateLimitUpdated(
-        uint256 oldMinInterval,
-        uint256 newMinInterval,
-        uint256 oldMaxInteractions,
-        uint256 newMaxInteractions
+        uint256 oldMinInterval, uint256 newMinInterval, uint256 oldMaxInteractions, uint256 newMaxInteractions
     );
-    event SuspiciousActivityDetected(
-        address indexed account,
-        string reason,
-        uint256 timestamp
-    );
+    event SuspiciousActivityDetected(address indexed account, string reason, uint256 timestamp);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -86,48 +79,29 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
     /**
      * @dev 최소 간격 확인
      */
-    function _checkMinimumInterval(
-        uint256 currentTime,
-        uint256 lastTime
-    ) internal view {
-        require(
-            currentTime >= lastTime + minInteractionInterval,
-            "Interaction too frequent"
-        );
+    function _checkMinimumInterval(uint256 currentTime, uint256 lastTime) internal view {
+        require(currentTime >= lastTime + minInteractionInterval, "Interaction too frequent");
     }
 
     /**
      * @dev 상호작용 수 업데이트
      */
-    function _updateInteractionCount(
-        address user,
-        uint256 currentTime,
-        uint256 lastTime
-    ) internal {
+    function _updateInteractionCount(address user, uint256 currentTime, uint256 lastTime) internal {
         if (currentTime - lastTime >= 3600) {
             // 1시간
             interactionCount[user] = 1;
         } else {
             interactionCount[user]++;
-            require(
-                interactionCount[user] <= maxInteractionsPerHour,
-                "Too many interactions per hour"
-            );
+            require(interactionCount[user] <= maxInteractionsPerHour, "Too many interactions per hour");
         }
     }
 
     /**
      * @dev 속도 제한 설정 업데이트
      */
-    function updateRateLimits(
-        uint256 newMinInterval,
-        uint256 newMaxInteractions
-    ) external onlyOwner {
+    function updateRateLimits(uint256 newMinInterval, uint256 newMaxInteractions) external onlyOwner {
         require(newMinInterval > 0, "Min interval must be greater than 0");
-        require(
-            newMaxInteractions > 0,
-            "Max interactions must be greater than 0"
-        );
+        require(newMaxInteractions > 0, "Max interactions must be greater than 0");
 
         uint256 oldMinInterval = minInteractionInterval;
         uint256 oldMaxInteractions = maxInteractionsPerHour;
@@ -135,34 +109,24 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
         minInteractionInterval = newMinInterval;
         maxInteractionsPerHour = newMaxInteractions;
 
-        emit RateLimitUpdated(
-            oldMinInterval,
-            newMinInterval,
-            oldMaxInteractions,
-            newMaxInteractions
-        );
+        emit RateLimitUpdated(oldMinInterval, newMinInterval, oldMaxInteractions, newMaxInteractions);
     }
 
     /**
      * @dev 의심스러운 활동 감지
      */
-    function detectSuspiciousActivity(
-        address user,
-        string memory reason
-    ) external onlyOwner {
+    function detectSuspiciousActivity(address user, string memory reason) external onlyOwner {
         emit SuspiciousActivityDetected(user, reason, block.timestamp);
     }
 
     /**
      * @dev 사용자 상호작용 통계 조회
      */
-    function getUserStats(
-        address /* user */
-    )
+    function getUserStats(address /* user */ )
         external
         pure
         returns (
-            bool /* isBlacklisted */,
+            bool, /* isBlacklisted */
             bool isWhitelisted,
             uint256 lastActivityTime,
             uint256 activityCount,
@@ -191,15 +155,8 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      */
     modifier rateLimited(address user) {
         require(!blacklistedAddresses[user], "Address is blacklisted");
-        require(
-            block.timestamp >=
-                lastInteractionTime[user] + minInteractionInterval,
-            "Interaction too frequent"
-        );
-        require(
-            interactionCount[user] < maxInteractionsPerHour,
-            "Too many interactions per hour"
-        );
+        require(block.timestamp >= lastInteractionTime[user] + minInteractionInterval, "Interaction too frequent");
+        require(interactionCount[user] < maxInteractionsPerHour, "Too many interactions per hour");
         _;
     }
 }
