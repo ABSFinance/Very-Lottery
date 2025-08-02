@@ -108,7 +108,7 @@ contract CryptolottoPerformance is Test {
     }
 
     /// @dev 스토리지 접근 성능 테스트
-    function testStorageAccessPerformance() public {
+    function testStorageAccessPerformance() public view {
         // 반복적인 스토리지 접근
         for (uint256 i = 0; i < 10; i++) {
             try lottery.getGameConfig() {

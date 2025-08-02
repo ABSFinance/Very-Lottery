@@ -151,10 +151,10 @@ contract CryptolottoFuzz is Test {
     /// @dev 불변성: 게임 설정
     function testInvariant_ConfigConsistency() public view {
         (
-            uint256 ticketPrice,
-            uint256 gameDuration,
-            uint256 maxTicketsPerPlayer,
-            bool isActive
+            ,
+            /* uint256 _ticketPrice */ uint256 gameDuration,
+            uint256 maxTicketsPerPlayer /* bool _isActive */,
+
         ) = lottery.getGameConfig();
 
         // 기본 검증만 수행

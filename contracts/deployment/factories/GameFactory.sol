@@ -238,7 +238,7 @@ contract GameFactory is Initializable, OwnableUpgradeable {
     }
 
     function getGamesByType(
-        string memory gameType
+        string memory /* gameType */
     ) public view returns (address[] memory) {
         address[] storage allGamesArr = allGames;
         uint256 length = allGamesArr.length;

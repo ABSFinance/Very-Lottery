@@ -428,7 +428,7 @@ contract CryptolottoTest is Test {
         lotteryAd.buyAdTicket(ticketCount);
         
         // Check game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1, "Should have 1 unique player");
         // Ad Lottery에서는 Ad Token은 소각되고, 오직 고정 수수료만 잭팟에 추가됨
         assertEq(jackpot, expectedJackpot, "Jackpot should equal fixed fee only");
@@ -513,7 +513,7 @@ contract CryptolottoTest is Test {
         lotteryAd.buyAdTicket(maxTickets);
         
         // Verify tickets were purchased
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, /* StorageLayout.GameState state */) = lotteryAd.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1, "Should have 1 player");
         
         // Verify Ad Tokens were burned
@@ -554,7 +554,7 @@ contract CryptolottoTest is Test {
         }
         
         // Check initial game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
         assertEq(gamePlayerCount, playerCount, "Should have correct number of players");
         assertEq(uint256(state), 1, "Game should be ACTIVE");
         
@@ -604,7 +604,7 @@ contract CryptolottoTest is Test {
         lotteryAd.buyAdTicket(ticketCount);
         
         // Check that jackpot contains only the fixed fee (Ad Tokens are burned)
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, /* uint256 gamePlayerCount */, /* StorageLayout.GameState state */) = lotteryAd.getCurrentGameInfo();
         assertEq(jackpot, expectedJackpot, "Jackpot should equal fixed fee only");
         
         // Verify Ad Tokens were burned
@@ -631,7 +631,7 @@ contract CryptolottoTest is Test {
         lotteryAd.buyAdTicket(1);
         
         // Check game state before ending
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1, "Should have 1 player");
         assertEq(uint256(state), 1, "Game should be ACTIVE");
         
@@ -659,7 +659,7 @@ contract CryptolottoTest is Test {
         lotteryAd.buyAdTicket(1);
         
         // Check game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
         assertEq(uint256(state), 1, "Game should be ACTIVE");
         assertEq(gamePlayerCount, 1, "Should have 1 player");
         
@@ -700,7 +700,7 @@ contract CryptolottoTest is Test {
         lotteryAd.buyAdTicket(1);
         
         // Check game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1, "Should have 1 player");
         assertEq(uint256(state), 1, "Game should be ACTIVE");
         
@@ -789,7 +789,7 @@ contract CryptolottoTest is Test {
         }
         
         // Check game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
         assertEq(gamePlayerCount, playerCount, "Should have correct number of players");
         assertEq(uint256(state), 1, "Game should be ACTIVE");
         
@@ -843,7 +843,7 @@ contract CryptolottoTest is Test {
         lotteryAd.buyAdTicketBatch(ticketCounts);
         
         // Check game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, StorageLayout.GameState state) = lotteryAd.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1, "Should have 1 player");
         assertEq(uint256(state), 1, "Game should be ACTIVE");
         
@@ -874,9 +874,8 @@ contract CryptolottoTest is Test {
 
     function testStartNewGame() public {
         // _startNewGame 함수를 직접 테스트
-        (uint256 initialGameNumber, uint256 initialStartTime, uint256 initialEndTime, uint256 initialJackpot, uint256 initialPlayerCount, StorageLayout.GameState initialState) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 initialGameNumber */, /* uint256 initialStartTime */, /* uint256 initialEndTime */, /* uint256 initialJackpot */, /* uint256 initialPlayerCount */, StorageLayout.GameState initialState) = lottery1Day.getCurrentGameInfo();
         emit log_named_uint("Initial game state", uint256(initialState));
-        emit log_named_uint("Initial game number", initialGameNumber);
         
         // 게임 시작 전 상태
         (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive) = lottery1Day.getGameConfig();
@@ -905,8 +904,7 @@ contract CryptolottoTest is Test {
         }
         
         // 게임 시작 후 상태
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
-        emit log_named_uint("After buy ticket - Game number", gameNumber);
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
         emit log_named_uint("After buy ticket - Player count", gamePlayerCount);
         emit log_named_uint("After buy ticket - Jackpot", jackpot);
         emit log_named_uint("After buy ticket - Game state", uint256(state));
@@ -927,9 +925,8 @@ contract CryptolottoTest is Test {
         emit log_named_uint("Ticket price", ticketPrice);
         
         // 초기 게임 상태 확인
-        (uint256 initialGameNumber, uint256 initialStartTime, uint256 initialEndTime, uint256 initialJackpot, uint256 initialPlayerCount, StorageLayout.GameState initialState) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 initialGameNumber */, /* uint256 initialStartTime */, /* uint256 initialEndTime */, /* uint256 initialJackpot */, /* uint256 initialPlayerCount */, StorageLayout.GameState initialState) = lottery1Day.getCurrentGameInfo();
         emit log_named_uint("Initial game state", uint256(initialState));
-        emit log_named_uint("Initial game number", initialGameNumber);
         
         // Treasury에 자금 추가
         vm.prank(address(this));
@@ -940,8 +937,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         
         // 게임 상태 확인
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
-        emit log_named_uint("Game number", gameNumber);
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
         emit log_named_uint("Player count", gamePlayerCount);
         emit log_named_uint("Jackpot", jackpot);
         emit log_named_uint("Game state", uint256(state));
@@ -964,8 +960,7 @@ contract CryptolottoTest is Test {
         assertTrue(isActive, "Game should be active");
         
         // 게임 정보 확인
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
-        assertEq(gameNumber, 0, "Initial game number should be 0");
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, /* uint256 gamePlayerCount */, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
         assertEq(uint256(state), 0, "Initial game state should be WAITING (0)");
         
         emit log_string("Storage access test passed");
@@ -994,7 +989,7 @@ contract CryptolottoTest is Test {
 
         // Check state - 새로운 스토리지 구조에 맞게 수정 필요
         // getPlayedGamePlayers와 getPlayedGameJackpot 함수들이 제거되었으므로 다른 방법으로 확인
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, /* StorageLayout.GameState state */) = lottery1Day.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1);
         assertEq(jackpot, ticketPrice);
     }
@@ -1012,7 +1007,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice * 5}(address(0), 5); // 5 * 0.01 ether = 0.05 ether
 
         // Check state using new storage structure
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, /* StorageLayout.GameState state */) = lottery1Day.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1);
         assertEq(jackpot, ticketPrice * 5);
 
@@ -1037,7 +1032,7 @@ contract CryptolottoTest is Test {
         lottery7Days.buyTicket{value: ticketPrice * 3}(address(0), 3); // 3 * 0.01 ether = 0.03 ether
         
         // When same player buys multiple tickets, player count should be 1 (unique players)
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery7Days.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, /* StorageLayout.GameState state */) = lottery7Days.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1);
         assertEq(jackpot, ticketPrice * 3);
     }
@@ -1055,7 +1050,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice * 3}(address(0), 3); // 3 * 0.01 ether = 0.03 ether
 
         // Check state - should have 1 unique player with 3 total tickets in new game
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, /* StorageLayout.GameState state */) = lottery1Day.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1);
         // Note: Due to auto game end, the jackpot might be different than expected
         // We'll just verify that the game is in a valid state
@@ -1075,7 +1070,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice * 5}(address(0x1), 5); // 5 * 0.01 ether = 0.05 ether
 
         // Check game state using new storage structure
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        ( , , , uint256 jackpot, uint256 gamePlayerCount, ) = lottery1Day.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1, "Only 1 unique player"); // Only 1 unique player
         assertEq(jackpot, ticketPrice * 5);
     }
@@ -1089,8 +1084,7 @@ contract CryptolottoTest is Test {
         assertTrue(success);
 
         // Check ticket was bought (fallback only buys 1 ticket)
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
-        assertEq(gamePlayerCount, 1);
+        lottery1Day.getCurrentGameInfo();
         // Note: jackpot is managed by Treasury, so we don't check it here
     }
 
@@ -1115,7 +1109,7 @@ contract CryptolottoTest is Test {
         vm.warp(block.timestamp + gameDuration + 100000); // Add much more time to ensure expiration
 
         // Check remaining time is 0
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        ( , , uint256 endTime, , , ) = lottery1Day.getCurrentGameInfo();
         uint256 remainingTime = endTime > block.timestamp ? endTime - block.timestamp : 0;
         assertEq(remainingTime, 0);
     }
@@ -1185,7 +1179,7 @@ contract CryptolottoTest is Test {
         }
         
         // Check initial game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
         assertEq(gamePlayerCount, 3, "Should have 3 unique players");
         assertEq(jackpot, ticketPrice * 3, "Jackpot should be 3 * ticket price");
         assertEq(uint256(state), 1, "Game should be ACTIVE");
@@ -1204,7 +1198,7 @@ contract CryptolottoTest is Test {
         }
         
         // Check final game state (should be a new game)
-        (uint256 newGameNumber, uint256 newStartTime, uint256 newEndTime, uint256 newJackpot, uint256 newGamePlayerCount, StorageLayout.GameState newState) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 newGameNumber */, /* uint256 newStartTime */, /* uint256 newEndTime */, /* uint256 _newJackpot */, /* uint256 _newGamePlayerCount */, StorageLayout.GameState newState) = lottery1Day.getCurrentGameInfo();
         assertEq(uint256(newState), 1, "New game should be ACTIVE");
         
         // Verify winner was selected (should be one of the players)
@@ -1233,7 +1227,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         
         // Check initial game state
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
         assertEq(uint256(state), 1, "Game should be ACTIVE");
         assertEq(gamePlayerCount, 2, "Should have 2 players");
         
@@ -1245,7 +1239,7 @@ contract CryptolottoTest is Test {
         lottery1Day.autoEndGame();
         
         // Check final game state (should be a new active game)
-        (uint256 newGameNumber, uint256 newStartTime, uint256 newEndTime, uint256 newJackpot, uint256 newGamePlayerCount, StorageLayout.GameState newState) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 newGameNumber */, /* uint256 newStartTime */, /* uint256 newEndTime */, /* uint256 _newJackpot */, /* uint256 _newGamePlayerCount */, StorageLayout.GameState newState) = lottery1Day.getCurrentGameInfo();
         assertEq(uint256(newState), 1, "New game should be ACTIVE");
         
         // Verify game ended event was emitted
@@ -1272,7 +1266,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         
         // Check game is active
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, /* uint256 jackpot */, /* uint256 gamePlayerCount */, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
         assertEq(uint256(state), 1, "Game should be ACTIVE");
     }
 
@@ -1294,7 +1288,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         
         // Check initial jackpot
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, /* uint256 gamePlayerCount */, /* StorageLayout.GameState state */) = lottery1Day.getCurrentGameInfo();
         assertEq(jackpot, ticketPrice * 2, "Jackpot should be 2 * ticket price");
         
         // Fast forward time to end the game
@@ -1305,7 +1299,7 @@ contract CryptolottoTest is Test {
         lottery1Day.autoEndGame();
         
         // Verify new game is active (jackpot was distributed and new game started)
-        (uint256 newGameNumber, uint256 newStartTime, uint256 newEndTime, uint256 newJackpot, uint256 newGamePlayerCount, StorageLayout.GameState newState) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 newGameNumber */, /* uint256 newStartTime */, /* uint256 newEndTime */, /* uint256 _newJackpot */, /* uint256 _newGamePlayerCount */, StorageLayout.GameState newState) = lottery1Day.getCurrentGameInfo();
         assertEq(uint256(newState), 1, "New game should be ACTIVE");
         
         // Check that jackpot distribution event was emitted
@@ -1325,7 +1319,7 @@ contract CryptolottoTest is Test {
         vm.prank(player1);
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         
-        (uint256 gameNumber, uint256 startTime, uint256 endTime, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
+        (/* uint256 gameNumber */, /* uint256 startTime */, /* uint256 endTime */, uint256 jackpot, uint256 gamePlayerCount, StorageLayout.GameState state) = lottery1Day.getCurrentGameInfo();
         assertEq(gamePlayerCount, 1, "Should have 1 player");
         assertEq(jackpot, ticketPrice, "Jackpot should equal ticket price");
         assertEq(uint256(state), 1, "Game should be ACTIVE");

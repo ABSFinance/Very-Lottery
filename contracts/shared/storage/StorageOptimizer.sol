@@ -177,12 +177,11 @@ library StorageOptimizer {
 
     /**
      * @dev 플레이어 수 계산 (mapping 기반)
-     * @param playerMap 플레이어 존재 여부를 추적하는 mapping
      * @return count 고유한 플레이어 수
      */
     function getUniquePlayerCount(
-        mapping(address => bool) storage playerMap
-    ) internal view returns (uint256 count) {
+        mapping(address => bool) storage /* playerMap */
+    ) internal pure returns (uint256 count) {
         // mapping의 모든 키를 순회하는 것은 비효율적이므로
         // 별도의 카운터를 유지하는 것이 좋습니다
         // 이 함수는 현재 mapping만으로는 정확한 카운트를 제공할 수 없습니다

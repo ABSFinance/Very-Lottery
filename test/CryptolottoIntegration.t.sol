@@ -94,7 +94,7 @@ contract CryptolottoIntegration is Test {
     // ============ INTEGRATION TESTS ============
 
     /// @dev 전체 시스템 초기화 테스트
-    function testSystemInitialization() public {
+    function testSystemInitialization() public view {
         // 컨트랙트 주소 확인
         assertTrue(
             address(lottery1Day) != address(0),
@@ -119,16 +119,16 @@ contract CryptolottoIntegration is Test {
 
         // 기본 상태 확인
         (
-            uint256 ticketPrice1,
-            uint256 gameDuration1,
-            uint256 maxTickets1,
-            bool isActive1
+            ,
+            /* uint256 _ticketPrice1 */ uint256 gameDuration1,
+            uint256 maxTickets1 /* bool _isActive1 */,
+
         ) = lottery1Day.getGameConfig();
         (
-            uint256 ticketPrice7,
-            uint256 gameDuration7,
-            uint256 maxTickets7,
-            bool isActive7
+            ,
+            /* uint256 _ticketPrice7 */ uint256 gameDuration7,
+            uint256 maxTickets7 /* bool _isActive7 */,
+
         ) = lottery7Days.getGameConfig();
 
         assertTrue(
@@ -300,7 +300,7 @@ contract CryptolottoIntegration is Test {
     }
 
     /// @dev 시스템 상태 모니터링 테스트
-    function testSystemMonitoring() public {
+    function testSystemMonitoring() public view {
         try this._systemMonitoringInternal() {
             assertTrue(true, "System monitoring passed");
         } catch {
@@ -308,7 +308,7 @@ contract CryptolottoIntegration is Test {
         }
     }
 
-    function _systemMonitoringInternal() public {
+    function _systemMonitoringInternal() public view {
         // AdToken 통계 확인
         uint256 totalSupply = adToken.totalSupply();
         uint256 burnedAmount = lotteryAd.getAdTokenBurnedAmount();
@@ -317,16 +317,16 @@ contract CryptolottoIntegration is Test {
 
         // 게임 설정 확인
         (
-            uint256 ticketPrice1,
-            uint256 gameDuration1,
-            uint256 maxTickets1,
-            bool isActive1
+            ,
+            /* uint256 _ticketPrice1 */ uint256 gameDuration1,
+            uint256 maxTickets1 /* bool _isActive1 */,
+
         ) = lottery1Day.getGameConfig();
         (
-            uint256 ticketPrice7,
-            uint256 gameDuration7,
-            uint256 maxTickets7,
-            bool isActive7
+            ,
+            /* uint256 _ticketPrice7 */ uint256 gameDuration7,
+            uint256 maxTickets7 /* bool _isActive7 */,
+
         ) = lottery7Days.getGameConfig();
         assertTrue(
             gameDuration1 >= 0,
@@ -648,14 +648,14 @@ contract CryptolottoIntegration is Test {
         uint256 adTicketPrice = 1 ether; // 1 AD Token
 
         // 총 수수료 비율: 10% (2% 리퍼럴 + 3% Ad Lottery + 5% 개발자)
-        uint256 totalFeePercent = 10;
+        // uint256 totalFeePercent = 10;
         uint256 adLotteryFeePercent = 3;
 
         // 1. 1Day 게임에서 정확한 티켓 구매
         vm.prank(player1);
         try lottery1Day.buyTicket{value: ticketPrice}(referrer1, 1) {
             // 수수료 계산: ticketPrice * 10% = 0.001 ETH
-            uint256 expectedTotalFee = (ticketPrice * totalFeePercent) / 100;
+            /* uint256 expectedTotalFee = (ticketPrice * totalFeePercent) / 100; */
             uint256 expectedAdLotteryFee = (ticketPrice * adLotteryFeePercent) /
                 100;
 
@@ -673,8 +673,7 @@ contract CryptolottoIntegration is Test {
         vm.prank(player2);
         try lottery7Days.buyTicket{value: ticketPrice}(referrer2, 2) {
             // 2개 티켓 구매: ticketPrice * 2 * 10% = 0.002 ETH
-            uint256 expectedTotalFee = (ticketPrice * 2 * totalFeePercent) /
-                100;
+            /* uint256 expectedTotalFee = (ticketPrice * 2 * totalFeePercent) / 100; */
             uint256 expectedAdLotteryFee = (ticketPrice *
                 2 *
                 adLotteryFeePercent) / 100;

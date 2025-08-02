@@ -15,6 +15,18 @@ import "../contracts/shared/utils/ContractRegistry.sol";
 import "../lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract DeployScript is Script {
+    // 배포된 컨트랙트 주소들을 저장할 변수들
+    SimpleOwnable public ownable;
+    StatsAggregator public stats;
+    FundsDistributor public fundsDistributor;
+    CryptolottoReferral public referral;
+    AdToken public adToken;
+    ContractRegistry public registry;
+    TreasuryManager public treasuryManager;
+    Cryptolotto1Day public lottery1Day;
+    Cryptolotto7Days public lottery7Days;
+    CryptolottoAd public lotteryAd;
+
     function setUp() public {}
 
     function run() public {
@@ -41,18 +53,7 @@ contract DeployScript is Script {
         _logDeploymentSummary();
     }
 
-    function _deployCoreContracts()
-        internal
-        returns (
-            SimpleOwnable ownable,
-            StatsAggregator stats,
-            FundsDistributor fundsDistributor,
-            CryptolottoReferral referral,
-            AdToken adToken,
-            ContractRegistry registry,
-            TreasuryManager treasuryManager
-        )
-    {
+    function _deployCoreContracts() internal {
         // Deploy core contracts
         ownable = new SimpleOwnable();
         stats = new StatsAggregator();
@@ -77,14 +78,7 @@ contract DeployScript is Script {
         );
     }
 
-    function _deployLotteryContracts()
-        internal
-        returns (
-            Cryptolotto1Day lottery1Day,
-            Cryptolotto7Days lottery7Days,
-            CryptolottoAd lotteryAd
-        )
-    {
+    function _deployLotteryContracts() internal {
         // Deploy implementations
         Cryptolotto1Day implementation1Day = new Cryptolotto1Day();
         Cryptolotto7Days implementation7Days = new Cryptolotto7Days();
@@ -124,55 +118,21 @@ contract DeployScript is Script {
     }
 
     function _setupContracts() internal {
-        // Get deployed contracts
-        (
-            SimpleOwnable _ownable,
-            StatsAggregator _stats,
-            FundsDistributor _fundsDistributor,
-            CryptolottoReferral _referral,
-            AdToken _adToken,
-            ContractRegistry _registry,
-            TreasuryManager _treasuryManager
-        ) = _deployCoreContracts();
-
-        (
-            Cryptolotto1Day _lottery1Day,
-            Cryptolotto7Days _lottery7Days,
-            CryptolottoAd _lotteryAd
-        ) = _deployLotteryContracts();
-
         // Set registry for lottery contracts
-        _lottery1Day.setRegistry(address(_registry));
-        _lottery7Days.setRegistry(address(_registry));
-        _lotteryAd.setRegistry(address(_registry));
+        lottery1Day.setRegistry(address(registry));
+        lottery7Days.setRegistry(address(registry));
+        lotteryAd.setRegistry(address(registry));
 
         // Set AdToken for Ad Lottery
-        _lotteryAd.setAdToken(address(_adToken));
+        lotteryAd.setAdToken(address(adToken));
 
         // Set test mode for easier testing
-        _lottery1Day.setTestMode(true);
-        _lottery7Days.setTestMode(true);
-        _lotteryAd.setTestMode(true);
+        lottery1Day.setTestMode(true);
+        lottery7Days.setTestMode(true);
+        lotteryAd.setTestMode(true);
     }
 
     function _registerContracts() internal {
-        // Get deployed contracts
-        (
-            SimpleOwnable _ownable,
-            StatsAggregator _stats,
-            FundsDistributor _fundsDistributor,
-            CryptolottoReferral _referral,
-            AdToken _adToken,
-            ContractRegistry _registry,
-            TreasuryManager _treasuryManager
-        ) = _deployCoreContracts();
-
-        (
-            Cryptolotto1Day _lottery1Day,
-            Cryptolotto7Days _lottery7Days,
-            CryptolottoAd _lotteryAd
-        ) = _deployLotteryContracts();
-
         // Register contracts in registry
         string[] memory names = new string[](8);
         address[] memory contracts = new address[](8);
@@ -186,55 +146,35 @@ contract DeployScript is Script {
         names[6] = "Cryptolotto1Day";
         names[7] = "Cryptolotto7Days";
 
-        contracts[0] = address(_treasuryManager);
-        contracts[1] = address(_referral);
-        contracts[2] = address(_stats);
-        contracts[3] = address(_fundsDistributor);
-        contracts[4] = address(_ownable);
-        contracts[5] = address(_adToken);
-        contracts[6] = address(_lottery1Day);
-        contracts[7] = address(_lottery7Days);
+        contracts[0] = address(treasuryManager);
+        contracts[1] = address(referral);
+        contracts[2] = address(stats);
+        contracts[3] = address(fundsDistributor);
+        contracts[4] = address(ownable);
+        contracts[5] = address(adToken);
+        contracts[6] = address(lottery1Day);
+        contracts[7] = address(lottery7Days);
 
-        _registry.registerBatchContracts(names, contracts);
+        registry.registerBatchContracts(names, contracts);
     }
 
-    function _logDeploymentSummary() internal {
+    function _logDeploymentSummary() internal view {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
-
-        // Get deployed contracts
-        (
-            SimpleOwnable _ownable,
-            StatsAggregator _stats,
-            FundsDistributor _fundsDistributor,
-            CryptolottoReferral _referral,
-            AdToken _adToken,
-            ContractRegistry _registry,
-            TreasuryManager _treasuryManager
-        ) = _deployCoreContracts();
-
-        (
-            Cryptolotto1Day _lottery1Day,
-            Cryptolotto7Days _lottery7Days,
-            CryptolottoAd _lotteryAd
-        ) = _deployLotteryContracts();
 
         // Log deployed addresses
         console.log("=== DEPLOYMENT SUMMARY ===");
         console.log("Deployer:", deployer);
-        console.log("Ownable deployed at:", address(_ownable));
-        console.log("StatsAggregator deployed at:", address(_stats));
-        console.log(
-            "FundsDistributor deployed at:",
-            address(_fundsDistributor)
-        );
-        console.log("CryptolottoReferral deployed at:", address(_referral));
-        console.log("AdToken deployed at:", address(_adToken));
-        console.log("ContractRegistry deployed at:", address(_registry));
-        console.log("TreasuryManager deployed at:", address(_treasuryManager));
-        console.log("Cryptolotto1Day deployed at:", address(_lottery1Day));
-        console.log("Cryptolotto7Days deployed at:", address(_lottery7Days));
-        console.log("CryptolottoAd deployed at:", address(_lotteryAd));
+        console.log("Ownable deployed at:", address(ownable));
+        console.log("StatsAggregator deployed at:", address(stats));
+        console.log("FundsDistributor deployed at:", address(fundsDistributor));
+        console.log("CryptolottoReferral deployed at:", address(referral));
+        console.log("AdToken deployed at:", address(adToken));
+        console.log("ContractRegistry deployed at:", address(registry));
+        console.log("TreasuryManager deployed at:", address(treasuryManager));
+        console.log("Cryptolotto1Day deployed at:", address(lottery1Day));
+        console.log("Cryptolotto7Days deployed at:", address(lottery7Days));
+        console.log("CryptolottoAd deployed at:", address(lotteryAd));
         console.log("=== DEPLOYMENT COMPLETE ===");
     }
 }

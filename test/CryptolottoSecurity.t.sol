@@ -34,7 +34,7 @@ contract CryptolottoSecurity is Test {
     }
 
     /// @dev 오버플로우/언더플로우 방지 테스트
-    function testOverflowUnderflowProtection() public {
+    function testOverflowUnderflowProtection() public pure {
         // 최대값 테스트
         uint256 maxValue = type(uint256).max;
 
