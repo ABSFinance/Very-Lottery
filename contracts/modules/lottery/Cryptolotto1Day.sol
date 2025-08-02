@@ -1,45 +1,81 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../../shared/interfaces/ITreasuryManager.sol";
-import "../../shared/interfaces/ICryptolottoReferral.sol";
-import "../../shared/interfaces/IFundsDistributor.sol";
-import "../../shared/interfaces/IAnalyticsEngine.sol";
-import "../../shared/interfaces/ICryptolottoStatsAggregator.sol";
-import "../../shared/utils/ContractRegistry.sol";
-import "../../shared/utils/GasOptimizer.sol";
-import "../../shared/storage/StorageLayout.sol";
-import "../../shared/storage/StorageAccess.sol";
-import "../../shared/storage/StorageOptimizer.sol";
-import "./BaseGame.sol";
+import {IFundsDistributor} from "../../shared/interfaces/IFundsDistributor.sol";
+import {ICryptolottoStatsAggregator} from "../../shared/interfaces/ICryptolottoStatsAggregator.sol";
+import {ITreasuryManager} from "../../shared/interfaces/ITreasuryManager.sol";
+import {ContractRegistry} from "../../shared/utils/ContractRegistry.sol";
+import {GasOptimizer} from "../../shared/utils/GasOptimizer.sol";
+import {StorageLayout} from "../../shared/storage/StorageLayout.sol";
+import {StorageAccess} from "../../shared/storage/StorageAccess.sol";
+import {StorageOptimizer} from "../../shared/storage/StorageOptimizer.sol";
+import {BaseGame} from "./BaseGame.sol";
 
 using GasOptimizer for address[];
 using StorageOptimizer for address[];
 
 /**
  * @title Cryptolotto1Day
- * @dev 1일 로또 게임 컨트랙트 - 새로운 중앙화된 스토리지 아키텍처 사용
+ * @author Cryptolotto Team
+ * @notice 1일 로또 게임 컨트랙트 - 새로운 중앙화된 스토리지 아키텍처 사용
+ * @dev 1일 단위로 진행되는 로또 게임을 관리합니다
  */
 contract Cryptolotto1Day is BaseGame {
     // 보안 강화를 위한 상수
-    uint256 public constant MIN_BLOCK_DELAY = 1; // 최소 블록 지연
-    uint256 public constant MAX_BLOCK_DELAY = 256; // 최대 블록 지연
-    uint256 public constant PURCHASE_COOLDOWN = 30 seconds; // 구매 쿨다운
-    uint256 public constant MAX_TICKETS_PER_TRANSACTION = 10; // 트랜잭션당 최대 티켓
+    /**
+     * @notice Minimum block delay time
+     */
+    uint256 public constant MIN_BLOCK_DELAY = 1;
+    /**
+     * @notice Maximum block delay time
+     */
+    uint256 public constant MAX_BLOCK_DELAY = 256;
+    /**
+     * @notice Purchase cooldown time
+     */
+    uint256 public constant PURCHASE_COOLDOWN = 30 seconds;
+    /**
+     * @notice Maximum tickets per transaction
+     */
+    uint256 public constant MAX_TICKETS_PER_TRANSACTION = 10;
 
     // 보안 강화를 위한 상태 변수
+    /**
+     * @notice Last purchase time per player
+     */
     mapping(address => uint256) public lastPurchaseTime;
-    bool public testMode = false; // 테스트 모드 플래그
+    /**
+     * @notice Test mode flag
+     */
+    bool public testMode = false;
 
     // ============ EVENTS ============
+    /**
+     * @notice Emitted when referral error occurs
+     * @param operation The operation that failed
+     * @param reason The reason for failure
+     * @param timestamp The timestamp when error occurred
+     */
     event ReferralError(string operation, string reason, uint256 timestamp);
+    /**
+     * @notice Emitted when stats error occurs
+     * @param operation The operation that failed
+     * @param reason The reason for failure
+     * @param timestamp The timestamp when error occurred
+     */
     event StatsError(string operation, string reason, uint256 timestamp);
+    /**
+     * @notice Emitted when distributor error occurs
+     * @param operation The operation that failed
+     * @param reason The reason for failure
+     * @param timestamp The timestamp when error occurred
+     */
     event DistributorError(string operation, string reason, uint256 timestamp);
+    /**
+     * @notice Emitted when purchase cooldown is updated
+     * @param newCooldown The new cooldown value
+     * @param timestamp The timestamp when cooldown was updated
+     */
     event PurchaseCooldownUpdated(uint256 newCooldown, uint256 timestamp);
 
     // ============ INITIALIZATION ============
@@ -59,7 +95,7 @@ contract Cryptolotto1Day is BaseGame {
     ) public initializer {
         require(owner != address(0), "Invalid owner address");
 
-        __BaseGame_init(owner, address(0)); // registry는 나중에 설정
+        __BaseGame_init(owner, address(0)); // registry will be set later
 
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         gameStorage.ticketPrice = 0.01 ether;
@@ -67,54 +103,22 @@ contract Cryptolotto1Day is BaseGame {
         gameStorage.maxTicketsPerPlayer = 100;
     }
 
+    // ============ OVERRIDE FUNCTIONS ============
+
+    // Remove duplicate functions - they are now inherited from BaseGame
+    // getPlayerInfo() - inherited from BaseGame
+    // getGameConfig() - inherited from BaseGame
+    // resetPlayerCooldown() - inherited from BaseGame
+    // setTestMode() - inherited from BaseGame
+    // setPurchaseCooldown() - inherited from BaseGame
+    // setRegistry() - inherited from BaseGame
+    // _endGame() - inherited from BaseGame
+    // _buyTicketInternal() - inherited from BaseGame
+
     // ============ GAME FUNCTIONS ============
 
     /**
-     * @dev 내부 티켓 구매 함수 (중앙화된 스토리지 사용)
-     */
-    function _buyTicketInternal(address partner, uint256 ticketCount) internal {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        require(gameStorage.isActive, "Game is not active");
-        require(ticketCount > 0, "Ticket count must be greater than 0");
-        require(msg.value == gameStorage.ticketPrice * ticketCount, "Incorrect amount sent");
-
-        // 현재 게임 정보 가져오기
-        uint256 currentGameId = gameStorage.totalGames;
-        StorageLayout.Game storage game = gameStorage.games[currentGameId];
-
-        // 게임이 아직 시작되지 않았다면 시작
-        if (game.state == StorageLayout.GameState.WAITING) {
-            _startNewGame();
-            game = gameStorage.games[currentGameId];
-        }
-
-        require(game.state == StorageLayout.GameState.ACTIVE, "Game not active");
-
-        // 최대 티켓 수 확인
-        require(
-            gameStorage.playerTicketCount[msg.sender] + ticketCount <= gameStorage.maxTicketsPerPlayer,
-            "Exceeds maximum tickets per player"
-        );
-
-        // 플레이어 정보 업데이트
-        _updatePlayerInfoOptimized(msg.sender, ticketCount);
-
-        // 재무 시스템 연동
-        _transferToTreasury(msg.value);
-
-        // 추천 시스템 처리
-        for (uint256 i = 0; i < ticketCount; i++) {
-            _processReferralSystem(partner, msg.sender);
-        }
-
-        // 이벤트 발생
-        for (uint256 i = 0; i < ticketCount; i++) {
-            emit TicketPurchased(msg.sender, game.gameNumber, game.players.length - 1 + i, block.timestamp);
-        }
-    }
-
-    /**
-     * @dev 승자 선택 (중앙화된 스토리지 사용)
+     * @dev Select winner (using centralized storage)
      */
     function _pickWinner() internal view override returns (address) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
@@ -127,7 +131,7 @@ contract Cryptolotto1Day is BaseGame {
     }
 
     /**
-     * @dev 승자 지급 처리
+     * @dev Process winner payout
      */
     function _processWinnerPayout(address winner, uint256 amount) internal override {
         if (address(registry) == address(0)) {
@@ -139,7 +143,7 @@ contract Cryptolotto1Day is BaseGame {
             if (treasuryAddress != address(0)) {
                 ITreasuryManager treasury = ITreasuryManager(treasuryAddress);
                 treasury.withdrawFunds(treasuryName, winner, amount);
-                emit TreasuryFundsWithdrawn(winner, amount, block.timestamp);
+                emit WinnerPayout(winner, amount, block.timestamp);
             } else {
                 emit ContractNotFound(treasuryName, block.timestamp);
             }
@@ -151,7 +155,7 @@ contract Cryptolotto1Day is BaseGame {
     }
 
     /**
-     * @dev 창립자 분배 처리
+     * @dev Process founder distribution
      */
     function _processFounderDistribution(uint256 amount) internal override {
         if (address(registry) == address(0)) {
@@ -166,7 +170,7 @@ contract Cryptolotto1Day is BaseGame {
             }
 
             try IFundsDistributor(distributorAddress).withdrawAmount(amount) {
-                // 성공적으로 처리됨
+                // Successfully processed
             } catch Error(string memory reason) {
                 emit DistributorError("withdrawAmount", reason, block.timestamp);
             } catch {
@@ -180,12 +184,15 @@ contract Cryptolotto1Day is BaseGame {
     }
 
     /**
-     * @dev 게임 통계 업데이트
+     * @dev Update game stats
      */
-    function _updateGameStats(address winner, uint256, /* playerCount */ uint256 amount, uint256 winnerIndex)
-        internal
-        override
-    {
+    function _updateGameStats(
+        address winner,
+        uint256,
+        /* playerCount */
+        uint256 amount,
+        uint256 winnerIndex
+    ) internal override {
         if (address(registry) == address(0)) {
             emit StatsError("getContract", "Registry not initialized", block.timestamp);
             return;
@@ -209,10 +216,10 @@ contract Cryptolotto1Day is BaseGame {
                 gameNumber,
                 gamePlayerCount,
                 amount,
-                1, // 1일 게임 타입
+                1, // 1 day game type
                 winnerIndex
             ) {
-                // 성공적으로 처리됨
+                // Successfully processed
             } catch Error(string memory reason) {
                 emit StatsError("newWinner", reason, block.timestamp);
             } catch {
@@ -226,50 +233,32 @@ contract Cryptolotto1Day is BaseGame {
     }
 
     /**
-     * @dev 게임 성능 메트릭 기록
-     * @notice 게임 성능을 추적하기 위한 메트릭 기록
+     * @dev Record game performance metrics
+     * @notice Record metrics for tracking game performance
      */
-    function _recordPerformanceMetrics(uint256 gameNumber, uint256 gasUsed, uint256, /* playerCount */ uint256 jackpot)
-        internal
-        override
-    {
+    function _recordPerformanceMetrics(
+        uint256 gameNumber,
+        uint256 gasUsed,
+        uint256,
+        /* playerCount */
+        uint256 jackpot
+    ) internal override {
         emit GamePerformanceMetrics(gameNumber, gasUsed, jackpot, jackpot, block.timestamp);
     }
 
     /**
-     * @dev 보안 이벤트 기록
-     * @notice 보안 관련 이벤트를 기록합니다
+     * @dev Record security event
+     * @param player The player address
+     * @param eventType The event type
      */
     function _recordSecurityEvent(address player, string memory eventType) internal override {
         emit GameSecurityEvent(player, eventType, block.timestamp);
     }
 
-    /**
-     * @dev 게임 종료 처리 (내부 함수)
-     * @notice 게임을 종료하고 승자를 선택합니다
-     */
-    function _endGame() internal {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
-        StorageLayout.Game storage game = gameStorage.games[currentGameId];
-
-        // 게임 상태를 ENDED로 변경
-        game.state = StorageLayout.GameState.ENDED;
-
-        // 승자 선택
-        _pickWinner();
-
-        // 성능 메트릭 기록
-        _recordPerformanceMetrics(game.gameNumber, gasleft(), game.players.length, game.jackpot);
-
-        // 새 게임 시작 준비
-        _startNewGame();
-    }
-
     // ============ UTILITY FUNCTIONS ============
 
     /**
-     * @dev 게임 시간 만료 확인
+     * @dev Check if game time has expired
      */
     function isGameTimeExpired() public view returns (bool) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
@@ -279,7 +268,7 @@ contract Cryptolotto1Day is BaseGame {
     }
 
     /**
-     * @dev 게임 정보 조회
+     * @dev Get game info
      */
     function getGameInfo()
         public
@@ -309,79 +298,20 @@ contract Cryptolotto1Day is BaseGame {
         );
     }
 
-    /**
-     * @dev 플레이어 정보 조회
-     */
-    function getPlayerInfo(address player) public view returns (uint256 ticketsInCurrentGame, bool isInCurrentGame) {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames;
-        StorageLayout.Game storage game = gameStorage.games[currentGameId];
-
-        bool inGame = false;
-        address[] storage players = game.players;
-        uint256 length = players.length;
-        for (uint256 i = 0; i < length; i++) {
-            if (players[i] == player) {
-                inGame = true;
-                break;
-            }
-        }
-
-        return (gameStorage.playerTicketCount[player], inGame);
-    }
-
     // ============ EMERGENCY FUNCTIONS ============
 
     /**
-     * @dev 긴급 정지
+     * @notice Emergency pause the contract
+     * @param reason The reason for pausing
      */
     function emergencyPause(string memory reason) public override onlyOwner {
         super.emergencyPause(reason);
     }
 
     /**
-     * @dev 긴급 재개
+     * @notice Emergency resume the contract
      */
     function emergencyResume() public override onlyOwner {
         super.emergencyResume();
-    }
-
-    /**
-     * @dev 계약 잔액 조회
-     */
-    function getContractBalance() public view returns (uint256) {
-        return address(this).balance;
-    }
-
-    /**
-     * @dev 테스트 모드 설정 (관리자만)
-     * @param enabled 테스트 모드 활성화 여부
-     * @custom:security onlyOwner
-     */
-    function setTestMode(bool enabled) external onlyOwner {
-        testMode = enabled;
-        _recordSecurityEvent(msg.sender, enabled ? "Test Mode Enabled" : "Test Mode Disabled");
-    }
-
-    /**
-     * @dev 구매 쿨다운 시간 설정
-     * @param newCooldown 새로운 쿨다운 시간 (초)
-     * @custom:security onlyOwner
-     */
-    function setPurchaseCooldown(uint256 newCooldown) external onlyOwner {
-        require(newCooldown >= 0, "Cooldown must be non-negative");
-        // 상수는 변경할 수 없으므로 이벤트만 발생
-        emit PurchaseCooldownUpdated(newCooldown, block.timestamp);
-    }
-
-    /**
-     * @dev 플레이어 쿨다운 재설정
-     * @param player 재설정할 플레이어 주소
-     * @custom:security onlyOwner
-     */
-    function resetPlayerCooldown(address player) external onlyOwner {
-        require(player != address(0), "Invalid player address");
-        lastPurchaseTime[player] = 0;
-        _recordSecurityEvent(player, "Cooldown Reset");
     }
 }

@@ -65,14 +65,14 @@ contract CryptolottoIntegration is Test {
         referrer2 = address(0x2002);
 
         // 기본 컨트랙트 배포
-        adToken = new AdToken();
+        adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
         lottery1Day = new Cryptolotto1Day();
         lottery7Days = new Cryptolotto7Days();
         lotteryAd = new CryptolottoAd();
         treasuryManager = new TreasuryManager();
         referral = new CryptolottoReferral();
         stats = new StatsAggregator();
-        contractRegistry = new ContractRegistry();
+        contractRegistry = new ContractRegistry(address(this));
 
         // 플레이어들에게 초기 자금 제공
         vm.deal(player1, INITIAL_BALANCE);

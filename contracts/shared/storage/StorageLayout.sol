@@ -12,16 +12,27 @@ contract StorageLayout {
         // 게임 상태
         mapping(uint256 => Game) games;
         mapping(address => uint256) playerTicketCount;
+        mapping(address => PlayerInfo) playerInfo;
         address[] allPlayers;
         // 게임 설정
         uint256 ticketPrice;
         uint256 gameDuration;
         uint256 maxTicketsPerPlayer;
         bool isActive;
+        bool testMode;
+        uint256 purchaseCooldown;
         // 게임 통계
         uint256 totalGames;
+        uint256 totalGamesPlayed;
         uint256 totalJackpot;
         uint256 totalPlayers;
+        uint256 totalPayouts;
+    }
+
+    struct PlayerInfo {
+        uint256 ticketCount;
+        uint256 lastPurchaseTime;
+        uint256 totalSpent;
     }
 
     struct Game {

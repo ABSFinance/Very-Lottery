@@ -87,7 +87,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(lottery.treasuryName(), address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function _buyTicketAndFundTreasury7Days(Cryptolotto7Days lottery, address player, uint256 ticketCount) internal {
@@ -98,7 +98,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(lottery.treasuryName(), address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function _buyAdTicketAndFundTreasury(CryptolottoAd lottery, address player, uint256 ticketCount) internal {
@@ -112,7 +112,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(lottery.treasuryName(), address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function _endGameAndStartNew(Cryptolotto1Day lottery) internal {
@@ -165,7 +165,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(lottery.treasuryName(), address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function setUp() public {
@@ -174,14 +174,14 @@ contract CryptolottoTest is Test {
         stats = new StatsAggregator();
         fundsDistributor = new FundsDistributor();
         referral = new CryptolottoReferral();
-        adToken = new AdToken();
+        adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
 
         // Deploy TreasuryManager as regular contract
         TreasuryManager treasuryManagerContract = new TreasuryManager();
         treasuryManager = ITreasuryManager(address(treasuryManagerContract));
 
         // Deploy ContractRegistry
-        contractRegistry = new ContractRegistry();
+        contractRegistry = new ContractRegistry(address(this));
 
         // Register contracts in ContractRegistry
         string[] memory contractNames = new string[](6);
@@ -355,7 +355,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Approve Ad Tokens and buy tickets
         vm.prank(player1);
@@ -397,7 +397,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Player approves and buys tickets (Ad Tokens will be burned)
         vm.prank(player1);
@@ -423,13 +423,15 @@ contract CryptolottoTest is Test {
             uint256 gameDuration,
             uint256 maxTickets,
             uint256 adLotteryFeePercent,
-            uint256 _adTokenBalance,
+            uint256 adTokenBalance,
             bool isActive
         ) = lotteryAd.getAdLotteryInfo();
 
         assertEq(gameDuration, 1 days, "Game duration should be 1 day");
         assertEq(ticketPrice, 1 ether, "Ticket price should be 1 AD Token");
         assertEq(maxTickets, 100, "Max tickets should be 100");
+        assertEq(adLotteryFeePercent, 0, "Ad Lottery fee should be 0");
+        assertEq(adTokenBalance, 0, "Ad Token balance should be 0");
         assertTrue(isActive, "Game should be active");
     }
 
@@ -448,7 +450,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.prank(player1);
         adToken.approve(address(lotteryAd), adTokensNeeded);
@@ -481,7 +483,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Fund each player with Ad Tokens and buy tickets
         for (uint256 i = 0; i < playerCount; i++) {
@@ -545,7 +547,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -577,7 +579,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket
         vm.prank(player1);
@@ -610,7 +612,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket
         vm.prank(player1);
@@ -643,7 +645,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Emergency pause
         vm.prank(owner);
@@ -688,7 +690,7 @@ contract CryptolottoTest is Test {
             uint256 gameDuration,
             uint256 maxTickets,
             uint256 adLotteryFeePercent,
-            uint256 _adTokenBalance,
+            uint256 adTokenBalance,
             bool isActive
         ) = lotteryAd.getAdLotteryInfo();
 
@@ -698,6 +700,7 @@ contract CryptolottoTest is Test {
         assertTrue(isActive, "Game should be active");
         // Ad Lottery fee는 0이 맞음 (자체 수수료가 없음)
         assertEq(adLotteryFeePercent, 0, "Ad Lottery fee should be 0");
+        assertEq(adTokenBalance, 0, "Ad Token balance should be 0");
     }
 
     function testAdLotteryTokenWithdrawal() public {
@@ -746,7 +749,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Fund players and buy tickets
         for (uint256 i = 0; i < playerCount; i++) {
@@ -815,7 +818,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("CryptolottoAd", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Approve and buy batch
         vm.prank(player1);
@@ -996,7 +999,7 @@ contract CryptolottoTest is Test {
         vm.prank(address(this));
         treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
-        vm.prank(lottery1DayOwnerAddress); // Use actual owner
+        vm.prank(address(this)); // Use test contract as owner
 
         // Buy a ticket using new getGameConfig()
         (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
@@ -1146,7 +1149,7 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         // Treasury 잔액 보강
         vm.prank(address(this));
-        treasuryManager.depositFunds("unique_test_lottery_1day", address(this), 1000 ether);
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 게임을 강제로 종료시켜 새 게임을 시작
         (,, uint256 gameDuration,) = lottery1Day.getGameConfig();

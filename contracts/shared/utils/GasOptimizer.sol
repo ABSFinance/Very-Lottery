@@ -36,10 +36,7 @@ library GasOptimizer {
      * @param element The element to remove
      * @return True if the element was found and removed, false otherwise
      */
-    function removeElement(
-        address[] storage array,
-        address element
-    ) internal returns (bool) {
+    function removeElement(address[] storage array, address element) internal returns (bool) {
         uint256 length = array.length;
         for (uint256 i = 0; i < length; ++i) {
             if (array[i] == element) {
@@ -69,9 +66,7 @@ library GasOptimizer {
      * @param array The array to sort
      * @return The sorted array
      */
-    function sortAddresses(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function sortAddresses(address[] memory array) internal pure returns (address[] memory) {
         address[] memory sorted = _copyArray(array);
         _sortArray(sorted);
         return sorted;
@@ -82,9 +77,7 @@ library GasOptimizer {
      * @param array The array to copy
      * @return A new array with the same elements
      */
-    function _copyArray(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function _copyArray(address[] memory array) internal pure returns (address[] memory) {
         address[] memory sorted = new address[](array.length);
         for (uint256 i = 0; i < array.length; ++i) {
             sorted[i] = array[i];
@@ -112,11 +105,7 @@ library GasOptimizer {
      * @param i The first index
      * @param j The second index
      */
-    function _swapElements(
-        address[] memory sorted,
-        uint256 i,
-        uint256 j
-    ) internal pure {
+    function _swapElements(address[] memory sorted, uint256 i, uint256 j) internal pure {
         address temp = sorted[i];
         sorted[i] = sorted[j];
         sorted[j] = temp;
@@ -129,10 +118,7 @@ library GasOptimizer {
      * @return found True if the element was found
      * @return index The index of the element if found
      */
-    function findElement(
-        address[] memory array,
-        address element
-    ) internal pure returns (bool found, uint256 index) {
+    function findElement(address[] memory array, address element) internal pure returns (bool found, uint256 index) {
         for (uint256 i = 0; i < array.length; ++i) {
             if (array[i] == element) {
                 return (true, i);
@@ -148,11 +134,7 @@ library GasOptimizer {
      * @param end The ending index (exclusive)
      * @return A new array containing the sliced elements
      */
-    function sliceArray(
-        address[] memory array,
-        uint256 start,
-        uint256 end
-    ) internal pure returns (address[] memory) {
+    function sliceArray(address[] memory array, uint256 start, uint256 end) internal pure returns (address[] memory) {
         if (start > end || end > array.length) {
             revert InvalidSliceRange();
         }
@@ -171,10 +153,7 @@ library GasOptimizer {
      * @param array2 The second array
      * @return A new array containing all elements from both arrays
      */
-    function mergeArrays(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function mergeArrays(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory result = new address[](array1.length + array2.length);
 
         for (uint256 i = 0; i < array1.length; ++i) {
@@ -194,10 +173,7 @@ library GasOptimizer {
      * @param array2 The second array
      * @return A new array containing common elements
      */
-    function intersection(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function intersection(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory temp = new address[](array1.length);
         uint256 count = 0;
 
@@ -225,10 +201,7 @@ library GasOptimizer {
      * @param array2 The second array
      * @return A new array containing all unique elements from both arrays
      */
-    function union(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function union(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory temp = new address[](array1.length + array2.length);
         uint256 count = 0;
 
@@ -267,10 +240,7 @@ library GasOptimizer {
      * @param array2 The second array
      * @return A new array containing elements from array1 that are not in array2
      */
-    function difference(
-        address[] memory array1,
-        address[] memory array2
-    ) internal pure returns (address[] memory) {
+    function difference(address[] memory array1, address[] memory array2) internal pure returns (address[] memory) {
         address[] memory temp = new address[](array1.length);
         uint256 count = 0;
 
@@ -302,10 +272,7 @@ library GasOptimizer {
      * @param seed A seed for the random shuffle
      * @return A new array with elements in a random order
      */
-    function shuffleArray(
-        address[] memory array,
-        uint256 seed
-    ) internal pure returns (address[] memory) {
+    function shuffleArray(address[] memory array, uint256 seed) internal pure returns (address[] memory) {
         address[] memory result = new address[](array.length);
 
         // Copy array
@@ -330,10 +297,7 @@ library GasOptimizer {
      * @param positions The number of positions to rotate
      * @return A new array with elements rotated by the specified positions
      */
-    function rotateArray(
-        address[] memory array,
-        uint256 positions
-    ) internal pure returns (address[] memory) {
+    function rotateArray(address[] memory array, uint256 positions) internal pure returns (address[] memory) {
         if (array.length == 0) return array;
 
         uint256 actualPositions = positions % array.length;
@@ -354,9 +318,7 @@ library GasOptimizer {
      * @param array The array to reverse
      * @return A new array with elements in reverse order
      */
-    function reverseArray(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function reverseArray(address[] memory array) internal pure returns (address[] memory) {
         address[] memory result = new address[](array.length);
 
         for (uint256 i = 0; i < array.length; ++i) {
@@ -371,9 +333,7 @@ library GasOptimizer {
      * @param array The array to remove duplicates from
      * @return A new array with unique elements
      */
-    function removeDuplicatesFromMemory(
-        address[] memory array
-    ) internal pure returns (address[] memory) {
+    function removeDuplicatesFromMemory(address[] memory array) internal pure returns (address[] memory) {
         if (array.length <= 1) return array;
 
         address[] memory temp = new address[](array.length);

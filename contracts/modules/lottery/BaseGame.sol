@@ -1,29 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import "../../shared/interfaces/ITreasuryManager.sol";
-import "../../shared/interfaces/ICryptolottoReferral.sol";
-import "../../shared/interfaces/IFundsDistributor.sol";
-import "../../shared/interfaces/IAnalyticsEngine.sol";
-import "../../shared/interfaces/IOwnable.sol";
-import "../../shared/utils/ContractRegistry.sol";
-import "../../shared/utils/GasOptimizer.sol";
-import "../../shared/storage/StorageLayout.sol";
-import "../../shared/storage/StorageAccess.sol";
-import "../../shared/storage/StorageOptimizer.sol";
-import "../../modules/treasury/CryptolottoReferral.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {IOwnable} from "../../shared/interfaces/IOwnable.sol";
+import {ContractRegistry} from "../../shared/utils/ContractRegistry.sol";
+import {GasOptimizer} from "../../shared/utils/GasOptimizer.sol";
+import {StorageLayout} from "../../shared/storage/StorageLayout.sol";
+import {StorageAccess} from "../../shared/storage/StorageAccess.sol";
+import {StorageOptimizer} from "../../shared/storage/StorageOptimizer.sol";
+import {CryptolottoReferral} from "../../modules/treasury/CryptolottoReferral.sol";
+import {ITreasuryManager} from "../../shared/interfaces/ITreasuryManager.sol";
 
 using GasOptimizer for address[];
 using StorageOptimizer for address[];
 
 /**
  * @title BaseGame
- * @dev 모든 게임 컨트랙트의 기본 클래스
- * 새로운 중앙화된 스토리지 아키텍처 사용
+ * @author Cryptolotto Team
+ * @notice 모든 게임 컨트랙트의 기본 클래스
+ * @dev 새로운 중앙화된 스토리지 아키텍처 사용
  */
 abstract contract BaseGame is
     Initializable,
@@ -39,36 +37,181 @@ abstract contract BaseGame is
     // Game currentGame; // 제거됨
     // uint256 ticketPrice; // 제거됨
 
-    // 중앙화된 스토리지 접근을 위한 변수들
+    // Centralized storage access variables
+    /**
+     * @notice Contract registry for managing contract addresses
+     */
     ContractRegistry public registry;
+    /**
+     * @notice Treasury name for fund management
+     */
     string public treasuryName;
+    /**
+     * @notice Ownable contract instance
+     */
     IOwnable public ownable;
 
+    // Fee constants
+    uint256 public constant TOTAL_FEE_PERCENT = 10;
+    uint256 public constant REFERRAL_FEE_PERCENT = 3;
+    uint256 public constant AD_LOTTERY_FEE_PERCENT = 4;
+    uint256 public constant DEVELOPER_FEE_PERCENT = 3;
+
     // ============ EVENTS ============
+    /**
+     * @notice Emitted when a ticket is purchased
+     * @param player The player who purchased the ticket
+     * @param gameNumber The game number
+     * @param ticketIndex The ticket index
+     * @param timestamp The timestamp when the ticket was purchased
+     */
     event TicketPurchased(address indexed player, uint256 indexed gameNumber, uint256 ticketIndex, uint256 timestamp);
+    /**
+     * @notice Emitted when a winner is selected
+     * @param winner The address of the winner
+     * @param gameNumber The game number
+     * @param jackpot The jackpot amount
+     * @param playerCount The number of players in the game
+     * @param timestamp The timestamp when the winner was selected
+     */
     event WinnerSelected(
         address indexed winner, uint256 indexed gameNumber, uint256 jackpot, uint256 playerCount, uint256 timestamp
     );
+    /**
+     * @notice Emitted when a game ends
+     * @param gameNumber The game number
+     * @param totalPlayers The total number of players
+     * @param totalJackpot The total jackpot amount
+     * @param timestamp The timestamp when the game ended
+     */
     event GameEnded(uint256 indexed gameNumber, uint256 totalPlayers, uint256 totalJackpot, uint256 timestamp);
+    /**
+     * @notice Emitted when jackpot is distributed
+     * @param winner The address of the winner
+     * @param amount The amount distributed
+     * @param gameNumber The game number
+     * @param timestamp The timestamp when jackpot was distributed
+     */
     event JackpotDistributed(address indexed winner, uint256 amount, uint256 indexed gameNumber, uint256 timestamp);
+    /**
+     * @notice Emitted when emergency pause is activated
+     * @param by The address that triggered the pause
+     * @param reason The reason for the pause
+     * @param timestamp The timestamp when pause was activated
+     */
     event EmergencyPaused(address indexed by, string reason, uint256 timestamp);
+    /**
+     * @notice Emitted when emergency pause is resumed
+     * @param by The address that resumed the system
+     * @param timestamp The timestamp when system was resumed
+     */
     event EmergencyResumed(address indexed by, uint256 timestamp);
+    /**
+     * @notice Emitted when max tickets per player is updated
+     * @param oldValue The old max tickets value
+     * @param newValue The new max tickets value
+     * @param timestamp The timestamp when the value was updated
+     */
     event MaxTicketsPerPlayerUpdated(uint256 oldValue, uint256 newValue, uint256 timestamp);
+    /**
+     * @notice Emitted when game duration is updated
+     * @param oldValue The old game duration value
+     * @param newValue The new game duration value
+     * @param timestamp The timestamp when the value was updated
+     */
     event GameDurationUpdated(uint256 oldValue, uint256 newValue, uint256 timestamp);
+    /**
+     * @notice Emitted when fees are distributed
+     * @param referralFee The referral fee amount
+     * @param adLotteryFee The ad lottery fee amount
+     * @param developerFee The developer fee amount
+     * @param timestamp The timestamp when fees were distributed
+     */
     event FeeDistributed(uint256 referralFee, uint256 adLotteryFee, uint256 developerFee, uint256 timestamp);
+    /**
+     * @notice Emitted when developer fee is sent
+     * @param distributor The distributor address
+     * @param amount The amount sent
+     * @param timestamp The timestamp when fee was sent
+     */
     event DeveloperFeeSent(address indexed distributor, uint256 amount, uint256 timestamp);
+    /**
+     * @notice Emitted when game performance metrics are recorded
+     * @param gameNumber The game number
+     * @param gasUsed The gas used
+     * @param playerCount The number of players
+     * @param jackpot The jackpot amount
+     * @param timestamp The timestamp when metrics were recorded
+     */
     event GamePerformanceMetrics(
         uint256 indexed gameNumber, uint256 gasUsed, uint256 playerCount, uint256 jackpot, uint256 timestamp
     );
+    /**
+     * @notice Emitted when a game security event occurs
+     * @param player The player address
+     * @param eventType The type of security event
+     * @param timestamp The timestamp when the event occurred
+     */
     event GameSecurityEvent(address indexed player, string eventType, uint256 timestamp);
+    /**
+     * @notice Emitted when ad lottery fee is collected
+     * @param amount The amount collected
+     * @param timestamp The timestamp when fee was collected
+     */
     event AdLotteryFeeCollected(uint256 amount, uint256 timestamp);
+    /**
+     * @notice Emitted when ticket price is changed
+     * @param oldPrice The old ticket price
+     * @param newPrice The new ticket price
+     * @param timestamp The timestamp when price was changed
+     */
     event TicketPriceChanged(uint256 oldPrice, uint256 newPrice, uint256 timestamp);
+    /**
+     * @notice Emitted when game state is changed
+     * @param gameNumber The game number
+     * @param state The new game state
+     * @param timestamp The timestamp when state was changed
+     */
     event GameStateChanged(uint256 gameNumber, StorageLayout.GameState state, uint256 timestamp);
+    /**
+     * @notice Emitted when treasury funds are deposited
+     * @param amount The amount deposited
+     * @param timestamp The timestamp when funds were deposited
+     */
     event TreasuryFundsDeposited(uint256 amount, uint256 timestamp);
+    /**
+     * @notice Emitted when treasury funds are withdrawn
+     * @param winner The winner address
+     * @param amount The amount withdrawn
+     * @param timestamp The timestamp when funds were withdrawn
+     */
     event TreasuryFundsWithdrawn(address winner, uint256 amount, uint256 timestamp);
+    /**
+     * @notice Emitted when treasury operation fails
+     * @param operation The operation that failed
+     * @param timestamp The timestamp when operation failed
+     */
     event TreasuryOperationFailed(string operation, uint256 timestamp);
+    /**
+     * @notice Emitted when registry error occurs
+     * @param operation The operation that failed
+     * @param contractName The contract name
+     * @param timestamp The timestamp when error occurred
+     */
     event RegistryError(string operation, string contractName, uint256 timestamp);
+    /**
+     * @notice Emitted when a contract is not found
+     * @param contractName The name of the contract that was not found
+     * @param timestamp The timestamp when the error occurred
+     */
     event ContractNotFound(string contractName, uint256 timestamp);
+    /**
+     * @notice Emitted when treasury transfer fails
+     * @param from The address attempting the transfer
+     * @param amount The amount that failed to transfer
+     * @param reason The reason for the failure
+     * @param timestamp The timestamp when the transfer failed
+     */
     event TreasuryTransferFailed(address from, uint256 amount, string reason, uint256 timestamp);
 
     // 추가된 이벤트들
@@ -131,37 +274,127 @@ abstract contract BaseGame is
     // );
 
     // ============ ABSTRACT FUNCTIONS ============
+    /**
+     * @notice Process referral system rewards
+     * @param referrer The referrer address
+     * @param player The player address
+     */
     function _processReferralSystem(address referrer, address player) internal virtual {
-        // 단순화된 리퍼럴 시스템 - 리퍼러가 유효한 주소인 경우에만 보상 지급
+        // Simplified referral system - only pay rewards if referrer is a valid address
         if (referrer != address(0) && referrer != player) {
-            // 리퍼럴 컨트랙트 주소 가져오기
+            // Get referral contract address
             address referralContract = registry.getContract("CryptolottoReferral");
             if (referralContract != address(0)) {
-                // 리퍼럴 보상 처리 (BaseGame에서 계산된 금액 사용)
+                // Process referral reward (amount calculated in BaseGame)
                 try CryptolottoReferral(referralContract).processReferralReward{value: 0}(
                     referrer,
-                    0 // 금액은 _processFeeDistribution에서 처리됨
+                    0 // Amount is processed in _processFeeDistribution
                 ) {
-                    // 성공적으로 처리됨
+                    // Successfully processed
                 } catch {
-                    // 리퍼럴 처리 실패 시 무시 (게임은 계속 진행)
+                    // Ignore referral processing failure (game continues)
                 }
             }
         }
     }
 
+    /**
+     * @notice Process winner payout
+     * @param winner The winner address
+     * @param amount The payout amount
+     */
     function _processWinnerPayout(address winner, uint256 amount) internal virtual;
 
+    /**
+     * @notice Process founder distribution
+     * @param amount The distribution amount
+     */
     function _processFounderDistribution(uint256 amount) internal virtual;
 
+    /**
+     * @notice Update game statistics
+     * @param winner The winner address
+     * @param playerCount The number of players
+     * @param amount The amount won
+     * @param winnerIndex The winner index
+     */
     function _updateGameStats(address winner, uint256 playerCount, uint256 amount, uint256 winnerIndex)
         internal
         virtual;
 
+    /**
+     * @notice Start a new game
+     */
+    function _startNewGame() internal {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 newGameId = gameStorage.totalGames;
+        StorageLayout.Game storage newGame = gameStorage.games[newGameId];
+        (newGame.gameNumber, newGame.startTime, newGame.endTime, newGame.state) =
+            _initializeNewGame(newGameId, gameStorage.gameDuration);
+        gameStorage.totalGames++;
+        _emitNewGameEvents(newGameId);
+    }
+
+    /**
+     * @notice End current game
+     */
+    function _endCurrentGame() internal {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        StorageLayout.Game storage currentGame = gameStorage.games[currentGameId];
+
+        _updateGameState();
+        address winner = _pickWinner();
+        _emitGameEndEvents(currentGame.gameNumber, currentGame.jackpot, currentGame.playerCount, winner);
+    }
+
+    /**
+     * @notice Process referral reward (using CryptolottoReferral)
+     * @param referrer The referrer address
+     * @param player The player address
+     */
+    function _processReferralReward(address referrer, address player) internal virtual {
+        if (_isValidReferrer(referrer, player)) {
+            if (_isRegistryAvailable()) {
+                _executeReferralReward(referrer);
+            }
+        }
+    }
+
+    /**
+     * @notice Process ad lottery fee
+     * @param amount The ad lottery fee amount
+     */
+    function _processAdLotteryFee(uint256 amount) internal virtual {
+        if (amount > 0) {
+            // Ad Lottery fee is used as prize money for Ad Lottery games
+            // Currently stored in contract and used later in Ad Lottery games
+            // In actual implementation, can be stored in Treasury or separate contract
+            emit AdLotteryFeeCollected(amount, block.timestamp);
+        }
+    }
+
+    /**
+     * @notice Process developer fee
+     * @param amount The developer fee amount
+     */
+    function _processDeveloperFee(uint256 amount) internal virtual {
+        if (amount > 0) {
+            if (_isRegistryAvailable()) {
+                _executeDeveloperFeeTransfer(amount);
+            }
+        }
+    }
+
     // ============ INITIALIZATION ============
+    /**
+     * @notice Initialize BaseGame contract
+     * @param owner The owner address
+     * @param _registry The registry address
+     */
     function __BaseGame_init(address owner, address _registry) internal onlyInitializing {
         require(owner != address(0), "Invalid owner address");
-        // registry는 나중에 설정될 수 있으므로 조건부 검증
+        // Registry can be set later, so conditional validation
         if (_registry != address(0)) {
             registry = ContractRegistry(_registry);
         }
@@ -173,12 +406,12 @@ abstract contract BaseGame is
         // Set ownable to this contract (since it inherits OwnableUpgradeable)
         ownable = IOwnable(address(this));
 
-        // 중앙화된 스토리지 초기화
+        // Initialize centralized storage
         _initializeGameStorage();
     }
 
     /**
-     * @dev 중앙화된 게임 스토리지 초기화
+     * @dev Initialize centralized game storage
      */
     function _initializeGameStorage() internal {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
@@ -188,7 +421,7 @@ abstract contract BaseGame is
             gameStorage.maxTicketsPerPlayer = 100;
             gameStorage.isActive = true;
 
-            // 초기 게임 생성
+            // Create initial game
             StorageLayout.Game storage initialGame = gameStorage.games[0];
             initialGame.gameNumber = 0;
             initialGame.startTime = 0;
@@ -202,7 +435,9 @@ abstract contract BaseGame is
     // ============ GAME FUNCTIONS ============
 
     /**
-     * @dev 티켓 구매 (중앙화된 스토리지 사용)
+     * @notice Buy tickets for the current game
+     * @param referrer The referrer address
+     * @param ticketCount The number of tickets to buy
      */
     function buyTicket(address referrer, uint256 ticketCount) public payable nonReentrant {
         _requireGameActive(ticketCount);
@@ -215,6 +450,10 @@ abstract contract BaseGame is
         _emitTicketPurchasedEvents(getGameStorage().games[currentGameId].gameNumber, ticketCount);
     }
 
+    /**
+     * @notice Require game to be active
+     * @param ticketCount The number of tickets
+     */
     function _requireGameActive(uint256 ticketCount) internal view {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         require(gameStorage.isActive, "Game is not active");
@@ -222,6 +461,10 @@ abstract contract BaseGame is
         require(msg.value == gameStorage.ticketPrice * ticketCount, "Incorrect amount sent");
     }
 
+    /**
+     * @notice Require current game to be active
+     * @param currentGameId The current game ID
+     */
     function _requireCurrentGameActive(uint256 currentGameId) internal view {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         StorageLayout.Game storage currentGame = gameStorage.games[currentGameId];
@@ -229,12 +472,20 @@ abstract contract BaseGame is
     }
 
     /**
-     * @dev 현재 게임 ID 가져오기
+     * @notice Get current game ID
+     * @param gameStorage The game storage
+     * @return The current game ID
      */
     function _getCurrentGameId(StorageLayout.GameStorage storage gameStorage) internal view returns (uint256) {
         return gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
     }
 
+    /**
+     * @notice Handle game state transitions
+     * @param gameStorage The game storage
+     * @param currentGameId The current game ID
+     * @return The updated game ID
+     */
     function _handleGameState(StorageLayout.GameStorage storage gameStorage, uint256 currentGameId)
         internal
         returns (uint256)
@@ -244,7 +495,7 @@ abstract contract BaseGame is
             _startNewGame();
             return gameStorage.totalGames - 1;
         }
-        if (currentGame.state == StorageLayout.GameState.ACTIVE && block.timestamp >= currentGame.endTime) {
+        if (currentGame.state == StorageLayout.GameState.ACTIVE && block.timestamp > currentGame.endTime - 1) {
             _endCurrentGame();
             _startNewGame();
             return gameStorage.totalGames - 1;
@@ -252,6 +503,11 @@ abstract contract BaseGame is
         return currentGameId;
     }
 
+    /**
+     * @notice Emit ticket purchased events
+     * @param gameNumber The game number
+     * @param ticketCount The number of tickets
+     */
     function _emitTicketPurchasedEvents(uint256 gameNumber, uint256 ticketCount) internal {
         for (uint256 i = 0; i < ticketCount; i++) {
             emit TicketPurchased(msg.sender, gameNumber, i, block.timestamp);
@@ -263,9 +519,9 @@ abstract contract BaseGame is
     }
 
     /**
-     * @dev 수수료 분배 처리 (새로운 구현)
-     * @param ticketAmount 티켓 가격
-     * @param referrer 리퍼러 주소
+     * @dev Fee distribution processing (new implementation)
+     * @param ticketAmount Ticket price
+     * @param referrer Referrer address
      */
     function _processFeeDistributionNew(uint256 ticketAmount, address referrer) internal {
         uint256 totalFee = _calculateTotalFee(ticketAmount);
@@ -282,14 +538,14 @@ abstract contract BaseGame is
     }
 
     /**
-     * @dev 총 수수료 계산
+     * @dev Calculate total fee
      */
     function _calculateTotalFee(uint256 ticketAmount) internal pure returns (uint256) {
         return (ticketAmount * TOTAL_FEE_PERCENT) / 100;
     }
 
     /**
-     * @dev 개별 수수료 계산
+     * @dev Calculate individual fees
      */
     function _calculateIndividualFees(uint256 ticketAmount)
         internal
@@ -494,19 +750,6 @@ abstract contract BaseGame is
     }
 
     /**
-     * @dev 현재 게임 종료 및 승자 선정
-     */
-    function _endCurrentGame() internal {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = _getCurrentGameId(gameStorage);
-        StorageLayout.Game storage currentGame = gameStorage.games[currentGameId];
-
-        _updateGameState();
-        address winner = _pickWinner();
-        _emitGameEndEvents(currentGame.gameNumber, currentGame.jackpot, currentGame.playerCount, winner);
-    }
-
-    /**
      * @dev 게임 상태 업데이트
      */
     function _updateGameState() internal {
@@ -635,210 +878,65 @@ abstract contract BaseGame is
     }
 
     /**
-     * @dev Treasury 예치 실행
+     * @notice Execute treasury deposit
+     * @param treasuryAddress The treasury address
+     * @param amount The amount to deposit
      */
     function _executeTreasuryDeposit(address treasuryAddress, uint256 amount) internal {
-        try ITreasuryManager(treasuryAddress).depositFunds(treasuryName, msg.sender, amount) {
-            // 성공적으로 Treasury로 전송됨
-        } catch {
-            // Treasury 전송 실패 시 컨트랙트에 보관 (긴급 상황에서만 사용)
-        }
-    }
-
-    // ============ FEE DISTRIBUTION ============
-
-    /**
-     * @dev 총 수수료 비율 (10%)
-     */
-    uint256 public constant TOTAL_FEE_PERCENT = 10;
-
-    /**
-     * @dev 리퍼럴 수수료 비율 (2%)
-     */
-    uint256 public constant REFERRAL_FEE_PERCENT = 2;
-
-    /**
-     * @dev Ad Lottery 수수료 비율 (3%)
-     */
-    uint256 public constant AD_LOTTERY_FEE_PERCENT = 3;
-
-    /**
-     * @dev 개발자 수수료 비율 (5%)
-     */
-    uint256 public constant DEVELOPER_FEE_PERCENT = 5;
-
-    /**
-     * @dev 수수료 분배 처리
-     * @param ticketAmount 티켓 가격
-     * @param referrer 리퍼러 주소
-     */
-    function _processFeeDistribution(uint256 ticketAmount, address referrer) internal {
-        uint256 totalFee = _calculateTotalFee(ticketAmount);
-
-        if (totalFee > 0) {
-            (uint256 referralFee, uint256 adLotteryFee, uint256 developerFee) = _calculateIndividualFees(ticketAmount);
-
-            _processReferralFeeIfValid(referralFee, referrer);
-            _processAdLotteryFeeIfValid(adLotteryFee);
-            _processDeveloperFeeIfValid(developerFee);
-
-            emit FeeDistributed(referralFee, adLotteryFee, developerFee, block.timestamp);
-        }
-    }
-
-    /**
-     * @dev 리퍼럴 보상 처리 (CryptolottoReferral 사용)
-     * @param referrer 리퍼러 주소
-     * @param player 플레이어 주소
-     */
-    function _processReferralReward(address referrer, address player) internal virtual {
-        if (_isValidReferrer(referrer, player)) {
-            if (_isRegistryAvailable()) {
-                _executeReferralReward(referrer);
+        if (treasuryAddress != address(0) && amount > 0) {
+            try ITreasuryManager(treasuryAddress).depositFunds(treasuryName, address(this), amount) {
+                emit TreasuryFundsDeposited(amount, block.timestamp);
+            } catch Error(string memory reason) {
+                emit TreasuryTransferFailed(address(this), amount, reason, block.timestamp);
+            } catch {
+                emit TreasuryTransferFailed(address(this), amount, "Unknown error", block.timestamp);
             }
         }
     }
 
     /**
-     * @dev 유효한 리퍼러인지 확인
+     * @dev 참조자 유효성 검사
      */
     function _isValidReferrer(address referrer, address player) internal pure returns (bool) {
         return referrer != address(0) && referrer != player;
     }
 
     /**
-     * @dev 리퍼럴 보상 실행
+     * @dev 참조자 보상 실행
      */
     function _executeReferralReward(address referrer) internal {
-        try registry.getContract("CryptolottoReferral") returns (address referralContract) {
-            if (referralContract != address(0)) {
-                _callReferralContract(referralContract, referrer);
-            }
-        } catch {
-            // registry에서 컨트랙트를 찾을 수 없는 경우 무시
-        }
-    }
-
-    /**
-     * @dev 리퍼럴 컨트랙트 호출
-     */
-    function _callReferralContract(address referralContract, address referrer) internal {
-        try CryptolottoReferral(referralContract).processReferralReward{value: 0}(referrer, 0) {
-            // 성공적으로 처리됨
-        } catch {
-            // 리퍼럴 처리 실패 시 무시 (게임은 계속 진행)
-        }
-    }
-
-    /**
-     * @dev Ad Lottery 수수료 처리
-     * @param amount 수수료 금액
-     */
-    function _processAdLotteryFee(uint256 amount) internal virtual {
-        if (amount > 0) {
-            // Ad Lottery 수수료는 Ad Lottery 게임의 당첨금으로 사용
-            // 현재는 컨트랙트에 보관하고 나중에 Ad Lottery 게임에서 사용
-            // 실제 구현에서는 Treasury나 별도 컨트랙트에 보관할 수 있음
-            emit AdLotteryFeeCollected(amount, block.timestamp);
-        }
-    }
-
-    /**
-     * @dev 개발자 수수료 처리 (FundsDistributor 사용)
-     * @param amount 수수료 금액
-     */
-    function _processDeveloperFee(uint256 amount) internal virtual {
-        if (amount > 0) {
-            if (_isRegistryAvailable()) {
-                _executeDeveloperFeeTransfer(amount);
+        if (_isRegistryAvailable()) {
+            try CryptolottoReferral(registry.getContract("CryptolottoReferral")).processReferralReward{value: 0}(
+                referrer,
+                0 // Amount is processed in _processFeeDistribution
+            ) {
+                // Successfully processed
+            } catch {
+                // Ignore referral processing failure (game continues)
             }
         }
     }
 
     /**
-     * @dev 개발자 수수료 전송 실행
+     * @dev 개발자 수수료 전송
      */
     function _executeDeveloperFeeTransfer(uint256 amount) internal {
-        try registry.getContract("FundsDistributor") returns (address distributorAddress) {
-            if (distributorAddress != address(0)) {
-                _sendToDistributor(distributorAddress, amount);
+        if (_isRegistryAvailable()) {
+            try ITreasuryManager(registry.getContract("TreasuryManager")).withdrawFunds(
+                treasuryName, msg.sender, amount
+            ) {
+                emit DeveloperFeeSent(msg.sender, amount, block.timestamp);
+            } catch Error(string memory reason) {
+                emit TreasuryTransferFailed(address(this), amount, reason, block.timestamp);
+            } catch {
+                emit TreasuryTransferFailed(address(this), amount, "Unknown error", block.timestamp);
             }
-        } catch {
-            // registry에서 컨트랙트를 찾을 수 없는 경우 무시
         }
     }
 
     /**
-     * @dev Distributor로 전송
-     */
-    function _sendToDistributor(address distributorAddress, uint256 amount) internal {
-        (bool success,) = payable(distributorAddress).call{value: amount}("");
-        if (success) {
-            emit DeveloperFeeSent(distributorAddress, amount, block.timestamp);
-        } else {
-            // 개발자 수수료 처리 실패 시 Treasury로 전송
-            _transferToTreasury(amount);
-        }
-    }
-
-    // ============ UTILITY FUNCTIONS ============
-
-    /**
-     * @dev 티켓 가격 변경
-     */
-    function changeTicketPrice(uint256 price) public {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 oldPrice = gameStorage.ticketPrice;
-        _updateTicketPrice(gameStorage, price);
-        emit TicketPriceChanged(oldPrice, price, block.timestamp);
-    }
-
-    /**
-     * @dev 티켓 가격 업데이트
-     */
-    function _updateTicketPrice(StorageLayout.GameStorage storage gameStorage, uint256 price) internal {
-        gameStorage.ticketPrice = price;
-    }
-
-    /**
-     * @dev 최대 티켓 수 변경
-     */
-    function changeMaxTicketsPerPlayer(uint256 maxTickets) public virtual {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 oldValue = gameStorage.maxTicketsPerPlayer;
-        _updateMaxTicketsPerPlayer(gameStorage, maxTickets);
-        emit MaxTicketsPerPlayerUpdated(oldValue, maxTickets, block.timestamp);
-    }
-
-    /**
-     * @dev 최대 티켓 수 업데이트
-     */
-    function _updateMaxTicketsPerPlayer(StorageLayout.GameStorage storage gameStorage, uint256 maxTickets) internal {
-        gameStorage.maxTicketsPerPlayer = maxTickets;
-    }
-
-    /**
-     * @dev 게임 시간 변경
-     */
-    function changeGameDuration(uint256 duration) public virtual {
-        require(ownable.isAllowed(msg.sender), "Not authorized");
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 oldValue = gameStorage.gameDuration;
-        _updateGameDuration(gameStorage, duration);
-        emit GameDurationUpdated(oldValue, duration, block.timestamp);
-    }
-
-    /**
-     * @dev 게임 시간 업데이트
-     */
-    function _updateGameDuration(StorageLayout.GameStorage storage gameStorage, uint256 duration) internal {
-        gameStorage.gameDuration = duration;
-    }
-
-    /**
-     * @dev 긴급 일시정지
+     * @notice Emergency pause the game
+     * @param reason The reason for pausing
      */
     function emergencyPause(string memory reason) public virtual {
         require(msg.sender == owner(), "Not authorized");
@@ -848,7 +946,7 @@ abstract contract BaseGame is
     }
 
     /**
-     * @dev 긴급 재개
+     * @notice Emergency resume the game
      */
     function emergencyResume() public virtual {
         require(msg.sender == owner(), "Not authorized");
@@ -857,101 +955,113 @@ abstract contract BaseGame is
         emit EmergencyResumed(msg.sender, block.timestamp);
     }
 
-    // 기존 getCurrentGameInfo 함수는 주석 처리
-    /*
-    function getCurrentGameInfo()
-        public
-        view
-        returns (
-            uint256 gameNumber,
-            uint256 startTime,
-            uint256 endTime,
-            uint256 jackpot,
-            uint256 playerCount,
-            StorageLayout.GameState state
-        )
-    {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
-        return _getGameInfo(game);
-    }
-    */
-
-    function getCurrentGameNumber() public view returns (uint256) {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
-        return game.gameNumber;
-    }
-
-    function getCurrentGameStartTime() public view returns (uint256) {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
-        return game.startTime;
-    }
-
-    function getCurrentGameEndTime() public view returns (uint256) {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
-        return game.endTime;
-    }
-
+    /**
+     * @notice Get current game jackpot
+     * @return The current game jackpot amount
+     */
     function getCurrentGameJackpot() public view returns (uint256) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
-        return game.jackpot;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        return gameStorage.games[currentGameId].jackpot;
     }
 
-    function getCurrentGamePlayerCount() public view returns (uint256) {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
-        return game.playerCount;
-    }
-
+    /**
+     * @notice Get current game state
+     * @return The current game state
+     */
     function getCurrentGameState() public view returns (StorageLayout.GameState) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
-        return game.state;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        return gameStorage.games[currentGameId].state;
     }
 
     /**
-     * @dev 현재 게임 가져오기
+     * @notice Get current game number
+     * @return The current game number
      */
-    function _getCurrentGame(StorageLayout.GameStorage storage gameStorage)
-        internal
-        view
-        returns (StorageLayout.Game storage)
-    {
-        if (gameStorage.totalGames > 0) {
-            return gameStorage.games[gameStorage.totalGames - 1];
-        } else {
-            return gameStorage.games[0];
+    function getCurrentGameNumber() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        return gameStorage.games[currentGameId].gameNumber;
+    }
+
+    /**
+     * @notice Get current game player count
+     * @return The current game player count
+     */
+    function getCurrentGamePlayerCount() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        return gameStorage.games[currentGameId].playerCount;
+    }
+
+    /**
+     * @notice Get remaining game time
+     * @return The remaining game time in seconds
+     */
+    function getRemainingGameTime() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        StorageLayout.Game storage currentGame = gameStorage.games[currentGameId];
+        if (currentGame.state != StorageLayout.GameState.ACTIVE) {
+            return 0;
         }
+        if (block.timestamp >= currentGame.endTime) {
+            return 0;
+        }
+        return currentGame.endTime - block.timestamp;
     }
 
     /**
-     * @dev 게임 정보 반환
+     * @notice Get current game end time
+     * @return The current game end time
      */
-    function _getGameInfo(StorageLayout.Game storage game)
-        internal
-        view
-        returns (
-            uint256 gameNumber,
-            uint256 startTime,
-            uint256 endTime,
-            uint256 jackpot,
-            uint256 playerCount,
-            StorageLayout.GameState state
-        )
-    {
-        return (game.gameNumber, game.startTime, game.endTime, game.jackpot, game.playerCount, game.state);
+    function getCurrentGameEndTime() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        StorageLayout.Game storage currentGame = gameStorage.games[currentGameId];
+        return currentGame.endTime;
+    }
+
+    // ============ COMMON VIEW FUNCTIONS ============
+
+    /**
+     * @notice Get contract balance
+     * @return The contract balance
+     */
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 
     /**
-     * @dev 게임 설정 조회
+     * @notice Get player information
+     * @param player The player address
+     * @return ticketCount The number of tickets purchased
+     * @return lastPurchaseTime The last purchase time
+     * @return totalSpent The total amount spent
+     */
+    function getPlayerInfo(address player)
+        public
+        view
+        virtual
+        returns (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent)
+    {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.PlayerInfo storage playerInfo = gameStorage.playerInfo[player];
+        return (playerInfo.ticketCount, playerInfo.lastPurchaseTime, playerInfo.totalSpent);
+    }
+
+    /**
+     * @notice Get game configuration
+     * @return ticketPrice The ticket price
+     * @return gameDuration The game duration
+     * @return maxTicketsPerPlayer The maximum tickets per player
+     * @return isActive Whether the game is active
      */
     function getGameConfig()
         public
         view
+        virtual
         returns (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive)
     {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
@@ -959,282 +1069,116 @@ abstract contract BaseGame is
             (gameStorage.ticketPrice, gameStorage.gameDuration, gameStorage.maxTicketsPerPlayer, gameStorage.isActive);
     }
 
+    // ============ COMMON ADMIN FUNCTIONS ============
+
     /**
-     * @dev 게임 상세 통계 조회 (BaseGame 레벨)
-     * @return totalGames 총 게임 수
-     * @return totalPlayers 총 플레이어 수
-     * @return totalJackpot 총 잭팟
-     * @return averageTicketsPerGame 게임당 평균 티켓 수
-     * @return successRate 성공률
+     * @notice Reset player cooldown
+     * @param player The player address
      */
-    function getDetailedGameStats()
-        external
-        view
-        virtual
-        returns (
-            uint256 totalGames,
-            uint256 totalPlayers,
-            uint256 totalJackpot,
-            uint256 averageTicketsPerGame,
-            uint256 successRate
-        )
-    {
+    function resetPlayerCooldown(address player) external virtual onlyOwner {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-
-        totalGames = gameStorage.totalGames;
-        totalPlayers = gameStorage.totalPlayers;
-        totalJackpot = gameStorage.totalJackpot;
-
-        averageTicketsPerGame = _calculateAverageTicketsPerGame(totalGames, totalJackpot, gameStorage.ticketPrice);
-        successRate = _calculateSuccessRate(gameStorage, totalGames);
-
-        return (totalGames, totalPlayers, totalJackpot, averageTicketsPerGame, successRate);
+        StorageLayout.PlayerInfo storage playerInfo = gameStorage.playerInfo[player];
+        playerInfo.lastPurchaseTime = 0;
+        emit PlayerCooldownReset(player, block.timestamp);
     }
 
     /**
-     * @dev 게임당 평균 티켓 수 계산
+     * @notice Set test mode
+     * @param enabled Whether test mode is enabled
      */
-    function _calculateAverageTicketsPerGame(uint256 totalGames, uint256 totalJackpot, uint256 ticketPrice)
-        internal
-        pure
-        returns (uint256)
-    {
-        return totalGames > 0 ? totalJackpot / (totalGames * ticketPrice) : 0;
-    }
-
-    /**
-     * @dev 성공률 계산
-     */
-    function _calculateSuccessRate(StorageLayout.GameStorage storage gameStorage, uint256 totalGames)
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 completedGames = _countCompletedGames(gameStorage, totalGames);
-        return totalGames > 0 ? (completedGames * 100) / totalGames : 0;
-    }
-
-    /**
-     * @dev 완료된 게임 수 계산
-     */
-    function _countCompletedGames(StorageLayout.GameStorage storage gameStorage, uint256 totalGames)
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 completedGames = 0;
-        for (uint256 i = 0; i < totalGames; i++) {
-            if (gameStorage.games[i].state == StorageLayout.GameState.ENDED) {
-                completedGames++;
-            }
-        }
-        return completedGames;
-    }
-
-    /**
-     * @dev 플레이어 활동 분석 (BaseGame 레벨)
-     * @param player 분석할 플레이어 주소
-     * @return totalTicketsPurchased 총 구매한 티켓 수
-     * @return gamesParticipated 참여한 게임 수
-     * @return lastActivityTime 마지막 활동 시간
-     * @return averageTicketsPerGame 게임당 평균 티켓 수
-     */
-    function getPlayerAnalytics(address player)
-        external
-        view
-        virtual
-        returns (
-            uint256 totalTicketsPurchased,
-            uint256 gamesParticipated,
-            uint256 lastActivityTime,
-            uint256 averageTicketsPerGame
-        )
-    {
-        totalTicketsPurchased = getGameStorage().playerTicketCount[player];
-        lastActivityTime = 0; // BaseGame에서는 lastPurchaseTime이 없으므로 0
-
-        gamesParticipated = _calculateGamesParticipated(totalTicketsPurchased);
-        averageTicketsPerGame = _calculatePlayerAverageTickets(totalTicketsPurchased, gamesParticipated);
-
-        return (totalTicketsPurchased, gamesParticipated, lastActivityTime, averageTicketsPerGame);
-    }
-
-    /**
-     * @dev 참여한 게임 수 계산
-     */
-    function _calculateGamesParticipated(uint256 totalTicketsPurchased) internal pure returns (uint256) {
-        return totalTicketsPurchased > 0 ? 1 : 0;
-    }
-
-    /**
-     * @dev 플레이어 평균 티켓 수 계산
-     */
-    function _calculatePlayerAverageTickets(uint256 totalTicketsPurchased, uint256 gamesParticipated)
-        internal
-        pure
-        returns (uint256)
-    {
-        return gamesParticipated > 0 ? totalTicketsPurchased / gamesParticipated : 0;
-    }
-
-    /**
-     * @dev 게임 상태 일괄 조회 (BaseGame 레벨)
-     * @return isActive 게임 활성 상태
-     * @return currentGameId 현재 게임 ID
-     * @return playerCount 플레이어 수
-     * @return jackpot 잭팟
-     * @return remainingTime 남은 시간
-     * @return gameState 게임 상태
-     */
-    function getCompleteGameStatus()
-        external
-        view
-        virtual
-        returns (
-            bool isActive,
-            uint256 currentGameId,
-            uint256 playerCount,
-            uint256 jackpot,
-            uint256 remainingTime,
-            StorageLayout.GameState gameState
-        )
-    {
+    function setTestMode(bool enabled) external virtual onlyOwner {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId_ = _getCurrentGameId(gameStorage);
-        StorageLayout.Game storage game = gameStorage.games[currentGameId_];
-
-        return _getGameStatus(gameStorage, game, currentGameId_);
+        gameStorage.testMode = enabled;
+        emit TestModeSet(enabled, block.timestamp);
     }
 
     /**
-     * @dev 게임 상태 반환
+     * @notice Set purchase cooldown
+     * @param newCooldown The new cooldown time
      */
-    function _getGameStatus(
-        StorageLayout.GameStorage storage gameStorage,
-        StorageLayout.Game storage game,
-        uint256 currentGameId_
-    )
-        internal
-        view
-        returns (
-            bool isActive,
-            uint256 currentGameId,
-            uint256 playerCount,
-            uint256 jackpot,
-            uint256 remainingTime,
-            StorageLayout.GameState gameState
-        )
-    {
-        return (
-            gameStorage.isActive, currentGameId_, game.players.length, game.jackpot, getRemainingGameTime(), game.state
-        );
-    }
-
-    /**
-     * @dev 컨트랙트 상태 점검 (BaseGame 레벨)
-     * @return isInitialized 초기화 상태
-     * @return contractBalance 컨트랙트 잔액
-     * @return totalGames 총 게임 수
-     * @return totalPlayers 총 플레이어 수
-     * @return totalJackpot 총 잭팟
-     */
-    function getContractHealth()
-        external
-        view
-        virtual
-        returns (
-            bool isInitialized,
-            uint256 contractBalance,
-            uint256 totalGames,
-            uint256 totalPlayers,
-            uint256 totalJackpot
-        )
-    {
+    function setPurchaseCooldown(uint256 newCooldown) external virtual onlyOwner {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        return (
-            address(registry) != address(0),
-            address(this).balance,
-            gameStorage.totalGames,
-            gameStorage.totalPlayers,
-            gameStorage.totalJackpot
-        );
+        gameStorage.purchaseCooldown = newCooldown;
+        emit PurchaseCooldownSet(newCooldown, block.timestamp);
     }
 
     /**
-     * @dev 남은 게임 시간 조회
+     * @notice Set registry address
+     * @param registryAddress The registry address
      */
-    function getRemainingGameTime() public view virtual returns (uint256) {
+    function setRegistry(address registryAddress) external virtual onlyOwner {
+        require(registryAddress != address(0), "Invalid registry address");
+        registry = ContractRegistry(registryAddress);
+        emit RegistrySet(registryAddress, block.timestamp);
+    }
+
+    // ============ COMMON INTERNAL FUNCTIONS ============
+
+    /**
+     * @notice End current game
+     */
+    function _endGame() internal virtual {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         uint256 currentGameId = _getCurrentGameId(gameStorage);
-        StorageLayout.Game storage game = gameStorage.games[currentGameId];
+        StorageLayout.Game storage currentGame = gameStorage.games[currentGameId];
 
-        return _calculateRemainingTime(game);
+        if (currentGame.state == StorageLayout.GameState.ACTIVE) {
+            _updateGameState();
+            address winner = _pickWinner();
+            _processWinnerPayout(winner, currentGame.jackpot);
+            _processFounderDistribution(currentGame.jackpot);
+            _updateGameStats(winner, currentGame.playerCount, currentGame.jackpot, 0);
+            _emitGameEndEvents(currentGame.gameNumber, currentGame.jackpot, currentGame.playerCount, winner);
+        }
     }
 
     /**
-     * @dev 남은 시간 계산
+     * @notice Buy ticket internal function
+     * @param partner The partner address
+     * @param ticketCount The number of tickets
      */
-    function _calculateRemainingTime(StorageLayout.Game storage game) internal view returns (uint256) {
-        if (block.timestamp >= game.endTime) {
-            return 0;
-        }
-        return game.endTime - block.timestamp;
+    function _buyTicketInternal(address partner, uint256 ticketCount) internal virtual {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        currentGameId = _handleGameState(gameStorage, currentGameId);
+        _requireCurrentGameActive(currentGameId);
+        _updatePlayerInfoOptimized(msg.sender, ticketCount);
+        _transferToTreasury(msg.value);
+        _processFeeDistributionInternal(msg.value, partner);
+        _emitTicketPurchasedEvents(gameStorage.games[currentGameId].gameNumber, ticketCount);
     }
 
-    // ============ UPGRADE FUNCTIONS ============
-
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    /**
+     * @notice Authorize upgrade (UUPS)
+     * @param newImplementation The new implementation address
+     */
+    function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {}
 
     // ============ FALLBACK FUNCTIONS ============
 
+    /**
+     * @notice Fallback function to buy tickets
+     */
     fallback() external payable {
+        // Buy 1 ticket with the sent value
         buyTicket(address(0), 1);
     }
 
+    /**
+     * @notice Receive function
+     */
     receive() external payable {
+        // Buy 1 ticket with the sent value
         buyTicket(address(0), 1);
     }
 
-    // ============ CUSTOM ERRORS ============
-    error GameNotActive();
-    error InvalidTicketCount();
-    error IncorrectAmount();
-    error GameNotInActiveState();
-    error ExceedsMaxTickets();
-    error InvalidRange();
-    error NoPlayersInGame();
-    error ReferralProcessingFailed();
-    error StatsUpdateFailed();
+    // ============ EVENTS ============
 
-    // ============ ADMIN FUNCTIONS ============
-
-    /**
-     * @dev Registry 설정 (관리자만)
-     * @param _registry 새로운 registry 주소
-     * @custom:security onlyOwner
-     */
-    function setRegistry(address _registry) external onlyOwner {
-        require(_registry != address(0), "Invalid registry address");
-        registry = ContractRegistry(_registry);
-    }
-
-    /**
-     * @dev Treasury 이름 설정 (관리자만)
-     * @param _treasuryName 새로운 treasury 이름
-     * @custom:security onlyOwner
-     */
-    function setTreasuryName(string memory _treasuryName) external onlyOwner {
-        require(bytes(_treasuryName).length > 0, "Invalid treasury name");
-        treasuryName = _treasuryName;
-    }
-
-    function _startNewGame() internal {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 newGameId = gameStorage.totalGames;
-        StorageLayout.Game storage newGame = gameStorage.games[newGameId];
-        (newGame.gameNumber, newGame.startTime, newGame.endTime, newGame.state) =
-            _initializeNewGame(newGameId, gameStorage.gameDuration);
-        gameStorage.totalGames++;
-        _emitNewGameEvents(newGameId);
-    }
+    event PlayerCooldownReset(address indexed player, uint256 timestamp);
+    event TestModeSet(bool enabled, uint256 timestamp);
+    event PurchaseCooldownSet(uint256 cooldown, uint256 timestamp);
+    event RegistrySet(address indexed registry, uint256 timestamp);
+    event WinnerPayout(address indexed winner, uint256 amount, uint256 timestamp);
+    event FounderDistribution(address indexed founder, uint256 amount, uint256 timestamp);
+    event GameStatsUpdated(uint256 totalGames, uint256 totalPlayers, uint256 totalPayouts, uint256 timestamp);
 }

@@ -15,7 +15,7 @@ contract CryptolottoFuzz is Test {
 
     function setUp() public {
         // 기본 컨트랙트 배포
-        adToken = new AdToken();
+        adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
         lottery = new Cryptolotto1Day();
         adLottery = new CryptolottoAd();
     }

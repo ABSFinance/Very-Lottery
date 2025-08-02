@@ -1,125 +1,160 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IEventLogger.sol";
 
 /**
  * @title EventLogger
- * @dev 중앙화된 이벤트 로깅 시스템
+ * @author Cryptolotto Team
+ * @notice Centralized event logging system
+ * @dev Provides comprehensive event logging and management functionality
  */
-contract EventLogger is IEventLogger, Ownable {
-    // 로깅 상태
-    bool public loggingEnabled = true;
+contract EventLogger is Ownable, IEventLogger {
+    // Custom Errors
+    error LoggingDisabled();
+    error InvalidEventType();
+    error InvalidMessage();
+    error InvalidAddress();
+    error InvalidData();
 
-    // 이벤트 로그 구조체
+    // Event log structure
     struct EventLog {
         string eventType;
         string message;
         address indexedAddress;
         bytes data;
         uint256 timestamp;
-        uint256 blockNumber;
+        uint256 logIndex;
     }
 
-    // 이벤트 로그 저장소
+    // State variables
+    /**
+     * @notice Whether logging is enabled
+     */
+    bool public loggingEnabled;
+    /**
+     * @notice Array of all event logs
+     */
     EventLog[] public eventLogs;
-
-    // 이벤트 타입별 카운터
+    /**
+     * @notice Mapping of event types to their count
+     */
     mapping(string => uint256) public eventTypeCounters;
 
     // Events
+    /**
+     * @notice Emitted when an event is logged
+     * @param eventType Type of event
+     * @param message Event message
+     * @param indexedAddress Associated address
+     * @param timestamp Log timestamp
+     */
     event EventLogged(
-        string indexed eventType,
-        string message,
-        address indexedAddress,
-        uint256 timestamp
+        string indexed eventType, string indexed message, address indexed indexedAddress, uint256 timestamp
     );
-    event LoggingToggled(bool enabled, uint256 timestamp);
-    event LogsCleared(uint256 timestamp);
-
-    constructor() Ownable(msg.sender) {}
+    /**
+     * @notice Emitted when logging is toggled
+     * @param enabled Whether logging is enabled
+     * @param timestamp Toggle timestamp
+     */
+    event LoggingToggled(bool indexed enabled, uint256 indexed timestamp);
+    /**
+     * @notice Emitted when logs are cleared
+     * @param timestamp Clear timestamp
+     */
+    event LogsCleared(uint256 indexed timestamp);
 
     /**
-     * @dev 이벤트 로깅
+     * @notice Constructor for the event logger
+     * @param owner Owner of the contract
      */
-    function logEvent(
-        string memory eventType,
-        string memory message,
-        address indexedAddress,
-        bytes memory data
-    ) external override {
-        require(loggingEnabled, "Logging is disabled");
+    constructor(address owner) Ownable(owner) {
+        loggingEnabled = true;
+    }
 
-        EventLog memory newLog = _createEventLog(
-            eventType,
-            message,
-            indexedAddress,
-            data
-        );
+    /**
+     * @notice Log an event
+     * @param eventType Type of event
+     * @param message Event message
+     * @param indexedAddress Associated address
+     * @param data Additional data
+     */
+    function logEvent(string calldata eventType, string calldata message, address indexedAddress, bytes calldata data)
+        external
+        override
+    {
+        if (!loggingEnabled) revert LoggingDisabled();
+        if (bytes(eventType).length == 0) revert InvalidEventType();
+        if (bytes(message).length == 0) revert InvalidMessage();
+
+        EventLog memory newLog = _createEventLog(eventType, message, indexedAddress, data);
         _storeEventLog(newLog, eventType);
         _emitEventLogged(eventType, message, indexedAddress);
     }
 
     /**
-     * @dev 이벤트 로그 생성
+     * @notice Create a new event log
+     * @param eventType Type of event
+     * @param message Event message
+     * @param indexedAddress Associated address
+     * @param data Additional data
+     * @return newLog Created event log
      */
     function _createEventLog(
-        string memory eventType,
-        string memory message,
+        string calldata eventType,
+        string calldata message,
         address indexedAddress,
-        bytes memory data
-    ) internal view returns (EventLog memory) {
-        return
-            EventLog({
-                eventType: eventType,
-                message: message,
-                indexedAddress: indexedAddress,
-                data: data,
-                timestamp: block.timestamp, // solhint-disable-line not-rely-on-time
-                blockNumber: block.number
-            });
+        bytes calldata data
+    ) internal view returns (EventLog memory newLog) {
+        return EventLog({
+            eventType: eventType,
+            message: message,
+            indexedAddress: indexedAddress,
+            data: data,
+            timestamp: block.timestamp, // solhint-disable-line not-rely-on-time
+            logIndex: eventLogs.length
+        });
     }
 
     /**
-     * @dev 이벤트 로그 저장
+     * @notice Store an event log
+     * @param newLog Event log to store
+     * @param eventType Type of event
      */
-    function _storeEventLog(
-        EventLog memory newLog,
-        string memory eventType
-    ) internal {
+    function _storeEventLog(EventLog memory newLog, string calldata eventType) internal {
         eventLogs.push(newLog);
-        eventTypeCounters[eventType]++;
+        ++eventTypeCounters[eventType]; // solhint-disable-line gas-increment-by-one
     }
 
     /**
-     * @dev 이벤트 로그 이벤트 발생
+     * @notice Emit the EventLogged event
+     * @param eventType Type of event
+     * @param message Event message
+     * @param indexedAddress Associated address
      */
-    function _emitEventLogged(
-        string memory eventType,
-        string memory message,
-        address indexedAddress
-    ) internal {
+    function _emitEventLogged(string calldata eventType, string calldata message, address indexedAddress) internal {
         emit EventLogged(eventType, message, indexedAddress, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 로깅 활성화/비활성화 토글
+     * @notice Toggle logging functionality
      */
-    function toggleLogging() external override onlyOwner {
+    function toggleLogging() external onlyOwner {
         loggingEnabled = !loggingEnabled;
         emit LoggingToggled(loggingEnabled, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 로깅 상태 확인
+     * @notice Check if logging is enabled
+     * @return Whether logging is enabled
      */
-    function isLoggingEnabled() external view override returns (bool) {
+    function isLoggingEnabled() external view returns (bool) {
         return loggingEnabled;
     }
 
     /**
-     * @dev 모든 로그 삭제 (긴급 상황용)
+     * @notice Clear all event logs
      */
     function clearLogs() external onlyOwner {
         delete eventLogs;
@@ -127,32 +162,34 @@ contract EventLogger is IEventLogger, Ownable {
     }
 
     /**
-     * @dev 이벤트 로그 개수 조회
+     * @notice Get total event log count
+     * @return Total number of event logs
      */
     function getEventLogCount() external view returns (uint256) {
         return eventLogs.length;
     }
 
     /**
-     * @dev 특정 이벤트 타입의 로그 개수 조회
+     * @notice Get count of events by type
+     * @param eventType Type of event
+     * @return Count of events for the specified type
      */
-    function getEventTypeCount(
-        string memory eventType
-    ) external view returns (uint256) {
+    function getEventTypeCount(string calldata eventType) external view returns (uint256) {
         return eventTypeCounters[eventType];
     }
 
     /**
-     * @dev 최근 로그 조회
+     * @notice Get recent event logs
+     * @param count Number of recent logs to retrieve
+     * @return Array of recent event logs
      */
-    function getRecentLogs(
-        uint256 count
-    ) external view returns (EventLog[] memory) {
+    function getRecentLogs(uint256 count) external view returns (EventLog[] memory) {
         uint256 totalLogs = eventLogs.length;
         uint256 returnCount = count > totalLogs ? totalLogs : count;
 
         EventLog[] memory recentLogs = new EventLog[](returnCount);
-        for (uint256 i = 0; i < returnCount; i++) {
+        for (uint256 i = 0; i < returnCount; ++i) {
+            // solhint-disable-line gas-increment-by-one
             recentLogs[i] = eventLogs[totalLogs - 1 - i];
         }
 

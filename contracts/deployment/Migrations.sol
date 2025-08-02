@@ -16,11 +16,17 @@ contract Migrations is Ownable {
     error InvalidContractAddress();
     error ContractAlreadyRegistered();
 
-    /** @notice Last completed migration number */
+    /**
+     * @notice Last completed migration number
+     */
     uint256 public lastCompletedMigration;
-    /** @notice Mapping of migration numbers to contract addresses */
+    /**
+     * @notice Mapping of migration numbers to contract addresses
+     */
     mapping(uint256 => address) public migrationContracts;
-    /** @notice Mapping of contract addresses to migration status */
+    /**
+     * @notice Mapping of contract addresses to migration status
+     */
     mapping(address => bool) public isMigrationContract;
 
     /**
@@ -30,9 +36,7 @@ contract Migrations is Ownable {
      * @param timestamp The timestamp when the migration was completed
      */
     event MigrationCompleted(
-        uint256 indexed migrationNumber,
-        address indexed contractAddress,
-        uint256 indexed timestamp
+        uint256 indexed migrationNumber, address indexed contractAddress, uint256 indexed timestamp
     );
 
     /**
@@ -42,9 +46,7 @@ contract Migrations is Ownable {
      * @param timestamp The timestamp when the contract was registered
      */
     event MigrationContractRegistered(
-        address indexed contractAddress,
-        uint256 indexed migrationNumber,
-        uint256 indexed timestamp
+        address indexed contractAddress, uint256 indexed migrationNumber, uint256 indexed timestamp
     );
 
     /**
@@ -96,11 +98,7 @@ contract Migrations is Ownable {
         migrationContracts[nextMigration] = newAddress;
         isMigrationContract[newAddress] = true;
 
-        emit MigrationContractRegistered(
-            newAddress,
-            nextMigration,
-            block.timestamp
-        ); // solhint-disable-line not-rely-on-time
+        emit MigrationContractRegistered(newAddress, nextMigration, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -108,9 +106,7 @@ contract Migrations is Ownable {
      * @param migrationNumber The migration number to look up
      * @return The address of the migration contract
      */
-    function getMigrationContract(
-        uint256 migrationNumber
-    ) external view returns (address) {
+    function getMigrationContract(uint256 migrationNumber) external view returns (address) {
         return migrationContracts[migrationNumber];
     }
 
@@ -119,9 +115,7 @@ contract Migrations is Ownable {
      * @param contractAddress The address to check
      * @return True if the address is a registered migration contract
      */
-    function isMigrationContractAddress(
-        address contractAddress
-    ) external view returns (bool) {
+    function isMigrationContractAddress(address contractAddress) external view returns (bool) {
         return isMigrationContract[contractAddress];
     }
 
@@ -134,16 +128,8 @@ contract Migrations is Ownable {
     function getMigrationStats()
         external
         view
-        returns (
-            uint256 lastCompleted,
-            uint256 totalMigrations,
-            bool hasActiveMigration
-        )
+        returns (uint256 lastCompleted, uint256 totalMigrations, bool hasActiveMigration)
     {
-        return (
-            lastCompletedMigration,
-            lastCompletedMigration,
-            lastCompletedMigration != 0
-        );
+        return (lastCompletedMigration, lastCompletedMigration, lastCompletedMigration != 0);
     }
 }

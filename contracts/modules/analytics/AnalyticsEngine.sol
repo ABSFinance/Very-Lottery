@@ -51,25 +51,41 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
     }
 
     // State variables
-    /** @notice Mapping of user addresses to their analytics */
+    /**
+     * @notice Mapping of user addresses to their analytics
+     */
     mapping(address => UserAnalytics) public userAnalytics;
-    /** @notice Mapping of game types to their analytics */
+    /**
+     * @notice Mapping of game types to their analytics
+     */
     mapping(uint8 => GameAnalytics) public gameAnalytics;
-    /** @notice System-wide analytics */
+    /**
+     * @notice System-wide analytics
+     */
     SystemAnalytics public systemAnalytics;
 
     // Daily statistics
-    /** @notice Daily volume by day */
+    /**
+     * @notice Daily volume by day
+     */
     mapping(uint256 => uint256) public dailyVolume;
-    /** @notice Daily transactions by day */
+    /**
+     * @notice Daily transactions by day
+     */
     mapping(uint256 => uint256) public dailyTransactions;
-    /** @notice Daily users by day */
+    /**
+     * @notice Daily users by day
+     */
     mapping(uint256 => uint256) public dailyUsers;
 
     // Configuration
-    /** @notice Whether analytics is enabled */
+    /**
+     * @notice Whether analytics is enabled
+     */
     bool public analyticsEnabled;
-    /** @notice Last update timestamp */
+    /**
+     * @notice Last update timestamp
+     */
     uint256 public lastUpdateTime;
 
     // Events
@@ -81,10 +97,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @param timestamp When the analytics were updated
      */
     event UserAnalyticsUpdated(
-        address indexed user,
-        uint256 indexed transactions,
-        uint256 indexed volume,
-        uint256 timestamp
+        address indexed user, uint256 indexed transactions, uint256 indexed volume, uint256 timestamp
     );
 
     /**
@@ -96,11 +109,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @param timestamp When the analytics were updated
      */
     event GameAnalyticsUpdated(
-        uint8 indexed gameType,
-        uint256 indexed games,
-        uint256 indexed players,
-        uint256 volume,
-        uint256 timestamp
+        uint8 indexed gameType, uint256 indexed games, uint256 indexed players, uint256 volume, uint256 timestamp
     );
     /**
      * @notice Emitted when system analytics are updated
@@ -110,10 +119,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @param timestamp When the analytics were updated
      */
     event SystemAnalyticsUpdated(
-        uint256 indexed totalGames,
-        uint256 indexed totalPlayers,
-        uint256 indexed totalVolume,
-        uint256 timestamp
+        uint256 indexed totalGames, uint256 indexed totalPlayers, uint256 indexed totalVolume, uint256 timestamp
     );
 
     /**
@@ -163,10 +169,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @param timestamp When the analytics were updated
      */
     event RevenueAnalyticsUpdated(
-        uint256 indexed dailyRevenue,
-        uint256 indexed weeklyRevenue,
-        uint256 indexed monthlyRevenue,
-        uint256 timestamp
+        uint256 indexed dailyRevenue, uint256 indexed weeklyRevenue, uint256 indexed monthlyRevenue, uint256 timestamp
     );
 
     /**
@@ -263,13 +266,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
         analytics.totalWinnings = totalWinnings;
         analytics.lastGameTime = block.timestamp; // solhint-disable-line not-rely-on-time
 
-        emit GameAnalyticsUpdated(
-            gameType,
-            totalGames,
-            totalPlayers,
-            totalVolume,
-            block.timestamp
-        ); // solhint-disable-line not-rely-on-time
+        emit GameAnalyticsUpdated(gameType, totalGames, totalPlayers, totalVolume, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -302,12 +299,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
 
         lastUpdateTime = block.timestamp; // solhint-disable-line not-rely-on-time
 
-        emit SystemAnalyticsUpdated(
-            totalUsers,
-            totalVolume,
-            totalTransactions,
-            block.timestamp
-        ); // solhint-disable-line not-rely-on-time
+        emit SystemAnalyticsUpdated(totalUsers, totalVolume, totalTransactions, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -317,12 +309,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @param transactions Daily transactions
      * @param users Daily users
      */
-    function updateDailyStats(
-        uint256 day,
-        uint256 volume,
-        uint256 transactions,
-        uint256 users
-    ) external onlyOwner {
+    function updateDailyStats(uint256 day, uint256 volume, uint256 transactions, uint256 users) external onlyOwner {
         if (!analyticsEnabled) {
             revert AnalyticsDisabled();
         }
@@ -345,9 +332,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @param user The user address
      * @return UserAnalytics structure
      */
-    function getUserAnalytics(
-        address user
-    ) external view returns (UserAnalytics memory) {
+    function getUserAnalytics(address user) external view returns (UserAnalytics memory) {
         return userAnalytics[user];
     }
 
@@ -356,9 +341,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @param gameType The game type
      * @return GameAnalytics structure
      */
-    function getGameAnalytics(
-        uint8 gameType
-    ) external view returns (GameAnalytics memory) {
+    function getGameAnalytics(uint8 gameType) external view returns (GameAnalytics memory) {
         return gameAnalytics[gameType];
     }
 
@@ -366,11 +349,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @notice Get system analytics
      * @return SystemAnalytics structure
      */
-    function getSystemAnalytics()
-        external
-        view
-        returns (SystemAnalytics memory)
-    {
+    function getSystemAnalytics() external view returns (SystemAnalytics memory) {
         return systemAnalytics;
     }
 
@@ -381,13 +360,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return transactions Daily transactions
      * @return users Daily users
      */
-    function getDailyStats(
-        uint256 day
-    )
-        external
-        view
-        returns (uint256 volume, uint256 transactions, uint256 users)
-    {
+    function getDailyStats(uint256 day) external view returns (uint256 volume, uint256 transactions, uint256 users) {
         return (dailyVolume[day], dailyTransactions[day], dailyUsers[day]);
     }
 
@@ -399,17 +372,10 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return totalTransactions Total transactions for the period
      * @return totalUsers Total users for the period
      */
-    function getPeriodStats(
-        uint256 startDay,
-        uint256 endDay
-    )
+    function getPeriodStats(uint256 startDay, uint256 endDay)
         external
         view
-        returns (
-            uint256 totalVolume,
-            uint256 totalTransactions,
-            uint256 totalUsers
-        )
+        returns (uint256 totalVolume, uint256 totalTransactions, uint256 totalUsers)
     {
         for (uint256 day = startDay; day < endDay + 1; ++day) {
             totalVolume += dailyVolume[day];
@@ -422,10 +388,8 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @notice Get top users by activity
      * @return Array of top user addresses
      */
-    function getTopUsers(
-        uint256 /* limit */
-    ) external pure returns (address[] memory) {
-        // 실제 구현에서는 상위 사용자 목록을 반환
+    function getTopUsers(uint256 /* limit */ ) external pure returns (address[] memory) {
+        // In actual implementation, return top user list
         return new address[](0);
     }
 
@@ -435,9 +399,11 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return activeUsers Number of active users
      * @return totalVolume Total volume
      */
-    function analyzeUserActivity(
-        address[] calldata users
-    ) external view returns (uint256 activeUsers, uint256 totalVolume) {
+    function analyzeUserActivity(address[] calldata users)
+        external
+        view
+        returns (uint256 activeUsers, uint256 totalVolume)
+    {
         // Gas optimized duplicate removal
         address[] memory uniqueUsers = users.removeDuplicatesFromMemory();
 
@@ -464,13 +430,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
     function getAnalyticsStats()
         external
         view
-        returns (
-            bool enabled,
-            uint256 updateTime,
-            uint256 totalUsers,
-            uint256 totalVolume,
-            uint256 totalTransactions
-        )
+        returns (bool enabled, uint256 updateTime, uint256 totalUsers, uint256 totalVolume, uint256 totalTransactions)
     {
         return (
             analyticsEnabled,
@@ -487,9 +447,7 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return volumes Volume for each game type
      * @return players Player count for each game type
      */
-    function compareGameTypes(
-        uint8[] calldata gameTypes
-    )
+    function compareGameTypes(uint8[] calldata gameTypes)
         external
         view
         returns (uint256[] memory volumes, uint256[] memory players)
@@ -513,10 +471,11 @@ contract AnalyticsEngine is Initializable, OwnableUpgradeable {
      * @return activeUsers Number of active users
      * @return totalVolume Total volume
      */
-    function analyzeUserActivityByPeriod(
-        address[] calldata users,
-        uint256 dayCount
-    ) external view returns (uint256 activeUsers, uint256 totalVolume) {
+    function analyzeUserActivityByPeriod(address[] calldata users, uint256 dayCount)
+        external
+        view
+        returns (uint256 activeUsers, uint256 totalVolume)
+    {
         // Gas optimized duplicate removal
         address[] memory uniqueUsers = users.removeDuplicatesFromMemory();
         uint256 cutoffTime = block.timestamp - (dayCount * 1 days); // solhint-disable-line not-rely-on-time

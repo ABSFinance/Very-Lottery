@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title TreasuryManager
@@ -118,6 +118,7 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
      */
     function depositFunds(string memory treasuryName, address user, uint256 amount)
         external
+        payable
         onlyOwnerOrAuthorized
         nonReentrant
         onlyTreasuryEnabled
@@ -328,5 +329,10 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     modifier onlyOwnerOrAuthorized() {
         require(msg.sender == owner() || authorizedContracts[msg.sender], "Not authorized");
         _;
+    }
+
+    // 명시적으로 owner() 함수 추가 (테스트 호환)
+    function owner() public view override returns (address) {
+        return super.owner();
     }
 }

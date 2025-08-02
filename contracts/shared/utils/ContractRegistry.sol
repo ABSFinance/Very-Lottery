@@ -1,163 +1,251 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title ContractRegistry
- * @dev 중앙화된 컨트랙트 주소 관리 시스템
+ * @author Cryptolotto Team
+ * @notice Central registry for managing contract addresses
+ * @dev Provides centralized contract address management and lookup functionality
  */
 contract ContractRegistry is Ownable {
-    // ============ CONSTANTS ============
-    string public constant TREASURY_MANAGER = "TreasuryManager";
-    string public constant FUNDS_DISTRIBUTOR = "FundsDistributor";
-    string public constant CRYPTOLOTTO_REFERRAL = "CryptolottoReferral";
-    string public constant STATS_AGGREGATOR = "StatsAggregator";
-    string public constant ANALYTICS_ENGINE = "AnalyticsEngine";
-    string public constant MONITORING_SYSTEM = "MonitoringSystem";
-    string public constant EMERGENCY_MANAGER = "EmergencyManager";
-    string public constant CONFIG_MANAGER = "ConfigManager";
-    string public constant SYSTEM_MANAGER = "SystemManager";
-    string public constant EVENT_LOGGER = "EventLogger";
-    string public constant MIGRATIONS = "Migrations";
-    string public constant GAME_FACTORY = "GameFactory";
+    // Custom Errors
+    error ContractAlreadyRegistered();
+    error ContractNotRegistered();
+    error InvalidContractAddress();
+    error InvalidContractName();
+    error ArraysLengthMismatch();
+    error EmptyNameArray();
+    error EmptyAddressArray();
 
-    // Contract name to address mapping
+    // Contract type constants
+    /**
+     * @notice Treasury manager contract identifier
+     */
+    string public constant TREASURY_MANAGER = "TREASURY_MANAGER";
+    /**
+     * @notice Funds distributor contract identifier
+     */
+    string public constant FUNDS_DISTRIBUTOR = "FUNDS_DISTRIBUTOR";
+    /**
+     * @notice Cryptolotto referral contract identifier
+     */
+    string public constant CRYPTOLOTTO_REFERRAL = "CRYPTOLOTTO_REFERRAL";
+    /**
+     * @notice Stats aggregator contract identifier
+     */
+    string public constant STATS_AGGREGATOR = "STATS_AGGREGATOR";
+    /**
+     * @notice Analytics engine contract identifier
+     */
+    string public constant ANALYTICS_ENGINE = "ANALYTICS_ENGINE";
+    /**
+     * @notice Monitoring system contract identifier
+     */
+    string public constant MONITORING_SYSTEM = "MONITORING_SYSTEM";
+    /**
+     * @notice Emergency manager contract identifier
+     */
+    string public constant EMERGENCY_MANAGER = "EMERGENCY_MANAGER";
+    /**
+     * @notice Config manager contract identifier
+     */
+    string public constant CONFIG_MANAGER = "CONFIG_MANAGER";
+    /**
+     * @notice System manager contract identifier
+     */
+    string public constant SYSTEM_MANAGER = "SYSTEM_MANAGER";
+    /**
+     * @notice Event logger contract identifier
+     */
+    string public constant EVENT_LOGGER = "EVENT_LOGGER";
+    /**
+     * @notice Migrations contract identifier
+     */
+    string public constant MIGRATIONS = "MIGRATIONS";
+    /**
+     * @notice Game factory contract identifier
+     */
+    string public constant GAME_FACTORY = "GAME_FACTORY";
+
+    // Storage
+    /**
+     * @notice Mapping of contract names to addresses
+     */
     mapping(string => address) public contracts;
-    mapping(address => string) public contractNames;
-
-    // Batch registration support
-    struct ContractInfo {
-        string name;
-        address contractAddress;
-    }
+    /**
+     * @notice Array of registered contract names
+     */
+    string[] public contractNames;
 
     // Events
+    /**
+     * @notice Emitted when a contract is registered
+     * @param name Contract name
+     * @param contractAddress Contract address
+     */
     event ContractRegistered(string indexed name, address indexed contractAddress);
+    /**
+     * @notice Emitted when a contract is updated
+     * @param name Contract name
+     * @param oldAddress Previous contract address
+     * @param newAddress New contract address
+     */
     event ContractUpdated(string indexed name, address indexed oldAddress, address indexed newAddress);
+    /**
+     * @notice Emitted when a contract is removed
+     * @param name Contract name
+     * @param contractAddress Contract address
+     */
     event ContractRemoved(string indexed name, address indexed contractAddress);
-    event BatchContractsRegistered(string[] names, address[] addresses);
-
-    constructor() Ownable(msg.sender) {}
+    /**
+     * @notice Emitted when multiple contracts are registered
+     * @param names Array of contract names
+     * @param addresses Array of contract addresses
+     */
+    event BatchContractsRegistered(string[] indexed names, address[] indexed addresses);
 
     /**
-     * @dev Register a new contract
+     * @notice Constructor for the contract registry
+     * @param owner Owner of the contract
      */
-    function registerContract(string memory name, address contractAddress) external onlyOwner {
-        require(contractAddress != address(0), "Invalid contract address");
-        require(bytes(name).length > 0, "Invalid contract name");
-        require(contracts[name] == address(0), "Contract already registered");
+    constructor(address owner) Ownable(owner) {}
+
+    /**
+     * @notice Register a single contract
+     * @param name Contract name
+     * @param contractAddress Contract address
+     */
+    function registerContract(string calldata name, address contractAddress) external onlyOwner {
+        if (contractAddress == address(0)) revert InvalidContractAddress();
+        if (bytes(name).length == 0) revert InvalidContractName();
+        if (contracts[name] != address(0)) revert ContractAlreadyRegistered();
 
         contracts[name] = contractAddress;
-        contractNames[contractAddress] = name;
-
+        contractNames.push(name);
         emit ContractRegistered(name, contractAddress);
     }
 
     /**
-     * @dev Register multiple contracts at once
+     * @notice Register multiple contracts in batch
+     * @param names Array of contract names
+     * @param addresses Array of contract addresses
      */
-    function registerBatchContracts(string[] memory names, address[] memory addresses) external onlyOwner {
-        require(names.length == addresses.length, "Array length mismatch");
-        require(names.length > 0, "Empty arrays");
+    function registerBatchContracts(string[] calldata names, address[] calldata addresses) external onlyOwner {
+        if (names.length == 0) revert EmptyNameArray();
+        if (addresses.length == 0) revert EmptyAddressArray();
+        if (names.length != addresses.length) revert ArraysLengthMismatch();
 
-        for (uint256 i = 0; i < names.length; i++) {
-            require(addresses[i] != address(0), "Invalid contract address");
-            require(bytes(names[i]).length > 0, "Invalid contract name");
-            require(contracts[names[i]] == address(0), "Contract already registered");
+        for (uint256 i = 0; i < names.length; ++i) {
+            // solhint-disable-line gas-increment-by-one
+            if (addresses[i] == address(0)) revert InvalidContractAddress();
+            if (bytes(names[i]).length == 0) revert InvalidContractName();
+            if (contracts[names[i]] != address(0)) {
+                revert ContractAlreadyRegistered();
+            }
 
             contracts[names[i]] = addresses[i];
-            contractNames[addresses[i]] = names[i];
+            contractNames.push(names[i]);
         }
 
         emit BatchContractsRegistered(names, addresses);
     }
 
     /**
-     * @dev Update an existing contract address
+     * @notice Update an existing contract address
+     * @param name Contract name
+     * @param newAddress New contract address
      */
-    function updateContract(string memory name, address newAddress) external onlyOwner {
-        require(newAddress != address(0), "Invalid contract address");
-        require(contracts[name] != address(0), "Contract not registered");
+    function updateContract(string calldata name, address newAddress) external onlyOwner {
+        if (newAddress == address(0)) revert InvalidContractAddress();
+        if (contracts[name] == address(0)) revert ContractNotRegistered();
 
         address oldAddress = contracts[name];
         contracts[name] = newAddress;
-        contractNames[oldAddress] = "";
-        contractNames[newAddress] = name;
-
         emit ContractUpdated(name, oldAddress, newAddress);
     }
 
     /**
-     * @dev Remove a contract registration
+     * @notice Remove a contract from registry
+     * @param name Contract name
      */
-    function removeContract(string memory name) external onlyOwner {
+    function removeContract(string calldata name) external onlyOwner {
+        if (contracts[name] == address(0)) revert ContractNotRegistered();
+
         address contractAddress = contracts[name];
-        require(contractAddress != address(0), "Contract not registered");
-
         delete contracts[name];
-        delete contractNames[contractAddress];
-
         emit ContractRemoved(name, contractAddress);
     }
 
     /**
-     * @dev Get contract address by name
+     * @notice Get contract address by name
+     * @param name Contract name
+     * @return Contract address
      */
-    function getContract(string memory name) external view returns (address) {
-        address contractAddress = contracts[name];
-        require(contractAddress != address(0), "Contract not found");
-        return contractAddress;
+    function getContract(string calldata name) external view returns (address) {
+        if (contracts[name] == address(0)) revert ContractNotRegistered();
+        return contracts[name];
     }
 
     /**
-     * @dev Get multiple contract addresses
+     * @notice Get multiple contract addresses
+     * @param names Array of contract names
+     * @return Array of contract addresses
      */
-    function getContracts(string[] memory names) external view returns (address[] memory) {
+    function getContracts(string[] calldata names) external view returns (address[] memory) {
         address[] memory addresses = new address[](names.length);
-        for (uint256 i = 0; i < names.length; i++) {
+        for (uint256 i = 0; i < names.length; ++i) {
+            // solhint-disable-line gas-increment-by-one
             addresses[i] = contracts[names[i]];
         }
         return addresses;
     }
 
     /**
-     * @dev Check if contract is registered
+     * @notice Check if a contract is registered
+     * @param name Contract name
+     * @return Whether contract is registered
      */
-    function isRegistered(string memory name) external view returns (bool) {
+    function isRegistered(string calldata name) external view returns (bool) {
         return contracts[name] != address(0);
     }
 
     /**
-     * @dev Get contract name by address
+     * @notice Get contract name by address
+     * @param contractAddress Contract address
+     * @return Contract name
      */
     function getContractName(address contractAddress) external view returns (string memory) {
-        return contractNames[contractAddress];
+        for (uint256 i = 0; i < contractNames.length; ++i) {
+            // solhint-disable-line gas-increment-by-one
+            if (contracts[contractNames[i]] == contractAddress) {
+                return contractNames[i];
+            }
+        }
+        return "";
     }
 
     /**
-     * @dev Get all registered contract names
+     * @notice Get all registered contract names
+     * @return Array of contract names
      */
     function getAllContractNames() external view returns (string[] memory) {
-        // This is a simplified implementation
-        // In production, you'd want to maintain a separate array of names
-        string[] memory names = new string[](20);
+        string[] memory names = new string[](contractNames.length);
         uint256 count = 0;
 
-        // Check predefined names
-        if (contracts[TREASURY_MANAGER] != address(0)) {
-            names[count] = TREASURY_MANAGER;
-            count++;
+        for (uint256 i = 0; i < contractNames.length; ++i) {
+            // solhint-disable-line gas-increment-by-one
+            if (contracts[contractNames[i]] != address(0)) {
+                names[count] = contractNames[i];
+                ++count; // solhint-disable-line gas-increment-by-one
+            }
         }
-        if (contracts[EMERGENCY_MANAGER] != address(0)) {
-            names[count] = EMERGENCY_MANAGER;
-            count++;
-        }
-        // Add more checks for other predefined names...
 
         // Resize array to actual count
         string[] memory result = new string[](count);
-        for (uint256 i = 0; i < count; i++) {
+        for (uint256 i = 0; i < count; ++i) {
+            // solhint-disable-line gas-increment-by-one
             result[i] = names[i];
         }
 
@@ -165,23 +253,54 @@ contract ContractRegistry is Ownable {
     }
 
     /**
-     * @dev Get contract count
+     * @notice Get contract count by type
+     * @return treasuryManagerCount Treasury manager contracts
+     * @return fundsDistributorCount Funds distributor contracts
+     * @return referralCount Referral contracts
+     * @return statsAggregatorCount Stats aggregator contracts
+     * @return analyticsEngineCount Analytics engine contracts
+     * @return monitoringSystemCount Monitoring system contracts
+     * @return emergencyManagerCount Emergency manager contracts
+     * @return configManagerCount Config manager contracts
+     * @return systemManagerCount System manager contracts
+     * @return eventLoggerCount Event logger contracts
+     * @return migrationsCount Migrations contracts
+     * @return gameFactoryCount Game factory contracts
      */
-    function getContractCount() external view returns (uint256) {
-        uint256 count = 0;
-        if (contracts[TREASURY_MANAGER] != address(0)) count++;
-        if (contracts[EMERGENCY_MANAGER] != address(0)) count++;
-        if (contracts[CONFIG_MANAGER] != address(0)) count++;
-        if (contracts[SYSTEM_MANAGER] != address(0)) count++;
-        if (contracts[FUNDS_DISTRIBUTOR] != address(0)) count++;
-        if (contracts[CRYPTOLOTTO_REFERRAL] != address(0)) count++;
-        if (contracts[ANALYTICS_ENGINE] != address(0)) count++;
-        if (contracts[STATS_AGGREGATOR] != address(0)) count++;
-        if (contracts[MONITORING_SYSTEM] != address(0)) count++;
-        if (contracts[EVENT_LOGGER] != address(0)) count++;
-        if (contracts[MIGRATIONS] != address(0)) count++;
-        if (contracts[GAME_FACTORY] != address(0)) count++;
-
-        return count;
+    function getContractCount()
+        external
+        view
+        returns (
+            uint256 treasuryManagerCount,
+            uint256 fundsDistributorCount,
+            uint256 referralCount,
+            uint256 statsAggregatorCount,
+            uint256 analyticsEngineCount,
+            uint256 monitoringSystemCount,
+            uint256 emergencyManagerCount,
+            uint256 configManagerCount,
+            uint256 systemManagerCount,
+            uint256 eventLoggerCount,
+            uint256 migrationsCount,
+            uint256 gameFactoryCount
+        )
+    {
+        for (uint256 i = 0; i < contractNames.length; ++i) {
+            // solhint-disable-line gas-increment-by-one
+            if (contracts[contractNames[i]] != address(0)) {
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(TREASURY_MANAGER))) ++treasuryManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(FUNDS_DISTRIBUTOR))) ++fundsDistributorCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(CRYPTOLOTTO_REFERRAL))) ++referralCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(STATS_AGGREGATOR))) ++statsAggregatorCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(ANALYTICS_ENGINE))) ++analyticsEngineCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(MONITORING_SYSTEM))) ++monitoringSystemCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(EMERGENCY_MANAGER))) ++emergencyManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(CONFIG_MANAGER))) ++configManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(SYSTEM_MANAGER))) ++systemManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(EVENT_LOGGER))) ++eventLoggerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(MIGRATIONS))) ++migrationsCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(GAME_FACTORY))) ++gameFactoryCount; // solhint-disable-line gas-increment-by-one
+            }
+        }
     }
 }

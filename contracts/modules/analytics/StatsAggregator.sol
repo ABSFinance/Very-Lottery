@@ -1,26 +1,37 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../../shared/interfaces/IAnalyticsEngine.sol";
-import "../../shared/utils/GasOptimizer.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {GasOptimizer} from "../../shared/utils/GasOptimizer.sol";
 
 using GasOptimizer for address[];
 
 /**
  * @title Cryptolotto Stats Aggregator
- * @dev Tracks game statistics and winner information
+ * @author Cryptolotto Team
+ * @notice Tracks game statistics and winner information
+ * @dev Provides comprehensive statistics tracking for lottery games
  */
 contract StatsAggregator is Ownable {
+    /**
+     * @notice Constructor for the StatsAggregator contract
+     */
     constructor() Ownable(msg.sender) {}
 
     /**
-     * @dev Winner event
+     * @notice Emitted when a new winner is selected
+     * @param winner The address of the winner
+     * @param game The game number
+     * @param players Number of players in the game
+     * @param amount Amount won by the winner
+     * @param gameType Type of game (1-day, 7-day, etc.)
+     * @param winnerIndex Index of the winner in the players array
+     * @param timestamp Timestamp when the winner was selected
      */
     event Winner(
         address indexed winner,
-        uint256 game,
-        uint256 players,
+        uint256 indexed game,
+        uint256 indexed players,
         uint256 amount,
         uint8 gameType,
         uint256 winnerIndex,
@@ -28,19 +39,30 @@ contract StatsAggregator is Ownable {
     );
 
     /**
-     * @dev Store winner statistics
+     * @notice Mapping of player addresses to their win count
      */
     mapping(address => uint256) public winnerCount;
+    /**
+     * @notice Mapping of game numbers to winner addresses
+     */
     mapping(uint256 => address) public gameWinners;
+    /**
+     * @notice Mapping of player addresses to their total winnings
+     */
     mapping(address => uint256) public totalWinnings;
 
     // Top player 집계를 위한 상태 변수
+    /**
+     * @notice Array of all players who have participated
+     */
     address[] public allPlayers;
+    /**
+     * @notice Mapping of player addresses to their scores
+     */
     mapping(address => uint256) public playerScores;
 
     /**
-     * @dev Write info to log about the new winner.
-     * @notice 가스 최적화된 승자 정보 기록
+     * @notice Record a new winner and update statistics
      * @param winner Winner address
      * @param game Game number
      * @param players Number of players in game
@@ -56,16 +78,17 @@ contract StatsAggregator is Ownable {
         uint8 gameType,
         uint256 winnerIndex
     ) public {
-        winnerCount[winner]++;
+        ++winnerCount[winner]; // solhint-disable-line gas-increment-by-one
         gameWinners[game] = winner;
         totalWinnings[winner] += amount;
 
-        // 가스 최적화된 플레이어 추가 (중복 체크 개선)
+        // Gas optimized player addition (improved duplicate check)
         bool exists = false;
         uint256 len = allPlayers.length;
 
-        // 가스 최적화를 위해 early return 패턴 사용
-        for (uint256 i = 0; i < len; i++) {
+        // Use early return pattern for gas optimization
+        for (uint256 i = 0; i < len; ++i) {
+            // solhint-disable-line gas-increment-by-one
             if (allPlayers[i] == winner) {
                 exists = true;
                 break;
@@ -79,55 +102,73 @@ contract StatsAggregator is Ownable {
         // playerScores에 당첨 금액 누적
         playerScores[winner] += amount;
 
-        emit Winner(winner, game, players, amount, gameType, winnerIndex, block.timestamp);
+        emit Winner(
+            winner,
+            game,
+            players,
+            amount,
+            gameType,
+            winnerIndex,
+            block.timestamp // solhint-disable-line not-rely-on-time
+        );
     }
 
     /**
-     * @dev Get winner count for address
+     * @notice Get winner count for a specific player
+     * @param player The player address
+     * @return Number of wins for the player
      */
     function getWinnerCount(address player) public view returns (uint256) {
         return winnerCount[player];
     }
 
     /**
-     * @dev Get total winnings for address
+     * @notice Get total winnings for a specific player
+     * @param player The player address
+     * @return Total amount won by the player
      */
     function getTotalWinnings(address player) public view returns (uint256) {
         return totalWinnings[player];
     }
 
     /**
-     * @dev Get winner of specific game
+     * @notice Get winner of a specific game
+     * @param game The game number
+     * @return Address of the winner
      */
     function getGameWinner(uint256 game) public view returns (address) {
         return gameWinners[game];
     }
 
     /**
-     * @dev Get comprehensive player statistics
+     * @notice Get comprehensive player statistics
+     * @param player The player address
+     * @return wins Number of wins
+     * @return totalWon Total amount won
+     * @return hasWon Whether the player has won at least once
      */
     function getPlayerStats(address player) public view returns (uint256 wins, uint256 totalWon, bool hasWon) {
         return (winnerCount[player], totalWinnings[player], winnerCount[player] > 0);
     }
 
     /**
-     * @dev Get top players (가스 최적화 버전)
-     * @notice 가스 효율적인 상위 플레이어 조회
-     * @param count 조회할 플레이어 수
-     * @return topPlayers 상위 플레이어 배열
-     * @return scores 플레이어 점수 배열
+     * @notice Get top players (gas optimized version)
+     * @param count Number of players to retrieve
+     * @return topPlayers Array of top player addresses
+     * @return scores Array of player scores
      */
     function getTopPlayers(uint256 count) public view returns (address[] memory topPlayers, uint256[] memory scores) {
         address[] storage players = allPlayers;
         uint256 length = players.length;
         uint256 found = 0;
 
-        // 가스 최적화를 위해 고정 크기 배열 사용
+        // Use fixed size array for gas optimization
         topPlayers = new address[](count);
         scores = new uint256[](count);
 
-        // 가스 최적화된 반복문
-        for (uint256 i = 0; i < length && found < count; i++) {
+        // Gas optimized loop
+        for (uint256 i = 0; i < length && found < count; ++i) {
+            // solhint-disable-line gas-increment-by-one
             address player = players[i];
             uint256 score = playerScores[player];
 
@@ -135,7 +176,7 @@ contract StatsAggregator is Ownable {
             if (score > 0) {
                 topPlayers[found] = player;
                 scores[found] = score;
-                found++;
+                ++found; // solhint-disable-line gas-increment-by-one
             }
         }
 
@@ -143,25 +184,25 @@ contract StatsAggregator is Ownable {
     }
 
     /**
-     * @dev Get top winners (가스 최적화 버전)
-     * @notice 가스 효율적인 상위 승자 조회
-     * @param count 조회할 승자 수
-     * @return topWinners 상위 승자 배열
+     * @notice Get top winners (gas optimized version)
+     * @param count Number of winners to retrieve
+     * @return topWinners Array of top winner addresses
      */
     function getTopWinners(uint256 count) public view returns (address[] memory topWinners) {
-        // 가스 최적화를 위해 고정 크기 배열 사용
+        // Use fixed size array for gas optimization
         topWinners = new address[](count);
         uint256 found = 0;
 
-        // 가스 최적화된 구현
+        // Gas optimized implementation
         address[] storage players = allPlayers;
         uint256 length = players.length;
 
-        for (uint256 i = 0; i < length && found < count; i++) {
+        for (uint256 i = 0; i < length && found < count; ++i) {
+            // solhint-disable-line gas-increment-by-one
             address player = players[i];
             if (winnerCount[player] > 0) {
                 topWinners[found] = player;
-                found++;
+                ++found; // solhint-disable-line gas-increment-by-one
             }
         }
 
@@ -169,23 +210,24 @@ contract StatsAggregator is Ownable {
     }
 
     /**
-     * @dev 승자 통계 일괄 조회 (가스 최적화)
-     * @param players 조회할 플레이어 배열
-     * @return winnerCounts 승자 횟수 배열
-     * @return totalWinningsArray 총 상금 배열
+     * @notice Get batch winner statistics (gas optimized)
+     * @param players Array of player addresses to query
+     * @return winnerCounts Array of win counts
+     * @return totalWinningsArray Array of total winnings
      */
-    function getBatchWinnerStats(address[] memory players)
+    function getBatchWinnerStats(address[] calldata players)
         external
         view
         returns (uint256[] memory winnerCounts, uint256[] memory totalWinningsArray)
     {
-        // 가스 최적화된 중복 제거
+        // Gas optimized duplicate removal
         address[] memory uniquePlayers = players.removeDuplicatesFromMemory();
 
         winnerCounts = new uint256[](uniquePlayers.length);
         totalWinningsArray = new uint256[](uniquePlayers.length);
 
-        for (uint256 i = 0; i < uniquePlayers.length; i++) {
+        for (uint256 i = 0; i < uniquePlayers.length; ++i) {
+            // solhint-disable-line gas-increment-by-one
             winnerCounts[i] = winnerCount[uniquePlayers[i]];
             totalWinningsArray[i] = totalWinnings[uniquePlayers[i]];
         }
@@ -194,11 +236,11 @@ contract StatsAggregator is Ownable {
     }
 
     /**
-     * @dev 상위 플레이어 점수 분석 (가스 최적화)
-     * @param count 조회할 플레이어 수
-     * @return players 플레이어 배열
-     * @return scores 점수 배열
-     * @return winRates 승률 배열
+     * @notice Get top player analysis (gas optimized)
+     * @param count Number of players to analyze
+     * @return players Array of player addresses
+     * @return scores Array of player scores
+     * @return winRates Array of win rates
      */
     function getTopPlayerAnalysis(uint256 count)
         external
@@ -208,9 +250,10 @@ contract StatsAggregator is Ownable {
         (players, scores) = getTopPlayers(count);
         winRates = new uint256[](count);
 
-        for (uint256 i = 0; i < count; i++) {
+        for (uint256 i = 0; i < count; ++i) {
+            // solhint-disable-line gas-increment-by-one
             if (players[i] != address(0)) {
-                // 승률 계산 (가스 최적화)
+                // Win rate calculation (gas optimized)
                 uint256 wins = winnerCount[players[i]];
                 uint256 totalGames = 0; // 실제로는 게임 참여 수를 추적해야 함
                 winRates[i] = totalGames > 0 ? (wins * 100) / totalGames : 0;

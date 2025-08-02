@@ -19,14 +19,8 @@ contract EmergencyManager is Initializable, OwnableUpgradeable {
     // Events
     event EmergencyPaused(address indexed by, uint256 timestamp);
     event EmergencyResumed(address indexed by, uint256 timestamp);
-    event ContractRegistered(
-        address indexed contractAddress,
-        uint256 timestamp
-    );
-    event ContractUnregistered(
-        address indexed contractAddress,
-        uint256 timestamp
-    );
+    event ContractRegistered(address indexed contractAddress, uint256 timestamp);
+    event ContractUnregistered(address indexed contractAddress, uint256 timestamp);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -59,10 +53,7 @@ contract EmergencyManager is Initializable, OwnableUpgradeable {
      */
     function registerContract(address contractAddress) external onlyOwner {
         require(contractAddress != address(0), "Invalid contract address");
-        require(
-            !registeredContracts[contractAddress],
-            "Contract already registered"
-        );
+        require(!registeredContracts[contractAddress], "Contract already registered");
 
         registeredContracts[contractAddress] = true;
         allContracts.push(contractAddress);
@@ -74,10 +65,7 @@ contract EmergencyManager is Initializable, OwnableUpgradeable {
      * @dev 컨트랙트 등록 해제
      */
     function unregisterContract(address contractAddress) external onlyOwner {
-        require(
-            registeredContracts[contractAddress],
-            "Contract not registered"
-        );
+        require(registeredContracts[contractAddress], "Contract not registered");
 
         registeredContracts[contractAddress] = false;
 

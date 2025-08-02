@@ -1,114 +1,213 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title AdToken
- * @dev 광고 로또용 AD 토큰
- * @dev 사용자가 광고를 시청하거나 특정 활동을 통해 AD 토큰을 획득할 수 있습니다.
- * @dev Ad Lottery 티켓 구매 시 소각되는 유틸리티 토큰입니다.
+ * @author Cryptolotto Team
+ * @notice Utility token for advertising rewards and lottery participation
+ * @dev ERC20 utility token used for ad watching rewards and lottery ticket purchases
  */
 contract AdToken is ERC20, ERC20Burnable, Ownable {
-    /**
-     * @dev 광고 시청 보상 (기본값: 1 AD)
-     */
-    uint256 public adReward = 1 * (10 ** 18);
+    // Custom Errors
+    error MaxDailyRewardTooLow();
+    error ContractEmergencyPaused();
+    error InvalidViewerAddress();
+    error CannotWatchForContract();
+    error InsufficientTokensForReward();
+    error MustWaitBetweenAds();
+    error DailyRewardLimitExceeded();
+    error RewardTooLow();
+    error OnlyAuthorizedBurner();
+    error InvalidBurnerAddress();
+    error InvalidBurnAmount();
+    error InsufficientBalanceForBurn();
+    error TransferNotAllowed();
 
+    // 광고 보상 관련 변수
     /**
-     * @dev 광고 시청 기록
+     * @notice Amount of utility tokens given for watching an ad
+     */
+    uint256 public adReward = 1 * 10 ** 18; // 1 utility token
+    /**
+     * @notice Mapping of user addresses to their last ad watch time
      */
     mapping(address => uint256) public lastAdWatchTime;
+    /**
+     * @notice Mapping of user addresses to their total ads watched
+     */
     mapping(address => uint256) public totalAdsWatched;
+    /**
+     * @notice Mapping of user addresses to their total rewards earned
+     */
     mapping(address => uint256) public totalRewardsEarned;
 
+    // 긴급 정지 관련 변수
     /**
-     * @dev 보안 설정
+     * @notice Whether the contract is emergency paused
      */
     bool public emergencyPaused;
-    uint256 public maxRewardPerDay = 10 * (10 ** 18); // 10 AD per day
+    /**
+     * @notice Maximum daily reward limit in utility tokens
+     */
+    uint256 public maxRewardPerDay = 100 * 10 ** 18; // 100 utility tokens
+    /**
+     * @notice Mapping of user addresses to their daily rewards
+     */
     mapping(address => uint256) public dailyRewards;
+    /**
+     * @notice Mapping of user addresses to their last reward reset time
+     */
     mapping(address => uint256) public lastRewardReset;
 
+    // 통계 추적 변수
     /**
-     * @dev 광고 시청 이벤트
+     * @notice Total number of transfers
      */
-    event AdWatched(address indexed viewer, uint256 reward, uint256 timestamp);
-    event RewardUpdated(uint256 newReward, uint256 timestamp);
-    event EmergencyPaused(address indexed by, uint256 timestamp);
-    event EmergencyResumed(address indexed by, uint256 timestamp);
-    event MaxDailyRewardUpdated(uint256 oldMax, uint256 newMax, uint256 timestamp);
+    uint256 public totalTransfersCount;
+    /**
+     * @notice Total number of burns
+     */
+    uint256 public totalBurnsCount;
+    /**
+     * @notice Total number of ads watched
+     */
+    uint256 public totalAdsWatchedCount;
+    /**
+     * @notice Total rewards earned
+     */
+    uint256 public totalRewardsEarnedAmount;
+    /**
+     * @notice Total number of holders
+     */
+    uint256 public totalHoldersCount;
+    /**
+     * @notice Mapping to track if address is a holder
+     */
+    mapping(address => bool) public isHolder;
+
+    // 이벤트
+    /**
+     * @notice Emitted when an ad is watched
+     * @param viewer The address of the viewer
+     * @param reward Amount of utility tokens rewarded
+     * @param timestamp Timestamp when ad was watched
+     */
+    event AdWatched(address indexed viewer, uint256 indexed reward, uint256 indexed timestamp);
+    /**
+     * @notice Emitted when reward amount is updated
+     * @param newReward New reward amount in utility tokens
+     * @param timestamp Timestamp when reward was updated
+     */
+    event RewardUpdated(uint256 indexed newReward, uint256 indexed timestamp);
+    /**
+     * @notice Emitted when contract is emergency paused
+     * @param by Address that paused the contract
+     * @param timestamp Timestamp when contract was paused
+     */
+    event EmergencyPaused(address indexed by, uint256 indexed timestamp);
+    /**
+     * @notice Emitted when contract is emergency resumed
+     * @param by Address that resumed the contract
+     * @param timestamp Timestamp when contract was resumed
+     */
+    event EmergencyResumed(address indexed by, uint256 indexed timestamp);
+    /**
+     * @notice Emitted when max daily reward is updated
+     * @param oldMax Previous max daily reward in utility tokens
+     * @param newMax New max daily reward in utility tokens
+     * @param timestamp Timestamp when max daily reward was updated
+     */
+    event MaxDailyRewardUpdated(uint256 indexed oldMax, uint256 indexed newMax, uint256 indexed timestamp);
 
     /**
-     * @dev Constructor that gives msg.sender all of existing tokens.
+     * @notice Constructor for the AdToken utility token contract
+     * @param initialSupply Initial utility token supply
      */
-    constructor() ERC20("AdToken", "AD") Ownable(msg.sender) {
-        _mint(msg.sender, 1000000 * (10 ** 18));
+    constructor(uint256 initialSupply) ERC20("AdToken", "ADT") Ownable(msg.sender) {
+        _mint(msg.sender, initialSupply);
+
+        // 초기 holder 설정
+        isHolder[msg.sender] = true;
+        totalHoldersCount = 1;
     }
 
     /**
-     * @dev 긴급 정지
+     * @notice Emergency pause the utility token contract
      */
     function emergencyPause() external onlyOwner {
         emergencyPaused = true;
-        emit EmergencyPaused(msg.sender, block.timestamp);
+        emit EmergencyPaused(msg.sender, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 긴급 정지 해제
+     * @notice Emergency resume the utility token contract
      */
     function emergencyResume() external onlyOwner {
         emergencyPaused = false;
-        emit EmergencyResumed(msg.sender, block.timestamp);
+        emit EmergencyResumed(msg.sender, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 일일 보상 한도 업데이트
+     * @notice Set maximum daily reward in utility tokens
+     * @param newMax New maximum daily reward amount in utility tokens
      */
     function setMaxDailyReward(uint256 newMax) external onlyOwner {
-        require(newMax > 0, "Max daily reward must be greater than 0");
+        if (newMax == 0) revert MaxDailyRewardTooLow();
         uint256 oldMax = maxRewardPerDay;
         maxRewardPerDay = newMax;
-        emit MaxDailyRewardUpdated(oldMax, newMax, block.timestamp);
+        emit MaxDailyRewardUpdated(oldMax, newMax, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 광고 시청 후 토큰 보상 지급
-     * @param viewer 광고 시청자 주소
+     * @notice Watch an ad and receive utility tokens
+     * @param viewer Address of the viewer
      */
     function watchAd(address viewer) external {
-        require(!emergencyPaused, "Contract is emergency paused");
-        require(viewer != address(0), "Invalid viewer address");
-        require(viewer != address(this), "Cannot watch ad for contract");
-        require(balanceOf(msg.sender) >= adReward, "Insufficient tokens for reward");
+        if (emergencyPaused) revert ContractEmergencyPaused();
+        if (viewer == address(0)) revert InvalidViewerAddress();
+        if (viewer == address(this)) revert CannotWatchForContract();
+        if (balanceOf(msg.sender) < adReward) {
+            revert InsufficientTokensForReward();
+        }
 
         // 최소 1시간 간격으로 광고 시청 가능
-        require(block.timestamp >= lastAdWatchTime[viewer] + 3600, "Must wait 1 hour between ads");
+        if (block.timestamp < lastAdWatchTime[viewer] + 3600 + 1) {
+            revert MustWaitBetweenAds();
+        } // solhint-disable-line not-rely-on-time
 
         // 일일 보상 한도 확인
         _resetDailyRewardIfNeeded(viewer);
-        require(dailyRewards[viewer] + adReward <= maxRewardPerDay, "Daily reward limit exceeded");
+        if (dailyRewards[viewer] + adReward > maxRewardPerDay) {
+            revert DailyRewardLimitExceeded();
+        }
 
-        // 토큰 전송
+        // 유틸리티 토큰 전송
         _transfer(msg.sender, viewer, adReward);
 
         // 기록 업데이트
-        lastAdWatchTime[viewer] = block.timestamp;
-        totalAdsWatched[viewer]++;
+        lastAdWatchTime[viewer] = block.timestamp; // solhint-disable-line not-rely-on-time
+        ++totalAdsWatched[viewer]; // solhint-disable-line gas-increment-by-one
         totalRewardsEarned[viewer] += adReward;
         dailyRewards[viewer] += adReward;
 
-        emit AdWatched(viewer, adReward, block.timestamp);
+        // 전체 통계 업데이트
+        ++totalAdsWatchedCount; // solhint-disable-line gas-increment-by-one
+        totalRewardsEarnedAmount += adReward;
+
+        emit AdWatched(viewer, adReward, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 일일 보상 리셋 확인
+     * @notice Reset daily reward if needed
+     * @param user The user address
      */
     function _resetDailyRewardIfNeeded(address user) internal {
         uint256 lastReset = lastRewardReset[user];
-        uint256 currentDay = block.timestamp / 86400; // 24시간을 하루로 계산
+        uint256 currentDay = block.timestamp / 86400; // 24시간을 하루로 계산 // solhint-disable-line not-rely-on-time
 
         if (lastReset < currentDay) {
             dailyRewards[user] = 0;
@@ -117,16 +216,24 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /**
-     * @dev 광고 보상 금액 업데이트
+     * @notice Set ad reward amount in utility tokens
+     * @param newReward New reward amount in utility tokens
      */
     function setAdReward(uint256 newReward) external onlyOwner {
-        require(newReward > 0, "Reward must be greater than 0");
+        if (newReward == 0) revert RewardTooLow();
         adReward = newReward;
-        emit RewardUpdated(newReward, block.timestamp);
+        emit RewardUpdated(newReward, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
-     * @dev 사용자 통계 조회
+     * @notice Get user statistics for utility token usage
+     * @param user The user address
+     * @return lastWatch Last watch timestamp
+     * @return totalWatched Total ads watched
+     * @return totalEarned Total utility tokens earned
+     * @return dailyReward Daily reward amount in utility tokens
+     * @return lastReset Last reset timestamp
+     * @return canWatchNow Whether user can watch now
      */
     function getUserStats(address user)
         external
@@ -140,8 +247,8 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
             bool canWatchNow
         )
     {
-        uint256 timeSinceLastWatch = block.timestamp - lastAdWatchTime[user];
-        canWatchNow = timeSinceLastWatch >= 3600;
+        uint256 timeSinceLastWatch = block.timestamp - lastAdWatchTime[user]; // solhint-disable-line not-rely-on-time
+        canWatchNow = timeSinceLastWatch > 3600 - 1;
 
         return (
             lastAdWatchTime[user],
@@ -154,35 +261,42 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /**
-     * @dev 컨트랙트 통계 조회
+     * @notice Get contract statistics
+     * @return totalSupplyAmount Total token supply
+     * @return totalHolders Total holders
+     * @return totalTransfers Total transfers
+     * @return totalBurns Total burns
+     * @return adsWatchedCount Total ads watched
+     * @return rewardsEarnedAmount Total rewards earned
      */
     function getContractStats()
         external
         view
         returns (
             uint256 totalSupplyAmount,
-            uint256 adRewardAmount,
-            uint256 maxDailyReward,
-            bool isEmergencyPaused,
-            uint256 totalHolders
+            uint256 totalHolders,
+            uint256 totalTransfers,
+            uint256 totalBurns,
+            uint256 adsWatchedCount,
+            uint256 rewardsEarnedAmount
         )
     {
-        return (
-            ERC20.totalSupply(),
-            adReward,
-            maxRewardPerDay,
-            emergencyPaused,
-            0 // 실제 구현에서는 holder 수를 계산해야 함
-        );
+        totalSupplyAmount = totalSupply();
+        totalHolders = totalHoldersCount;
+        totalTransfers = totalTransfersCount;
+        totalBurns = totalBurnsCount;
+        adsWatchedCount = totalAdsWatchedCount;
+        rewardsEarnedAmount = totalRewardsEarnedAmount;
     }
 
     /**
-     * @dev 긴급 상황에서 토큰 인출
+     * @notice Emergency token withdrawal
+     * @param to Address to withdraw to
      */
     function emergencyWithdraw(address to) external onlyOwner {
-        require(emergencyPaused, "Contract must be paused for emergency withdrawal");
-        require(to != address(0), "Invalid recipient address");
-        require(to != address(this), "Cannot withdraw to self");
+        if (emergencyPaused) revert ContractEmergencyPaused();
+        if (to == address(0)) revert InvalidBurnerAddress();
+        if (to == address(this)) revert TransferNotAllowed();
 
         uint256 balance = balanceOf(address(this));
         if (balance > 0) {
@@ -191,20 +305,33 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /**
-     * @dev 토큰 소각 (Ad Lottery용)
+     * @notice Burn tokens for Ad Lottery
+     * @param from Address to burn from
+     * @param amount Amount to burn
      */
     function burnForLottery(address from, uint256 amount) external {
-        require(msg.sender == owner() || isAuthorizedBurner(msg.sender), "Not authorized to burn");
-        require(from != address(0), "Invalid from address");
-        require(from != address(this), "Cannot burn from self");
-        require(amount > 0, "Amount must be greater than 0");
-        require(balanceOf(from) >= amount, "Insufficient balance to burn");
+        if (msg.sender != owner() && !isAuthorizedBurner(msg.sender)) {
+            revert OnlyAuthorizedBurner();
+        }
+        if (from == address(0)) revert InvalidBurnerAddress();
+        if (from == address(this)) revert TransferNotAllowed();
+        if (amount == 0) revert InvalidBurnAmount();
+        if (balanceOf(from) < amount) revert InsufficientBalanceForBurn();
 
         _burn(from, amount);
+        ++totalBurnsCount; // solhint-disable-line gas-increment-by-one
+
+        // Holder 수 업데이트 (잔액이 0이 되면 holder에서 제거)
+        if (balanceOf(from) == 0 && isHolder[from]) {
+            isHolder[from] = false;
+            --totalHoldersCount; // solhint-disable-line gas-increment-by-one
+        }
     }
 
     /**
-     * @dev 소각 권한 확인
+     * @notice Check if address is authorized burner
+     * @param burner Address to check
+     * @return bool Whether the address is authorized
      */
     function isAuthorizedBurner(address burner) public view returns (bool) {
         // 실제 구현에서는 승인된 소각자 목록을 확인
@@ -212,11 +339,78 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /**
-     * @dev 토큰 전송 전 검증 (ERC20Burnable과 호환)
+     * @notice Validate before token transfer (compatible with ERC20Burnable)
+     * @param from Sender address
+     * @param to Recipient address
      */
     function _beforeTokenTransfer(address from, address to, uint256 /* amount */ ) internal virtual {
         // 긴급 정지 확인
-        require(!emergencyPaused, "Token transfers paused");
-        require(from != address(0) || to != address(0), "Invalid transfer");
+        if (emergencyPaused) revert TransferNotAllowed();
+        if (from == address(0) && to == address(0)) revert TransferNotAllowed();
+    }
+
+    /**
+     * @notice Override transfer to add utility token specific logic
+     * @param to Recipient address
+     * @param amount Amount of utility tokens to transfer
+     * @return bool Success status
+     */
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+        if (emergencyPaused) revert TransferNotAllowed();
+
+        // Holder 수 업데이트
+        if (!isHolder[to] && amount > 0) {
+            isHolder[to] = true;
+            ++totalHoldersCount; // solhint-disable-line gas-increment-by-one
+        }
+
+        bool success = super.transfer(to, amount);
+        if (success) {
+            ++totalTransfersCount; // solhint-disable-line gas-increment-by-one
+        }
+        return success;
+    }
+
+    /**
+     * @notice Override transferFrom to add utility token specific logic
+     * @param from Sender address
+     * @param to Recipient address
+     * @param amount Amount of utility tokens to transfer
+     * @return bool Success status
+     */
+    function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
+        if (emergencyPaused) revert TransferNotAllowed();
+
+        // Holder 수 업데이트
+        if (!isHolder[to] && amount > 0) {
+            isHolder[to] = true;
+            ++totalHoldersCount; // solhint-disable-line gas-increment-by-one
+        }
+
+        bool success = super.transferFrom(from, to, amount);
+        if (success) {
+            ++totalTransfersCount; // solhint-disable-line gas-increment-by-one
+        }
+        return success;
+    }
+
+    /**
+     * @notice Burn utility tokens from authorized burner
+     * @param burner Address authorized to burn utility tokens
+     * @param amount Amount of utility tokens to burn
+     */
+    function burnFromAuthorized(address burner, uint256 amount) external onlyOwner {
+        if (burner == address(0)) revert InvalidBurnerAddress();
+        if (amount == 0) revert InvalidBurnAmount();
+        if (balanceOf(burner) < amount) revert InsufficientBalanceForBurn();
+
+        _burn(burner, amount);
+        ++totalBurnsCount; // solhint-disable-line gas-increment-by-one
+
+        // Holder 수 업데이트 (잔액이 0이 되면 holder에서 제거)
+        if (balanceOf(burner) == 0 && isHolder[burner]) {
+            isHolder[burner] = false;
+            --totalHoldersCount; // solhint-disable-line gas-increment-by-one
+        }
     }
 }

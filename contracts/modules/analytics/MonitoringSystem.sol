@@ -14,8 +14,18 @@ using GasOptimizer for address[];
  * @dev Provides monitoring capabilities for the lottery system
  */
 contract MonitoringSystem is Initializable, OwnableUpgradeable {
+    // Custom Errors
+    error InvalidSeverityLevel();
+    error InvalidAlertId();
+    error AlertAlreadyResolved();
+    error InvalidContractAddress();
+    error ContractAlreadyRegistered();
+    error ContractNotRegistered();
     // Monitoring data
-    /** @notice Current system metrics */
+    /**
+     * @notice Current system metrics
+     */
+
     struct SystemMetrics {
         uint256 totalTransactions;
         uint256 totalVolume;
@@ -24,7 +34,9 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
         bool isHealthy;
     }
 
-    /** @notice Alert information structure */
+    /**
+     * @notice Alert information structure
+     */
     struct Alert {
         string message;
         uint256 severity; // 1: Low, 2: Medium, 3: High, 4: Critical
@@ -33,23 +45,39 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
     }
 
     // State variables
-    /** @notice Current system metrics */
+    /**
+     * @notice Current system metrics
+     */
     SystemMetrics public currentMetrics;
-    /** @notice Mapping of alert IDs to alert information */
+    /**
+     * @notice Mapping of alert IDs to alert information
+     */
     mapping(uint256 => Alert) public alerts;
-    /** @notice Total number of alerts */
+    /**
+     * @notice Total number of alerts
+     */
     uint256 public alertCount;
-    /** @notice Mapping of contract addresses to monitoring status */
+    /**
+     * @notice Mapping of contract addresses to monitoring status
+     */
     mapping(address => bool) public monitoredContracts;
-    /** @notice Mapping of contract addresses to last check time */
+    /**
+     * @notice Mapping of contract addresses to last check time
+     */
     mapping(address => uint256) public contractLastCheck;
 
     // Thresholds
-    /** @notice Minimum transaction threshold for monitoring */
+    /**
+     * @notice Minimum transaction threshold for monitoring
+     */
     uint256 public minTransactionThreshold = 10;
-    /** @notice Maximum response time in seconds */
+    /**
+     * @notice Maximum response time in seconds
+     */
     uint256 public maxResponseTime = 300; // 5 minutes
-    /** @notice Health check interval in seconds */
+    /**
+     * @notice Health check interval in seconds
+     */
     uint256 public healthCheckInterval = 3600; // 1 hour
 
     // Events
@@ -61,10 +89,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param timestamp Timestamp of the update
      */
     event MetricsUpdated(
-        uint256 indexed totalTransactions,
-        uint256 indexed totalVolume,
-        uint256 indexed activeUsers,
-        uint256 timestamp
+        uint256 indexed totalTransactions, uint256 indexed totalVolume, uint256 indexed activeUsers, uint256 timestamp
     );
     /**
      * @notice Emitted when a new alert is created
@@ -73,12 +98,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param severity Alert severity level
      * @param timestamp Timestamp when alert was created
      */
-    event AlertCreated(
-        uint256 indexed alertId,
-        string message,
-        uint256 indexed severity,
-        uint256 indexed timestamp
-    );
+    event AlertCreated(uint256 indexed alertId, string message, uint256 indexed severity, uint256 indexed timestamp);
     /**
      * @notice Emitted when an alert is resolved
      * @param alertId The alert ID
@@ -90,28 +110,19 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param contractAddress The contract address
      * @param timestamp Timestamp when contract was registered
      */
-    event ContractRegistered(
-        address indexed contractAddress,
-        uint256 indexed timestamp
-    );
+    event ContractRegistered(address indexed contractAddress, uint256 indexed timestamp);
     /**
      * @notice Emitted when a contract is unregistered from monitoring
      * @param contractAddress The contract address
      * @param timestamp Timestamp when contract was unregistered
      */
-    event ContractUnregistered(
-        address indexed contractAddress,
-        uint256 indexed timestamp
-    );
+    event ContractUnregistered(address indexed contractAddress, uint256 indexed timestamp);
     /**
      * @notice Emitted when a health check is performed
      * @param isHealthy Whether the system is healthy
      * @param timestamp Timestamp of the health check
      */
-    event HealthCheckPerformed(
-        bool indexed isHealthy,
-        uint256 indexed timestamp
-    );
+    event HealthCheckPerformed(bool indexed isHealthy, uint256 indexed timestamp);
 
     // 추가된 이벤트들
     /**
@@ -121,12 +132,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param severity Alert severity level
      * @param timestamp Timestamp when alert was created
      */
-    event SystemAlert(
-        string indexed alertType,
-        string message,
-        uint256 indexed severity,
-        uint256 indexed timestamp
-    );
+    event SystemAlert(string indexed alertType, string message, uint256 indexed severity, uint256 indexed timestamp);
     /**
      * @notice Emitted when a performance threshold is exceeded
      * @param metric The metric that exceeded threshold
@@ -135,10 +141,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param timestamp Timestamp when threshold was exceeded
      */
     event PerformanceThresholdExceeded(
-        string indexed metric,
-        uint256 indexed currentValue,
-        uint256 indexed threshold,
-        uint256 timestamp
+        string indexed metric, uint256 indexed currentValue, uint256 indexed threshold, uint256 timestamp
     );
     /**
      * @notice Emitted when a security event occurs
@@ -147,12 +150,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param details Details of the security event
      * @param timestamp Timestamp when event occurred
      */
-    event SecurityEvent(
-        address indexed contractAddress,
-        string eventType,
-        string details,
-        uint256 indexed timestamp
-    );
+    event SecurityEvent(address indexed contractAddress, string eventType, string details, uint256 indexed timestamp);
     /**
      * @notice Emitted when monitoring configuration is updated
      * @param parameter The parameter that was updated
@@ -161,10 +159,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param timestamp Timestamp when configuration was updated
      */
     event MonitoringConfigUpdated(
-        string parameter,
-        uint256 indexed oldValue,
-        uint256 indexed newValue,
-        uint256 indexed timestamp
+        string parameter, uint256 indexed oldValue, uint256 indexed newValue, uint256 indexed timestamp
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -196,11 +191,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param volume Total volume
      * @param users Number of active users
      */
-    function updateMetrics(
-        uint256 transactions,
-        uint256 volume,
-        uint256 users
-    ) external onlyOwner {
+    function updateMetrics(uint256 transactions, uint256 volume, uint256 users) external onlyOwner {
         currentMetrics.totalTransactions = transactions;
         currentMetrics.totalVolume = volume;
         currentMetrics.activeUsers = users;
@@ -217,11 +208,8 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param message Alert message
      * @param severity Alert severity level (1-4)
      */
-    function createAlert(
-        string memory message,
-        uint256 severity
-    ) external onlyOwner {
-        require(severity >= 1 && severity <= 4, "Invalid severity level");
+    function createAlert(string memory message, uint256 severity) external onlyOwner {
+        if (severity < 1 || severity > 4) revert InvalidSeverityLevel();
 
         ++alertCount; // solhint-disable-line gas-increment-by-one
         alerts[alertCount] = Alert({
@@ -239,8 +227,8 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param alertId The alert ID to resolve
      */
     function resolveAlert(uint256 alertId) external onlyOwner {
-        require(alertId > 0 && alertId <= alertCount, "Invalid alert ID");
-        require(!alerts[alertId].isResolved, "Alert already resolved");
+        if (alertId == 0 || alertId > alertCount) revert InvalidAlertId();
+        if (alerts[alertId].isResolved) revert AlertAlreadyResolved();
 
         alerts[alertId].isResolved = true;
         emit AlertResolved(alertId, block.timestamp); // solhint-disable-line not-rely-on-time
@@ -251,11 +239,10 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param contractAddress The contract address to register
      */
     function registerContract(address contractAddress) external onlyOwner {
-        require(contractAddress != address(0), "Invalid contract address");
-        require(
-            !monitoredContracts[contractAddress],
-            "Contract already registered"
-        );
+        if (contractAddress == address(0)) revert InvalidContractAddress();
+        if (monitoredContracts[contractAddress]) {
+            revert ContractAlreadyRegistered();
+        }
 
         monitoredContracts[contractAddress] = true;
         contractLastCheck[contractAddress] = block.timestamp; // solhint-disable-line not-rely-on-time
@@ -268,7 +255,9 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param contractAddress The contract address to unregister
      */
     function unregisterContract(address contractAddress) external onlyOwner {
-        require(monitoredContracts[contractAddress], "Contract not registered");
+        if (!monitoredContracts[contractAddress]) {
+            revert ContractNotRegistered();
+        }
 
         monitoredContracts[contractAddress] = false;
         delete contractLastCheck[contractAddress];
@@ -295,10 +284,8 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      */
     function _checkHealthStatus() internal view returns (bool) {
         // 기본적인 건강 상태 확인 로직
-        bool hasRecentActivity = block.timestamp - currentMetrics.lastUpdate <
-            healthCheckInterval + 1; // solhint-disable-line not-rely-on-time, gas-strict-inequalities
-        bool hasMinimumTransactions = currentMetrics.totalTransactions >=
-            minTransactionThreshold; // solhint-disable-line gas-strict-inequalities
+        bool hasRecentActivity = block.timestamp - currentMetrics.lastUpdate < healthCheckInterval + 1; // solhint-disable-line not-rely-on-time
+        bool hasMinimumTransactions = currentMetrics.totalTransactions > minTransactionThreshold - 1; // solhint-disable-line gas-strict-inequalities
 
         return hasRecentActivity && hasMinimumTransactions;
     }
@@ -309,7 +296,7 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @return Alert The alert information
      */
     function getAlert(uint256 alertId) external view returns (Alert memory) {
-        require(alertId > 0 && alertId <= alertCount, "Invalid alert ID");
+        if (alertId == 0 || alertId > alertCount) revert InvalidAlertId();
         return alerts[alertId];
     }
 
@@ -317,26 +304,22 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @notice Get active alerts (gas optimized version)
      * @return activeAlerts Array of active alert IDs
      */
-    function getActiveAlerts()
-        external
-        view
-        returns (uint256[] memory activeAlerts)
-    {
-        // 가스 최적화를 위해 먼저 활성 알림 수 계산
+    function getActiveAlerts() external view returns (uint256[] memory activeAlerts) {
+        // Calculate active alerts count first for gas optimization
         uint256 activeCount = 0;
-        for (uint256 i = 1; i <= alertCount; ++i) {
+        for (uint256 i = 1; i < alertCount + 1; ++i) {
             // solhint-disable-line gas-increment-by-one
             if (!alerts[i].isResolved) {
                 ++activeCount; // solhint-disable-line gas-increment-by-one
             }
         }
 
-        // 정확한 크기로 배열 생성
+        // Create array with exact size
         activeAlerts = new uint256[](activeCount);
         uint256 found = 0;
 
-        // 가스 최적화된 반복문
-        for (uint256 i = 1; i <= alertCount && found < activeCount; ++i) {
+        // Gas optimized loop
+        for (uint256 i = 1; i < alertCount + 1 && found < activeCount; ++i) {
             // solhint-disable-line gas-increment-by-one
             if (!alerts[i].isResolved) {
                 activeAlerts[found] = i;
@@ -357,25 +340,20 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
     function getSystemStats()
         external
         view
-        returns (
-            SystemMetrics memory metrics,
-            uint256 totalAlerts,
-            uint256 activeAlerts,
-            uint256 contractCount
-        )
+        returns (SystemMetrics memory metrics, uint256 totalAlerts, uint256 activeAlerts, uint256 contractCount)
     {
-        // 가스 최적화를 위해 한 번에 계산
+        // Calculate all at once for gas optimization
         uint256 activeCount = 0;
-        for (uint256 i = 1; i <= alertCount; ++i) {
+        for (uint256 i = 1; i < alertCount + 1; ++i) {
             // solhint-disable-line gas-increment-by-one
             if (!alerts[i].isResolved) {
                 ++activeCount; // solhint-disable-line gas-increment-by-one
             }
         }
 
-        // 모니터링 중인 컨트랙트 수 계산 (가스 최적화)
+        // Calculate monitored contracts count (gas optimized)
         uint256 monitoredCount = 0;
-        // 실제 구현에서는 더 효율적인 방법 사용
+        // In actual implementation, use more efficient method
 
         return (currentMetrics, alertCount, activeCount, monitoredCount);
     }
@@ -386,11 +364,10 @@ contract MonitoringSystem is Initializable, OwnableUpgradeable {
      * @param newMaxResponseTime New maximum response time
      * @param newHealthCheckInterval New health check interval
      */
-    function updateThresholds(
-        uint256 newMinTransactions,
-        uint256 newMaxResponseTime,
-        uint256 newHealthCheckInterval
-    ) external onlyOwner {
+    function updateThresholds(uint256 newMinTransactions, uint256 newMaxResponseTime, uint256 newHealthCheckInterval)
+        external
+        onlyOwner
+    {
         minTransactionThreshold = newMinTransactions;
         maxResponseTime = newMaxResponseTime;
         healthCheckInterval = newHealthCheckInterval;

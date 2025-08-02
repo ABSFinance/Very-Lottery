@@ -55,22 +55,26 @@ contract CryptolottoAd is BaseGame {
     // 보안 강화를 위한 상태 변수
     mapping(address => uint256) public lastPurchaseTime;
     uint256 public constant PURCHASE_COOLDOWN = 1 minutes; // 구매 쿨다운
-    bool public testMode = false; // 테스트 모드 플래그
     // ============ EVENTS ============
 
     event ReferralError(string operation, string reason, uint256 timestamp);
     event StatsError(string operation, string reason, uint256 timestamp);
     event DistributorError(string operation, string reason, uint256 timestamp);
-    event AdTicketPurchased( // indexed 추가로 가스 최적화
-    address indexed player, uint256 indexed gameNumber, uint256 ticketCount, uint256 adTokensUsed, uint256 timestamp);
-    event AdLotteryWinnerSelected( // indexed 추가로 가스 최적화
-    address indexed winner, uint256 indexed gameNumber, uint256 prizeAmount, uint256 timestamp);
-    event AdLotteryFeeUpdated( // indexed 추가로 가스 최적화
-    uint256 indexed oldFee, uint256 indexed newFee, uint256 timestamp);
+    // indexed 추가로 가스 최적화
+    event AdTicketPurchased(
+        address indexed player, uint256 indexed gameNumber, uint256 ticketCount, uint256 adTokensUsed, uint256 timestamp
+    );
+    // indexed 추가로 가스 최적화
+    event AdLotteryWinnerSelected(
+        address indexed winner, uint256 indexed gameNumber, uint256 prizeAmount, uint256 timestamp
+    );
+    // indexed 추가로 가스 최적화
+    event AdLotteryFeeUpdated(uint256 indexed oldFee, uint256 indexed newFee, uint256 timestamp);
     event AdLotteryPerformanceMetrics(
         uint256 indexed gameNumber, uint256 gasUsed, uint256 playerCount, uint256 jackpot, uint256 timestamp
     );
     event AdLotterySecurityEvent(address indexed player, string eventType, uint256 timestamp);
+    event AdTokenSet(address indexed adToken, uint256 timestamp);
 
     // ============ INITIALIZATION ============
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -128,7 +132,7 @@ contract CryptolottoAd is BaseGame {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         require(gameStorage.isActive, "Game is not active");
         // 구매 쿨다운 확인 (테스트 모드가 아닐 때만)
-        if (!testMode) {
+        if (!gameStorage.testMode) {
             require(block.timestamp >= lastPurchaseTime[msg.sender] + PURCHASE_COOLDOWN, "Purchase cooldown not met");
         }
         uint256 totalAdTokens = ticketCount * AD_TICKET_PRICE;
@@ -157,7 +161,7 @@ contract CryptolottoAd is BaseGame {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         require(gameStorage.isActive, "Game is not active");
         // 구매 쿨다운 확인 (테스트 모드가 아닐 때만)
-        if (!testMode) {
+        if (!gameStorage.testMode) {
             require(block.timestamp >= lastPurchaseTime[msg.sender] + PURCHASE_COOLDOWN, "Purchase cooldown not met");
         }
         uint256 totalTickets = 0;
@@ -343,7 +347,7 @@ contract CryptolottoAd is BaseGame {
     /**
      * @dev 승자 지급 처리
      */
-    function _processWinnerPayout(address winner, uint256 amount) internal override {
+    function _processWinnerPayout(address winner, uint256 /* amount */ ) internal override {
         if (address(registry) == address(0)) {
             emit TreasuryOperationFailed("payout", block.timestamp);
             return;
@@ -353,12 +357,16 @@ contract CryptolottoAd is BaseGame {
                 emit TreasuryOperationFailed("payout", block.timestamp);
                 return;
             }
-            try ITreasuryManager(treasuryAddress).withdrawFunds(treasuryName, winner, amount) {
-                emit TreasuryFundsWithdrawn(winner, amount, block.timestamp);
-            } catch Error(string memory) /* reason */ {
-                emit TreasuryTransferFailed(winner, amount, "Unknown treasury error", block.timestamp);
-            } catch {
-                emit TreasuryTransferFailed(winner, amount, "Unknown treasury error", block.timestamp);
+            // Process winner payout
+            if (winner != address(0)) {
+                uint256 jackpot = getCurrentGameJackpot();
+                if (jackpot > 0) {
+                    try ITreasuryManager(treasuryAddress).withdrawFunds(treasuryName, winner, jackpot) {
+                        emit WinnerPayout(winner, jackpot, block.timestamp);
+                    } catch {
+                        emit TreasuryTransferFailed(address(this), jackpot, "Withdrawal failed", block.timestamp);
+                    }
+                }
             }
         } catch Error(string memory) /* reason */ {
             emit RegistryError("getContract", "TreasuryManager", block.timestamp);
@@ -381,10 +389,13 @@ contract CryptolottoAd is BaseGame {
     /**
      * @dev 게임 통계 업데이트
      */
-    function _updateGameStats(address winner, uint256, /* playerCount */ uint256 amount, uint256 winnerIndex)
-        internal
-        override
-    {
+    function _updateGameStats(
+        address winner,
+        uint256,
+        /* playerCount */
+        uint256 amount,
+        uint256 winnerIndex
+    ) internal override {
         if (address(registry) == address(0)) {
             emit StatsError("getContract", "Registry not initialized", block.timestamp);
             return;
@@ -556,7 +567,6 @@ contract CryptolottoAd is BaseGame {
     function getPlayerAnalytics(address player)
         external
         view
-        override
         returns (
             uint256 totalTicketsPurchased,
             uint256 gamesParticipated,
@@ -663,25 +673,6 @@ contract CryptolottoAd is BaseGame {
     }
 
     /**
-     * @dev 플레이어 정보 조회
-     */
-    function getPlayerInfo(address player) public view returns (uint256 ticketsInCurrentGame, bool isInCurrentGame) {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames;
-        StorageLayout.Game storage game = gameStorage.games[currentGameId];
-        bool inGame = false;
-        address[] storage players = game.players;
-        uint256 length = players.length;
-        for (uint256 i = 0; i < length; i++) {
-            if (players[i] == player) {
-                inGame = true;
-                break;
-            }
-        }
-        return (gameStorage.playerTicketCount[player], inGame);
-    }
-
-    /**
      * @dev Ad Lottery 게임 상태 조회
      * @return isActive 게임 활성 상태
      * @return currentGameId 현재 게임 ID
@@ -738,89 +729,31 @@ contract CryptolottoAd is BaseGame {
     }
 
     /**
-     * @dev 게임 종료 처리 (내부 함수)
-     * @notice 게임을 종료하고 승자를 선택합니다
-     */
-    function _endGame() internal {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
-        StorageLayout.Game storage game = gameStorage.games[currentGameId];
-        // 게임 상태를 ENDED로 변경
-        game.state = StorageLayout.GameState.ENDED;
-        // 승자 선택
-        _pickWinner();
-        // 성능 메트릭 기록
-        _recordPerformanceMetrics(game.gameNumber, gasleft(), game.players.length, game.jackpot);
-        // 새 게임 시작 준비
-        _startNewGame();
-    }
-
-    // ============ EMERGENCY FUNCTIONS ============
-    /**
-     * @dev 긴급 정지
+     * @notice Emergency pause the contract
+     * @param reason The reason for pausing
      */
     function emergencyPause(string memory reason) public override onlyOwner {
         super.emergencyPause(reason);
     }
 
     /**
-     * @dev 긴급 재개
+     * @notice Emergency resume the contract
      */
     function emergencyResume() public override onlyOwner {
         super.emergencyResume();
     }
 
-    /**
-     * @dev 계약 잔액 조회
-     */
-    function getContractBalance() public view returns (uint256) {
-        return address(this).balance;
-    }
+    // ============ ADMIN FUNCTIONS ============
 
     /**
-     * @dev 테스트 모드 설정 (관리자만)
-     * @param enabled 테스트 모드 활성화 여부
-     * @custom:security onlyOwner
-     */
-    function setTestMode(bool enabled) external onlyOwner {
-        testMode = enabled;
-        _recordSecurityEvent(msg.sender, enabled ? "Test Mode Enabled" : "Test Mode Disabled");
-    }
-
-    /**
-     * @dev 구매 쿨다운 시간 설정
-     * @param newCooldown 새로운 쿨다운 시간 (초)
-     * @custom:security onlyOwner
-     */
-    function setPurchaseCooldown(uint256 newCooldown) external onlyOwner {
-        require(newCooldown <= 1 hours, "Cooldown too long");
-        uint256 oldCooldown = PURCHASE_COOLDOWN;
-        // 상수는 변경할 수 없으므로 이벤트만 발생
-        emit AdLotteryFeeUpdated(oldCooldown, newCooldown, block.timestamp);
-    }
-
-    /**
-     * @dev 플레이어 쿨다운 재설정
-     * @param player 재설정할 플레이어 주소
-     * @custom:security onlyOwner
-     */
-    function resetPlayerCooldown(address player) external onlyOwner {
-        require(player != address(0), "Invalid player address");
-        lastPurchaseTime[player] = 0;
-        _recordSecurityEvent(player, "Cooldown Reset");
-    }
-
-    /**
-     * @dev Ad Token 주소 설정
-     * @notice Ad Token 컨트랙트 주소를 설정합니다
-     * @param adTokenAddress Ad Token 컨트랙트 주소
-     * @custom:security onlyOwner
+     * @notice Set Ad Token address
+     * @param adTokenAddress The Ad Token contract address
      */
     function setAdToken(address adTokenAddress) external onlyOwner {
         require(adTokenAddress != address(0), "Invalid Ad Token address");
         require(adTokenAddress != address(this), "Cannot set self as Ad Token");
 
-        // Ad Token 컨트랙트가 실제로 존재하는지 확인
+        // Verify that the Ad Token contract actually exists
         uint256 codeSize;
         assembly {
             codeSize := extcodesize(adTokenAddress)
@@ -828,5 +761,6 @@ contract CryptolottoAd is BaseGame {
         require(codeSize > 0, "Ad Token address has no code");
 
         adToken = IAdToken(adTokenAddress);
+        emit AdTokenSet(adTokenAddress, block.timestamp);
     }
 }

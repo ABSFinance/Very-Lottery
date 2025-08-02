@@ -59,8 +59,8 @@ contract DeployScript is Script {
         stats = new StatsAggregator();
         fundsDistributor = new FundsDistributor();
         referral = new CryptolottoReferral();
-        adToken = new AdToken();
-        registry = new ContractRegistry();
+        adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
+        registry = new ContractRegistry(msg.sender);
         treasuryManager = new TreasuryManager();
 
         // Create treasuries

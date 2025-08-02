@@ -18,7 +18,7 @@ contract CryptolottoSecurity is Test {
     address public player1 = address(0x1001);
 
     function setUp() public {
-        adToken = new AdToken();
+        adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
         lottery = new Cryptolotto1Day();
         adLottery = new CryptolottoAd();
     }
