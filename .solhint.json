@@ -4,7 +4,7 @@
     "compiler-version": ["error", "^0.8.19"],
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "no-empty-blocks": "off",
-    "no-inline-assembly": "warn",
+    "no-inline-assembly": "off",
     "not-rely-on-time": "off",
     "avoid-low-level-calls": "warn",
     "avoid-sha3": "warn",
@@ -22,6 +22,10 @@
     "gas-increment-by-one": "off",
     "gas-small-strings": "off",
     "func-name-mixedcase": "off",
-    "gas-strict-inequalities": "off"
+    "gas-strict-inequalities": "off",
+    "gas-calldata-parameters": "off",
+    "gas-struct-packing": "off",
+    "function-max-lines": "off",
+    "state-visibility": "off"
   }
 }
