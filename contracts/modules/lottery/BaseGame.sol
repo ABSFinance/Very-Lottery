@@ -299,7 +299,6 @@ abstract contract BaseGame is
             "Incorrect amount sent"
         );
 
-        // 현재 게임 정보 가져오기
         uint256 currentGameId = gameStorage.totalGames > 0
             ? gameStorage.totalGames - 1
             : 0;
@@ -307,22 +306,9 @@ abstract contract BaseGame is
             currentGameId
         ];
 
-        // 게임이 아직 시작되지 않았다면 시작
-        if (currentGame.state == StorageLayout.GameState.WAITING) {
-            _startNewGame();
-            currentGame = gameStorage.games[gameStorage.totalGames - 1]; // 새로 생성된 게임을 가져옴
-        }
-
-        // 게임이 활성 상태이고 시간이 만료되었는지 자동 체크
-        if (
-            currentGame.state == StorageLayout.GameState.ACTIVE &&
-            block.timestamp >= currentGame.endTime
-        ) {
-            _endCurrentGame();
-            // 새 게임 시작
-            _startNewGame();
-            currentGame = gameStorage.games[gameStorage.totalGames - 1];
-        }
+        // 게임 상태 처리 분리
+        currentGameId = _handleGameState(gameStorage, currentGameId);
+        currentGame = gameStorage.games[currentGameId];
 
         require(
             currentGame.state == StorageLayout.GameState.ACTIVE,
@@ -331,22 +317,87 @@ abstract contract BaseGame is
 
         // 플레이어 정보 업데이트
         _updatePlayerInfoOptimized(msg.sender, ticketCount);
-
         // 재무 시스템 연동
         _transferToTreasury(msg.value);
-
         // 수수료 분배 처리
-        _processFeeDistribution(msg.value, referrer);
-
+        _processFeeDistributionInternal(msg.value, referrer);
         // 이벤트 발생
-        for (uint i = 0; i < ticketCount; i++) {
-            emit TicketPurchased(
-                msg.sender,
-                currentGame.gameNumber,
-                i, // players.length - 1 + i 대신 단순히 i 사용
-                block.timestamp
-            );
+        _emitTicketPurchasedEvents(currentGame.gameNumber, ticketCount);
+    }
+
+    function _handleGameState(
+        StorageLayout.GameStorage storage gameStorage,
+        uint256 currentGameId
+    ) internal returns (uint256) {
+        StorageLayout.Game storage currentGame = gameStorage.games[
+            currentGameId
+        ];
+        if (currentGame.state == StorageLayout.GameState.WAITING) {
+            _startNewGame();
+            return gameStorage.totalGames - 1;
         }
+        if (
+            currentGame.state == StorageLayout.GameState.ACTIVE &&
+            block.timestamp >= currentGame.endTime
+        ) {
+            _endCurrentGame();
+            _startNewGame();
+            return gameStorage.totalGames - 1;
+        }
+        return currentGameId;
+    }
+
+    function _emitTicketPurchasedEvents(
+        uint256 gameNumber,
+        uint256 ticketCount
+    ) internal {
+        for (uint i = 0; i < ticketCount; i++) {
+            emit TicketPurchased(msg.sender, gameNumber, i, block.timestamp);
+        }
+    }
+
+    function _processFeeDistributionInternal(
+        uint256 ticketAmount,
+        address referrer
+    ) internal {
+        (
+            uint256 referralFee,
+            uint256 adLotteryFee,
+            uint256 developerFee
+        ) = _calculateFees(ticketAmount);
+        if (
+            referralFee > 0 && referrer != address(0) && referrer != msg.sender
+        ) {
+            _processReferralReward(referrer, msg.sender);
+        }
+        if (adLotteryFee > 0) {
+            _processAdLotteryFee(adLotteryFee);
+        }
+        if (developerFee > 0) {
+            _processDeveloperFee(developerFee);
+        }
+        emit FeeDistributed(
+            referralFee,
+            adLotteryFee,
+            developerFee,
+            block.timestamp
+        );
+    }
+
+    function _calculateFees(
+        uint256 ticketAmount
+    )
+        internal
+        pure
+        returns (
+            uint256 referralFee,
+            uint256 adLotteryFee,
+            uint256 developerFee
+        )
+    {
+        referralFee = (ticketAmount * REFERRAL_FEE_PERCENT) / 100;
+        adLotteryFee = (ticketAmount * AD_LOTTERY_FEE_PERCENT) / 100;
+        developerFee = (ticketAmount * DEVELOPER_FEE_PERCENT) / 100;
     }
 
     /**

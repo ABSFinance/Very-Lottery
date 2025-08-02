@@ -29,7 +29,8 @@ jobs:
           path: |
             ~/.cache/solc
             ~/.cache/foundry
-          key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml') }}
+            ~/.foundry
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
 
@@ -56,33 +57,33 @@ jobs:
         run: |
           echo "Starting coverage analysis..."
           
-          # Try with coverage profile and --ir-minimum
+          # Try with coverage profile first (suppress warnings)
           export FOUNDRY_PROFILE=coverage
           export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
-          forge coverage --report lcov --ir-minimum && {
-            echo "Coverage with coverage profile and --ir-minimum succeeded"
+          forge coverage --report lcov && {
+            echo "Coverage with coverage profile succeeded"
             exit 0
           } || {
-            echo "Coverage with coverage profile failed, trying default profile with --ir-minimum..."
+            echo "Coverage with coverage profile failed, trying default profile..."
             
             # Reset to default profile
             unset FOUNDRY_PROFILE
             export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
-            forge coverage --report lcov --ir-minimum && {
-              echo "Coverage with default profile and --ir-minimum succeeded"
+            forge coverage --report lcov && {
+              echo "Coverage with default profile succeeded"
               exit 0
             } || {
-              echo "Coverage with --ir-minimum failed, trying --via-ir..."
+              echo "Coverage with default profile failed, trying --via-ir..."
               
               export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
-              forge coverage --report lcov --via-ir && {
+              forge coverage --report lcov --via-ir 2>/dev/null && {
                 echo "Coverage with --via-ir succeeded"
                 exit 0
               } || {
                 echo "Coverage with --via-ir failed, trying basic coverage..."
                 
                 export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
-                forge coverage --report lcov && {
+                forge coverage --report lcov 2>/dev/null && {
                   echo "Basic coverage succeeded"
                   exit 0
                 } || {
@@ -90,7 +91,7 @@ jobs:
                   
                   # Try to generate at least a summary
                   export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
-                  forge coverage --report summary --ir-minimum || {
+                  forge coverage --report summary 2>/dev/null || {
                     echo "Even summary generation failed"
                     echo "Creating empty lcov.info file"
                     echo "TN:" > lcov.info
@@ -139,7 +140,8 @@ jobs:
           path: |
             ~/.cache/solc
             ~/.cache/foundry
-          key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml') }}
+            ~/.foundry
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
 
@@ -177,7 +179,8 @@ jobs:
           path: |
             ~/.cache/solc
             ~/.cache/foundry
-          key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml') }}
+            ~/.foundry
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
 
@@ -215,7 +218,8 @@ jobs:
           path: |
             ~/.cache/solc
             ~/.cache/foundry
-          key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml') }}
+            ~/.foundry
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
 
@@ -259,7 +263,8 @@ jobs:
           path: |
             ~/.cache/solc
             ~/.cache/foundry
-          key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml') }}
+            ~/.foundry
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
 
@@ -294,7 +299,8 @@ jobs:
           path: |
             ~/.cache/solc
             ~/.cache/foundry
-          key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml') }}
+            ~/.foundry
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
 
