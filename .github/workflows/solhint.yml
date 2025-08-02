@@ -20,7 +20,24 @@ jobs:
         cache: 'npm'
     
     - name: Install Solhint
-      run: npm install -g solhint
+      run: npm install -g solhint@latest
     
-    - name: Run Solhint
-      run: solhint contracts/**/*.sol 
+    - name: Verify Solhint config
+      run: |
+        echo "Checking .solhint.json configuration..."
+        cat .solhint.json
+        echo "Checking .solhintrc configuration..."
+        cat .solhintrc
+        echo "Solhint version:"
+        solhint --version
+        echo "Current directory:"
+        pwd
+        echo "Files in current directory:"
+        ls -la
+    
+    - name: Run Solhint with config
+      run: solhint contracts/**/*.sol --config .solhint.json
+    
+    - name: Run Solhint without config (fallback)
+      run: solhint contracts/**/*.sol
+      continue-on-error: true 
