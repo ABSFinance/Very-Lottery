@@ -276,8 +276,8 @@ jobs:
 
       - name: Run Solhint
         run: |
-          npm install -g solhint
-          solhint 'contracts/**/*.sol'
+          npm install -g solhint@latest
+          solhint 'contracts/**/*.sol' --config .solhint.json
 
       - name: Check formatting
         run: forge fmt --check
