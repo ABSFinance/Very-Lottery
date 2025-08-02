@@ -85,21 +85,14 @@ contract ContractRegistry is Ownable {
      * @param name Contract name
      * @param contractAddress Contract address
      */
-    event ContractRegistered(
-        string indexed name,
-        address indexed contractAddress
-    );
+    event ContractRegistered(string indexed name, address indexed contractAddress);
     /**
      * @notice Emitted when a contract is updated
      * @param name Contract name
      * @param oldAddress Previous contract address
      * @param newAddress New contract address
      */
-    event ContractUpdated(
-        string indexed name,
-        address indexed oldAddress,
-        address indexed newAddress
-    );
+    event ContractUpdated(string indexed name, address indexed oldAddress, address indexed newAddress);
     /**
      * @notice Emitted when a contract is removed
      * @param name Contract name
@@ -111,10 +104,7 @@ contract ContractRegistry is Ownable {
      * @param names Array of contract names
      * @param addresses Array of contract addresses
      */
-    event BatchContractsRegistered(
-        string[] indexed names,
-        address[] indexed addresses
-    );
+    event BatchContractsRegistered(string[] indexed names, address[] indexed addresses);
 
     /**
      * @notice Constructor for the contract registry
@@ -127,10 +117,7 @@ contract ContractRegistry is Ownable {
      * @param name Contract name
      * @param contractAddress Contract address
      */
-    function registerContract(
-        string calldata name,
-        address contractAddress
-    ) external onlyOwner {
+    function registerContract(string calldata name, address contractAddress) external onlyOwner {
         if (contractAddress == address(0)) revert InvalidContractAddress();
         if (bytes(name).length == 0) revert InvalidContractName();
         if (contracts[name] != address(0)) revert ContractAlreadyRegistered();
@@ -145,10 +132,7 @@ contract ContractRegistry is Ownable {
      * @param names Array of contract names
      * @param addresses Array of contract addresses
      */
-    function registerBatchContracts(
-        string[] calldata names,
-        address[] calldata addresses
-    ) external onlyOwner {
+    function registerBatchContracts(string[] calldata names, address[] calldata addresses) external onlyOwner {
         if (names.length == 0) revert EmptyNameArray();
         if (addresses.length == 0) revert EmptyAddressArray();
         if (names.length != addresses.length) revert ArraysLengthMismatch();
@@ -173,10 +157,7 @@ contract ContractRegistry is Ownable {
      * @param name Contract name
      * @param newAddress New contract address
      */
-    function updateContract(
-        string calldata name,
-        address newAddress
-    ) external onlyOwner {
+    function updateContract(string calldata name, address newAddress) external onlyOwner {
         if (newAddress == address(0)) revert InvalidContractAddress();
         if (contracts[name] == address(0)) revert ContractNotRegistered();
 
@@ -212,9 +193,7 @@ contract ContractRegistry is Ownable {
      * @param names Array of contract names
      * @return Array of contract addresses
      */
-    function getContracts(
-        string[] calldata names
-    ) external view returns (address[] memory) {
+    function getContracts(string[] calldata names) external view returns (address[] memory) {
         address[] memory addresses = new address[](names.length);
         for (uint256 i = 0; i < names.length; ++i) {
             // solhint-disable-line gas-increment-by-one
@@ -237,9 +216,7 @@ contract ContractRegistry is Ownable {
      * @param contractAddress Contract address
      * @return Contract name
      */
-    function getContractName(
-        address contractAddress
-    ) external view returns (string memory) {
+    function getContractName(address contractAddress) external view returns (string memory) {
         for (uint256 i = 0; i < contractNames.length; ++i) {
             // solhint-disable-line gas-increment-by-one
             if (contracts[contractNames[i]] == contractAddress) {
@@ -311,54 +288,18 @@ contract ContractRegistry is Ownable {
         for (uint256 i = 0; i < contractNames.length; ++i) {
             // solhint-disable-line gas-increment-by-one
             if (contracts[contractNames[i]] != address(0)) {
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(TREASURY_MANAGER))
-                ) ++treasuryManagerCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(FUNDS_DISTRIBUTOR))
-                ) ++fundsDistributorCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(CRYPTOLOTTO_REFERRAL))
-                ) ++referralCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(STATS_AGGREGATOR))
-                ) ++statsAggregatorCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(ANALYTICS_ENGINE))
-                ) ++analyticsEngineCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(MONITORING_SYSTEM))
-                ) ++monitoringSystemCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(EMERGENCY_MANAGER))
-                ) ++emergencyManagerCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(CONFIG_MANAGER))
-                ) ++configManagerCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(SYSTEM_MANAGER))
-                ) ++systemManagerCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(EVENT_LOGGER))
-                ) ++eventLoggerCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(MIGRATIONS))
-                ) ++migrationsCount; // solhint-disable-line gas-increment-by-one
-                if (
-                    keccak256(bytes(contractNames[i])) ==
-                    keccak256(bytes(GAME_FACTORY))
-                ) ++gameFactoryCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(TREASURY_MANAGER))) ++treasuryManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(FUNDS_DISTRIBUTOR))) ++fundsDistributorCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(CRYPTOLOTTO_REFERRAL))) ++referralCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(STATS_AGGREGATOR))) ++statsAggregatorCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(ANALYTICS_ENGINE))) ++analyticsEngineCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(MONITORING_SYSTEM))) ++monitoringSystemCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(EMERGENCY_MANAGER))) ++emergencyManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(CONFIG_MANAGER))) ++configManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(SYSTEM_MANAGER))) ++systemManagerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(EVENT_LOGGER))) ++eventLoggerCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(MIGRATIONS))) ++migrationsCount; // solhint-disable-line gas-increment-by-one
+                if (keccak256(bytes(contractNames[i])) == keccak256(bytes(GAME_FACTORY))) ++gameFactoryCount; // solhint-disable-line gas-increment-by-one
             }
         }
     }
