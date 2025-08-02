@@ -77,11 +77,13 @@ contract CryptolottoPerformance is Test {
         }
 
         // 메모리 사용량 확인
-        try lottery.getCurrentGameInfo() {
-            assertTrue(true, "Memory access should work");
-        } catch {
-            assertTrue(true, "Memory access failed as expected");
-        }
+        uint256 gameNumber = lottery.getCurrentGameNumber();
+        uint256 startTime = lottery.getCurrentGameStartTime();
+        uint256 endTime = lottery.getCurrentGameEndTime();
+        uint256 jackpot = lottery.getCurrentGameJackpot();
+        uint256 gamePlayerCount = lottery.getCurrentGamePlayerCount();
+        StorageLayout.GameState state = lottery.getCurrentGameState();
+        // getCurrentGameInfo() 호출 제거 (테스트 목적상 불필요)
     }
 
     /// @dev AdToken 소각 성능 테스트

@@ -291,6 +291,20 @@ abstract contract BaseGame is
         address referrer,
         uint256 ticketCount
     ) public payable nonReentrant {
+        _requireGameActive(ticketCount);
+        uint256 currentGameId = _getCurrentGameId(getGameStorage());
+        currentGameId = _handleGameState(getGameStorage(), currentGameId);
+        _requireCurrentGameActive(currentGameId);
+        _updatePlayerInfoOptimized(msg.sender, ticketCount);
+        _transferToTreasury(msg.value);
+        _processFeeDistributionInternal(msg.value, referrer);
+        _emitTicketPurchasedEvents(
+            getGameStorage().games[currentGameId].gameNumber,
+            ticketCount
+        );
+    }
+
+    function _requireGameActive(uint256 ticketCount) internal view {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         require(gameStorage.isActive, "Game is not active");
         require(ticketCount > 0, "Ticket count must be greater than 0");
@@ -298,31 +312,26 @@ abstract contract BaseGame is
             msg.value == gameStorage.ticketPrice * ticketCount,
             "Incorrect amount sent"
         );
+    }
 
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+    function _requireCurrentGameActive(uint256 currentGameId) internal view {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
         StorageLayout.Game storage currentGame = gameStorage.games[
             currentGameId
         ];
-
-        // 게임 상태 처리 분리
-        currentGameId = _handleGameState(gameStorage, currentGameId);
-        currentGame = gameStorage.games[currentGameId];
-
         require(
             currentGame.state == StorageLayout.GameState.ACTIVE,
             "Game not active"
         );
+    }
 
-        // 플레이어 정보 업데이트
-        _updatePlayerInfoOptimized(msg.sender, ticketCount);
-        // 재무 시스템 연동
-        _transferToTreasury(msg.value);
-        // 수수료 분배 처리
-        _processFeeDistributionInternal(msg.value, referrer);
-        // 이벤트 발생
-        _emitTicketPurchasedEvents(currentGame.gameNumber, ticketCount);
+    /**
+     * @dev 현재 게임 ID 가져오기
+     */
+    function _getCurrentGameId(
+        StorageLayout.GameStorage storage gameStorage
+    ) internal view returns (uint256) {
+        return gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
     }
 
     function _handleGameState(
@@ -360,28 +369,121 @@ abstract contract BaseGame is
         uint256 ticketAmount,
         address referrer
     ) internal {
-        (
+        _processFeeDistributionNew(ticketAmount, referrer);
+    }
+
+    /**
+     * @dev 수수료 분배 처리 (새로운 구현)
+     * @param ticketAmount 티켓 가격
+     * @param referrer 리퍼러 주소
+     */
+    function _processFeeDistributionNew(
+        uint256 ticketAmount,
+        address referrer
+    ) internal {
+        uint256 totalFee = _calculateTotalFee(ticketAmount);
+
+        if (totalFee > 0) {
+            (
+                uint256 referralFee,
+                uint256 adLotteryFee,
+                uint256 developerFee
+            ) = _calculateIndividualFees(ticketAmount);
+
+            _processReferralFeeIfValid(referralFee, referrer);
+            _processAdLotteryFeeIfValid(adLotteryFee);
+            _processDeveloperFeeIfValid(developerFee);
+
+            emit FeeDistributed(
+                referralFee,
+                adLotteryFee,
+                developerFee,
+                block.timestamp
+            );
+        }
+    }
+
+    /**
+     * @dev 총 수수료 계산
+     */
+    function _calculateTotalFee(
+        uint256 ticketAmount
+    ) internal pure returns (uint256) {
+        return (ticketAmount * TOTAL_FEE_PERCENT) / 100;
+    }
+
+    /**
+     * @dev 개별 수수료 계산
+     */
+    function _calculateIndividualFees(
+        uint256 ticketAmount
+    )
+        internal
+        pure
+        returns (
             uint256 referralFee,
             uint256 adLotteryFee,
             uint256 developerFee
-        ) = _calculateFees(ticketAmount);
+        )
+    {
+        referralFee = (ticketAmount * REFERRAL_FEE_PERCENT) / 100;
+        adLotteryFee = (ticketAmount * AD_LOTTERY_FEE_PERCENT) / 100;
+        developerFee = (ticketAmount * DEVELOPER_FEE_PERCENT) / 100;
+    }
+
+    /**
+     * @dev 유효한 경우 리퍼럴 수수료 처리
+     */
+    function _processReferralFeeIfValid(
+        uint256 referralFee,
+        address referrer
+    ) internal {
+        if (
+            referrer != address(0) && referrer != msg.sender && referralFee > 0
+        ) {
+            _processReferralReward(referrer, msg.sender);
+        }
+    }
+
+    /**
+     * @dev 유효한 경우 Ad Lottery 수수료 처리
+     */
+    function _processAdLotteryFeeIfValid(uint256 adLotteryFee) internal {
+        if (adLotteryFee > 0) {
+            _processAdLotteryFee(adLotteryFee);
+        }
+    }
+
+    /**
+     * @dev 유효한 경우 개발자 수수료 처리
+     */
+    function _processDeveloperFeeIfValid(uint256 developerFee) internal {
+        if (developerFee > 0) {
+            _processDeveloperFee(developerFee);
+        }
+    }
+
+    /**
+     * @dev 추천 수수료 처리
+     */
+    function _processReferralFee(
+        uint256 referralFee,
+        address referrer
+    ) internal {
         if (
             referralFee > 0 && referrer != address(0) && referrer != msg.sender
         ) {
             _processReferralReward(referrer, msg.sender);
         }
+    }
+
+    /**
+     * @dev 광고 복권 수수료 처리
+     */
+    function _processAdLotteryFeeInternal(uint256 adLotteryFee) internal {
         if (adLotteryFee > 0) {
             _processAdLotteryFee(adLotteryFee);
         }
-        if (developerFee > 0) {
-            _processDeveloperFee(developerFee);
-        }
-        emit FeeDistributed(
-            referralFee,
-            adLotteryFee,
-            developerFee,
-            block.timestamp
-        );
     }
 
     function _calculateFees(
@@ -411,26 +513,46 @@ abstract contract BaseGame is
         uint256 ticketCount
     ) internal {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage currentGame = gameStorage.games[
             currentGameId
         ];
 
-        // 오버플로우 방지를 위한 안전한 계산
+        _updateTicketCount(gameStorage, player, ticketCount);
+        _updatePlayerList(currentGame, gameStorage, player);
+        currentGame.jackpot = _updateJackpot(
+            currentGame.jackpot,
+            ticketCount,
+            gameStorage.ticketPrice
+        );
+    }
+
+    /**
+     * @dev 티켓 수 업데이트
+     */
+    function _updateTicketCount(
+        StorageLayout.GameStorage storage gameStorage,
+        address player,
+        uint256 ticketCount
+    ) internal {
         uint256 currentTicketCount = gameStorage.playerTicketCount[player];
         require(
             currentTicketCount + ticketCount >= currentTicketCount,
             "Ticket count overflow"
         );
-
-        // 플레이어 티켓 수 업데이트
         gameStorage.playerTicketCount[player] =
             currentTicketCount +
             ticketCount;
+    }
 
-        // 새로운 플레이어인지 확인하고 추가 (O(1) 최적화)
+    /**
+     * @dev 플레이어 리스트 업데이트
+     */
+    function _updatePlayerList(
+        StorageLayout.Game storage currentGame,
+        StorageLayout.GameStorage storage gameStorage,
+        address player
+    ) internal {
         bool isNewPlayer = StorageOptimizer.addUniquePlayerOptimized(
             currentGame.players,
             currentGame.playerExists,
@@ -449,26 +571,41 @@ abstract contract BaseGame is
             gameStorage.totalPlayers++;
             currentGame.playerCount += 1;
         }
-
-        // 잭팟에 추가
-        currentGame.jackpot += ticketCount * gameStorage.ticketPrice;
     }
 
     /**
-     * @dev 새 게임 시작
+     * @dev 잭팟 업데이트
      */
-    function _startNewGame() internal {
-        StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 newGameId = gameStorage.totalGames;
+    function _updateJackpot(
+        uint256 jackpot,
+        uint256 ticketCount,
+        uint256 ticketPrice
+    ) internal pure returns (uint256) {
+        return jackpot + (ticketCount * ticketPrice);
+    }
 
-        StorageLayout.Game storage newGame = gameStorage.games[newGameId];
-        newGame.gameNumber = newGameId;
-        newGame.startTime = block.timestamp;
-        newGame.endTime = block.timestamp + gameStorage.gameDuration;
-        newGame.state = StorageLayout.GameState.ACTIVE;
+    /**
+     * @dev 새 게임 초기화
+     */
+    function _initializeNewGame(
+        uint256 newGameId,
+        uint256 gameDuration
+    )
+        internal
+        view
+        returns (uint256, uint256, uint256, StorageLayout.GameState)
+    {
+        uint256 gameNumber = newGameId;
+        uint256 startTime = block.timestamp;
+        uint256 endTime = block.timestamp + gameDuration;
+        StorageLayout.GameState state = StorageLayout.GameState.ACTIVE;
+        return (gameNumber, startTime, endTime, state);
+    }
 
-        gameStorage.totalGames++;
-
+    /**
+     * @dev 새 게임 이벤트 발생
+     */
+    function _emitNewGameEvents(uint256 newGameId) internal {
         emit GameStateChanged(
             newGameId,
             StorageLayout.GameState.ACTIVE,
@@ -476,12 +613,7 @@ abstract contract BaseGame is
         );
 
         // 디버깅 이벤트
-        emit TicketPurchased(
-            address(0), // 더미 주소
-            newGameId,
-            999, // 특별한 값
-            block.timestamp
-        );
+        emit TicketPurchased(address(0), newGameId, 999, block.timestamp);
     }
 
     /**
@@ -494,7 +626,16 @@ abstract contract BaseGame is
             currentGameId
         ];
 
-        address[] storage players = currentGame.players;
+        _resetPlayerTickets(gameStorage, currentGame.players);
+    }
+
+    /**
+     * @dev 플레이어 티켓 초기화
+     */
+    function _resetPlayerTickets(
+        StorageLayout.GameStorage storage gameStorage,
+        address[] storage players
+    ) internal {
         uint256 length = players.length;
         for (uint256 i = 0; i < length; i++) {
             gameStorage.playerTicketCount[players[i]] = 0;
@@ -506,18 +647,12 @@ abstract contract BaseGame is
      */
     function checkAndEndGame() public {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage currentGame = gameStorage.games[
             currentGameId
         ];
 
-        // 게임이 활성 상태이고 시간이 만료되었는지 확인
-        if (
-            currentGame.state == StorageLayout.GameState.ACTIVE &&
-            block.timestamp >= currentGame.endTime
-        ) {
+        if (_shouldEndGame(currentGame)) {
             _endCurrentGame();
         }
     }
@@ -527,22 +662,26 @@ abstract contract BaseGame is
      */
     function autoEndGame() public {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage currentGame = gameStorage.games[
             currentGameId
         ];
 
-        // 게임이 활성 상태이고 시간이 만료되었는지 확인
-        if (
-            currentGame.state == StorageLayout.GameState.ACTIVE &&
-            block.timestamp >= currentGame.endTime
-        ) {
+        if (_shouldEndGame(currentGame)) {
             _endCurrentGame();
-            // 새 게임 자동 시작
             _startNewGame();
         }
+    }
+
+    /**
+     * @dev 게임 종료 조건 확인
+     */
+    function _shouldEndGame(
+        StorageLayout.Game storage currentGame
+    ) internal view returns (bool) {
+        return
+            currentGame.state == StorageLayout.GameState.ACTIVE &&
+            block.timestamp >= currentGame.endTime;
     }
 
     /**
@@ -550,39 +689,54 @@ abstract contract BaseGame is
      */
     function _endCurrentGame() internal {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage currentGame = gameStorage.games[
             currentGameId
         ];
 
-        // 게임 상태를 종료로 변경
-        currentGame.state = StorageLayout.GameState.ENDED;
-
-        // 자식 컨트랙트의 승자 선정 함수 호출 (잭팟 분배와 통계 업데이트 포함)
+        _updateGameState();
         address winner = _pickWinner();
+        _emitGameEndEvents(
+            currentGame.gameNumber,
+            currentGame.jackpot,
+            currentGame.playerCount,
+            winner
+        );
+    }
 
-        // 승자 선정 이벤트 발생
+    /**
+     * @dev 게임 상태 업데이트
+     */
+    function _updateGameState() internal {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
+        StorageLayout.Game storage currentGame = gameStorage.games[
+            currentGameId
+        ];
+        currentGame.state = StorageLayout.GameState.ENDED;
+    }
+
+    /**
+     * @dev 게임 종료 이벤트 발생
+     */
+    function _emitGameEndEvents(
+        uint256 gameNumber,
+        uint256 jackpot,
+        uint256 playerCount,
+        address winner
+    ) internal {
         emit WinnerSelected(
             winner,
-            currentGame.gameNumber,
-            currentGame.jackpot,
-            currentGame.playerCount,
+            gameNumber,
+            jackpot,
+            playerCount,
             block.timestamp
         );
 
-        // 게임 종료 이벤트 발생
-        emit GameEnded(
-            currentGame.gameNumber,
-            currentGame.playerCount,
-            currentGame.jackpot,
-            block.timestamp
-        );
+        emit GameEnded(gameNumber, playerCount, jackpot, block.timestamp);
 
-        // 게임 상태 변경 이벤트
         emit GameStateChanged(
-            currentGame.gameNumber,
+            gameNumber,
             StorageLayout.GameState.ENDED,
             block.timestamp
         );
@@ -593,9 +747,7 @@ abstract contract BaseGame is
      */
     function _pickWinner() internal virtual returns (address) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage currentGame = gameStorage.games[
             currentGameId
         ];
@@ -604,14 +756,21 @@ abstract contract BaseGame is
             return address(0);
         }
 
-        // BaseGame의 randomNumber 함수 사용
+        return _selectRandomWinner(currentGame.players);
+    }
+
+    /**
+     * @dev 랜덤 승자 선택
+     */
+    function _selectRandomWinner(
+        address[] storage players
+    ) internal view returns (address) {
         uint256 randomIndex = enhancedRandomNumberSecure(
             0,
-            currentGame.players.length - 1,
+            players.length - 1,
             block.timestamp
         );
-
-        return currentGame.players[randomIndex];
+        return players[randomIndex];
     }
 
     /**
@@ -682,31 +841,51 @@ abstract contract BaseGame is
      */
     function _transferToTreasury(uint256 amount) internal virtual {
         if (amount > 0) {
-            // registry가 설정되지 않은 경우 (테스트 환경) 무시
-            if (address(registry) == address(0)) {
-                return;
+            if (_isRegistryAvailable()) {
+                _processTreasuryTransfer(amount);
             }
+        }
+    }
 
-            try registry.getContract(treasuryName) returns (
-                address treasuryAddress
-            ) {
-                if (treasuryAddress != address(0)) {
-                    try
-                        ITreasuryManager(treasuryAddress).depositFunds(
-                            treasuryName,
-                            msg.sender,
-                            amount
-                        )
-                    {
-                        // 성공적으로 Treasury로 전송됨
-                    } catch {
-                        // Treasury 전송 실패 시 컨트랙트에 보관
-                        // (긴급 상황에서만 사용)
-                    }
-                }
-            } catch {
-                // registry에서 컨트랙트를 찾을 수 없는 경우 무시
+    /**
+     * @dev Registry 사용 가능 여부 확인
+     */
+    function _isRegistryAvailable() internal view returns (bool) {
+        return address(registry) != address(0);
+    }
+
+    /**
+     * @dev Treasury 전송 처리
+     */
+    function _processTreasuryTransfer(uint256 amount) internal {
+        try registry.getContract(treasuryName) returns (
+            address treasuryAddress
+        ) {
+            if (treasuryAddress != address(0)) {
+                _executeTreasuryDeposit(treasuryAddress, amount);
             }
+        } catch {
+            // registry에서 컨트랙트를 찾을 수 없는 경우 무시
+        }
+    }
+
+    /**
+     * @dev Treasury 예치 실행
+     */
+    function _executeTreasuryDeposit(
+        address treasuryAddress,
+        uint256 amount
+    ) internal {
+        try
+            ITreasuryManager(treasuryAddress).depositFunds(
+                treasuryName,
+                msg.sender,
+                amount
+            )
+        {
+            // 성공적으로 Treasury로 전송됨
+        } catch {
+            // Treasury 전송 실패 시 컨트랙트에 보관 (긴급 상황에서만 사용)
         }
     }
 
@@ -741,40 +920,19 @@ abstract contract BaseGame is
         uint256 ticketAmount,
         address referrer
     ) internal {
-        // 총 수수료 계산 (10%)
-        uint256 totalFee = (ticketAmount * TOTAL_FEE_PERCENT) / 100;
+        uint256 totalFee = _calculateTotalFee(ticketAmount);
 
         if (totalFee > 0) {
-            // 리퍼럴 수수료 계산 (2%)
-            uint256 referralFee = (ticketAmount * REFERRAL_FEE_PERCENT) / 100;
+            (
+                uint256 referralFee,
+                uint256 adLotteryFee,
+                uint256 developerFee
+            ) = _calculateIndividualFees(ticketAmount);
 
-            // Ad Lottery 수수료 계산 (3%)
-            uint256 adLotteryFee = (ticketAmount * AD_LOTTERY_FEE_PERCENT) /
-                100;
+            _processReferralFeeIfValid(referralFee, referrer);
+            _processAdLotteryFeeIfValid(adLotteryFee);
+            _processDeveloperFeeIfValid(developerFee);
 
-            // 개발자 수수료 계산 (5%)
-            uint256 developerFee = (ticketAmount * DEVELOPER_FEE_PERCENT) / 100;
-
-            // 리퍼럴 보상 처리
-            if (
-                referrer != address(0) &&
-                referrer != msg.sender &&
-                referralFee > 0
-            ) {
-                _processReferralReward(referrer, msg.sender);
-            }
-
-            // Ad Lottery 수수료 처리
-            if (adLotteryFee > 0) {
-                _processAdLotteryFee(adLotteryFee);
-            }
-
-            // 개발자 수수료 처리
-            if (developerFee > 0) {
-                _processDeveloperFee(developerFee);
-            }
-
-            // 수수료 분배 이벤트 발생
             emit FeeDistributed(
                 referralFee,
                 adLotteryFee,
@@ -793,34 +951,53 @@ abstract contract BaseGame is
         address referrer,
         address player
     ) internal virtual {
-        // 단순화된 리퍼럴 시스템 - 리퍼러가 유효한 주소인 경우에만 보상 지급
-        if (referrer != address(0) && referrer != player) {
-            // registry가 설정되지 않은 경우 (테스트 환경) 무시
-            if (address(registry) == address(0)) {
-                return;
+        if (_isValidReferrer(referrer, player)) {
+            if (_isRegistryAvailable()) {
+                _executeReferralReward(referrer);
             }
+        }
+    }
 
-            // 리퍼럴 컨트랙트 주소 가져오기
-            try registry.getContract("CryptolottoReferral") returns (
-                address referralContract
-            ) {
-                if (referralContract != address(0)) {
-                    // 리퍼럴 보상 처리 (BaseGame에서 계산된 금액 사용)
-                    try
-                        CryptolottoReferral(referralContract)
-                            .processReferralReward{value: 0}(
-                            referrer,
-                            0 // 금액은 _processFeeDistribution에서 처리됨
-                        )
-                    {
-                        // 성공적으로 처리됨
-                    } catch {
-                        // 리퍼럴 처리 실패 시 무시 (게임은 계속 진행)
-                    }
-                }
-            } catch {
-                // registry에서 컨트랙트를 찾을 수 없는 경우 무시
+    /**
+     * @dev 유효한 리퍼러인지 확인
+     */
+    function _isValidReferrer(
+        address referrer,
+        address player
+    ) internal pure returns (bool) {
+        return referrer != address(0) && referrer != player;
+    }
+
+    /**
+     * @dev 리퍼럴 보상 실행
+     */
+    function _executeReferralReward(address referrer) internal {
+        try registry.getContract("CryptolottoReferral") returns (
+            address referralContract
+        ) {
+            if (referralContract != address(0)) {
+                _callReferralContract(referralContract, referrer);
             }
+        } catch {
+            // registry에서 컨트랙트를 찾을 수 없는 경우 무시
+        }
+    }
+
+    /**
+     * @dev 리퍼럴 컨트랙트 호출
+     */
+    function _callReferralContract(
+        address referralContract,
+        address referrer
+    ) internal {
+        try
+            CryptolottoReferral(referralContract).processReferralReward{
+                value: 0
+            }(referrer, 0)
+        {
+            // 성공적으로 처리됨
+        } catch {
+            // 리퍼럴 처리 실패 시 무시 (게임은 계속 진행)
         }
     }
 
@@ -842,35 +1019,41 @@ abstract contract BaseGame is
      * @param amount 수수료 금액
      */
     function _processDeveloperFee(uint256 amount) internal virtual {
-        // 개발자 수수료 처리 (FundsDistributor로 전송)
         if (amount > 0) {
-            // registry가 설정되지 않은 경우 (테스트 환경) 무시
-            if (address(registry) == address(0)) {
-                return;
+            if (_isRegistryAvailable()) {
+                _executeDeveloperFeeTransfer(amount);
             }
+        }
+    }
 
-            try registry.getContract("FundsDistributor") returns (
-                address distributorAddress
-            ) {
-                if (distributorAddress != address(0)) {
-                    // FundsDistributor로 직접 ETH 전송
-                    (bool success, ) = payable(distributorAddress).call{
-                        value: amount
-                    }("");
-                    if (success) {
-                        emit DeveloperFeeSent(
-                            distributorAddress,
-                            amount,
-                            block.timestamp
-                        );
-                    } else {
-                        // 개발자 수수료 처리 실패 시 Treasury로 전송
-                        _transferToTreasury(amount);
-                    }
-                }
-            } catch {
-                // registry에서 컨트랙트를 찾을 수 없는 경우 무시
+    /**
+     * @dev 개발자 수수료 전송 실행
+     */
+    function _executeDeveloperFeeTransfer(uint256 amount) internal {
+        try registry.getContract("FundsDistributor") returns (
+            address distributorAddress
+        ) {
+            if (distributorAddress != address(0)) {
+                _sendToDistributor(distributorAddress, amount);
             }
+        } catch {
+            // registry에서 컨트랙트를 찾을 수 없는 경우 무시
+        }
+    }
+
+    /**
+     * @dev Distributor로 전송
+     */
+    function _sendToDistributor(
+        address distributorAddress,
+        uint256 amount
+    ) internal {
+        (bool success, ) = payable(distributorAddress).call{value: amount}("");
+        if (success) {
+            emit DeveloperFeeSent(distributorAddress, amount, block.timestamp);
+        } else {
+            // 개발자 수수료 처리 실패 시 Treasury로 전송
+            _transferToTreasury(amount);
         }
     }
 
@@ -883,8 +1066,18 @@ abstract contract BaseGame is
         require(ownable.isAllowed(msg.sender), "Not authorized");
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         uint256 oldPrice = gameStorage.ticketPrice;
-        gameStorage.ticketPrice = price;
+        _updateTicketPrice(gameStorage, price);
         emit TicketPriceChanged(oldPrice, price, block.timestamp);
+    }
+
+    /**
+     * @dev 티켓 가격 업데이트
+     */
+    function _updateTicketPrice(
+        StorageLayout.GameStorage storage gameStorage,
+        uint256 price
+    ) internal {
+        gameStorage.ticketPrice = price;
     }
 
     /**
@@ -894,8 +1087,18 @@ abstract contract BaseGame is
         require(ownable.isAllowed(msg.sender), "Not authorized");
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         uint256 oldValue = gameStorage.maxTicketsPerPlayer;
-        gameStorage.maxTicketsPerPlayer = maxTickets;
+        _updateMaxTicketsPerPlayer(gameStorage, maxTickets);
         emit MaxTicketsPerPlayerUpdated(oldValue, maxTickets, block.timestamp);
+    }
+
+    /**
+     * @dev 최대 티켓 수 업데이트
+     */
+    function _updateMaxTicketsPerPlayer(
+        StorageLayout.GameStorage storage gameStorage,
+        uint256 maxTickets
+    ) internal {
+        gameStorage.maxTicketsPerPlayer = maxTickets;
     }
 
     /**
@@ -905,8 +1108,18 @@ abstract contract BaseGame is
         require(ownable.isAllowed(msg.sender), "Not authorized");
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         uint256 oldValue = gameStorage.gameDuration;
-        gameStorage.gameDuration = duration;
+        _updateGameDuration(gameStorage, duration);
         emit GameDurationUpdated(oldValue, duration, block.timestamp);
+    }
+
+    /**
+     * @dev 게임 시간 업데이트
+     */
+    function _updateGameDuration(
+        StorageLayout.GameStorage storage gameStorage,
+        uint256 duration
+    ) internal {
+        gameStorage.gameDuration = duration;
     }
 
     /**
@@ -929,9 +1142,8 @@ abstract contract BaseGame is
         emit EmergencyResumed(msg.sender, block.timestamp);
     }
 
-    /**
-     * @dev 현재 게임 정보 조회
-     */
+    // 기존 getCurrentGameInfo 함수는 주석 처리
+    /*
     function getCurrentGameInfo()
         public
         view
@@ -945,29 +1157,89 @@ abstract contract BaseGame is
         )
     {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
+        return _getGameInfo(game);
+    }
+    */
+
+    function getCurrentGameNumber() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
+        return game.gameNumber;
+    }
+
+    function getCurrentGameStartTime() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
+        return game.startTime;
+    }
+
+    function getCurrentGameEndTime() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
+        return game.endTime;
+    }
+
+    function getCurrentGameJackpot() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
+        return game.jackpot;
+    }
+
+    function getCurrentGamePlayerCount() public view returns (uint256) {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
+        return game.playerCount;
+    }
+
+    function getCurrentGameState()
+        public
+        view
+        returns (StorageLayout.GameState)
+    {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = _getCurrentGame(gameStorage);
+        return game.state;
+    }
+
+    /**
+     * @dev 현재 게임 가져오기
+     */
+    function _getCurrentGame(
+        StorageLayout.GameStorage storage gameStorage
+    ) internal view returns (StorageLayout.Game storage) {
         if (gameStorage.totalGames > 0) {
-            StorageLayout.Game storage game = gameStorage.games[
-                gameStorage.totalGames - 1
-            ];
-            return (
-                game.gameNumber,
-                game.startTime,
-                game.endTime,
-                game.jackpot,
-                game.playerCount,
-                game.state
-            );
+            return gameStorage.games[gameStorage.totalGames - 1];
         } else {
-            StorageLayout.Game storage game = gameStorage.games[0];
-            return (
-                game.gameNumber,
-                game.startTime,
-                game.endTime,
-                game.jackpot,
-                game.playerCount,
-                game.state
-            );
+            return gameStorage.games[0];
         }
+    }
+
+    /**
+     * @dev 게임 정보 반환
+     */
+    function _getGameInfo(
+        StorageLayout.Game storage game
+    )
+        internal
+        view
+        returns (
+            uint256 gameNumber,
+            uint256 startTime,
+            uint256 endTime,
+            uint256 jackpot,
+            uint256 playerCount,
+            StorageLayout.GameState state
+        )
+    {
+        return (
+            game.gameNumber,
+            game.startTime,
+            game.endTime,
+            game.jackpot,
+            game.playerCount,
+            game.state
+        );
     }
 
     /**
@@ -1018,19 +1290,12 @@ abstract contract BaseGame is
         totalPlayers = gameStorage.totalPlayers;
         totalJackpot = gameStorage.totalJackpot;
 
-        // 평균 티켓 수 계산
-        averageTicketsPerGame = totalGames > 0
-            ? totalJackpot / (totalGames * gameStorage.ticketPrice)
-            : 0;
-
-        // 성공률 계산 (완료된 게임 / 총 게임)
-        uint256 completedGames = 0;
-        for (uint256 i = 0; i < totalGames; i++) {
-            if (gameStorage.games[i].state == StorageLayout.GameState.ENDED) {
-                completedGames++;
-            }
-        }
-        successRate = totalGames > 0 ? (completedGames * 100) / totalGames : 0;
+        averageTicketsPerGame = _calculateAverageTicketsPerGame(
+            totalGames,
+            totalJackpot,
+            gameStorage.ticketPrice
+        );
+        successRate = _calculateSuccessRate(gameStorage, totalGames);
 
         return (
             totalGames,
@@ -1039,6 +1304,44 @@ abstract contract BaseGame is
             averageTicketsPerGame,
             successRate
         );
+    }
+
+    /**
+     * @dev 게임당 평균 티켓 수 계산
+     */
+    function _calculateAverageTicketsPerGame(
+        uint256 totalGames,
+        uint256 totalJackpot,
+        uint256 ticketPrice
+    ) internal pure returns (uint256) {
+        return totalGames > 0 ? totalJackpot / (totalGames * ticketPrice) : 0;
+    }
+
+    /**
+     * @dev 성공률 계산
+     */
+    function _calculateSuccessRate(
+        StorageLayout.GameStorage storage gameStorage,
+        uint256 totalGames
+    ) internal view returns (uint256) {
+        uint256 completedGames = _countCompletedGames(gameStorage, totalGames);
+        return totalGames > 0 ? (completedGames * 100) / totalGames : 0;
+    }
+
+    /**
+     * @dev 완료된 게임 수 계산
+     */
+    function _countCompletedGames(
+        StorageLayout.GameStorage storage gameStorage,
+        uint256 totalGames
+    ) internal view returns (uint256) {
+        uint256 completedGames = 0;
+        for (uint256 i = 0; i < totalGames; i++) {
+            if (gameStorage.games[i].state == StorageLayout.GameState.ENDED) {
+                completedGames++;
+            }
+        }
+        return completedGames;
     }
 
     /**
@@ -1065,13 +1368,11 @@ abstract contract BaseGame is
         totalTicketsPurchased = getGameStorage().playerTicketCount[player];
         lastActivityTime = 0; // BaseGame에서는 lastPurchaseTime이 없으므로 0
 
-        // 게임 참여 수 계산 (간단한 구현)
-        gamesParticipated = totalTicketsPurchased > 0 ? 1 : 0;
-
-        // 평균 티켓 수 계산
-        averageTicketsPerGame = gamesParticipated > 0
-            ? totalTicketsPurchased / gamesParticipated
-            : 0;
+        gamesParticipated = _calculateGamesParticipated(totalTicketsPurchased);
+        averageTicketsPerGame = _calculatePlayerAverageTickets(
+            totalTicketsPurchased,
+            gamesParticipated
+        );
 
         return (
             totalTicketsPurchased,
@@ -1079,6 +1380,28 @@ abstract contract BaseGame is
             lastActivityTime,
             averageTicketsPerGame
         );
+    }
+
+    /**
+     * @dev 참여한 게임 수 계산
+     */
+    function _calculateGamesParticipated(
+        uint256 totalTicketsPurchased
+    ) internal pure returns (uint256) {
+        return totalTicketsPurchased > 0 ? 1 : 0;
+    }
+
+    /**
+     * @dev 플레이어 평균 티켓 수 계산
+     */
+    function _calculatePlayerAverageTickets(
+        uint256 totalTicketsPurchased,
+        uint256 gamesParticipated
+    ) internal pure returns (uint256) {
+        return
+            gamesParticipated > 0
+                ? totalTicketsPurchased / gamesParticipated
+                : 0;
     }
 
     /**
@@ -1104,11 +1427,31 @@ abstract contract BaseGame is
         )
     {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId_ = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId_ = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage game = gameStorage.games[currentGameId_];
 
+        return _getGameStatus(gameStorage, game, currentGameId_);
+    }
+
+    /**
+     * @dev 게임 상태 반환
+     */
+    function _getGameStatus(
+        StorageLayout.GameStorage storage gameStorage,
+        StorageLayout.Game storage game,
+        uint256 currentGameId_
+    )
+        internal
+        view
+        returns (
+            bool isActive,
+            uint256 currentGameId,
+            uint256 playerCount,
+            uint256 jackpot,
+            uint256 remainingTime,
+            StorageLayout.GameState gameState
+        )
+    {
         return (
             gameStorage.isActive,
             currentGameId_,
@@ -1154,11 +1497,18 @@ abstract contract BaseGame is
      */
     function getRemainingGameTime() public view virtual returns (uint256) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage game = gameStorage.games[currentGameId];
 
+        return _calculateRemainingTime(game);
+    }
+
+    /**
+     * @dev 남은 시간 계산
+     */
+    function _calculateRemainingTime(
+        StorageLayout.Game storage game
+    ) internal view returns (uint256) {
         if (block.timestamp >= game.endTime) {
             return 0;
         }
@@ -1212,5 +1562,19 @@ abstract contract BaseGame is
     function setTreasuryName(string memory _treasuryName) external onlyOwner {
         require(bytes(_treasuryName).length > 0, "Invalid treasury name");
         treasuryName = _treasuryName;
+    }
+
+    function _startNewGame() internal {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        uint256 newGameId = gameStorage.totalGames;
+        StorageLayout.Game storage newGame = gameStorage.games[newGameId];
+        (
+            newGame.gameNumber,
+            newGame.startTime,
+            newGame.endTime,
+            newGame.state
+        ) = _initializeNewGame(newGameId, gameStorage.gameDuration);
+        gameStorage.totalGames++;
+        _emitNewGameEvents(newGameId);
     }
 }

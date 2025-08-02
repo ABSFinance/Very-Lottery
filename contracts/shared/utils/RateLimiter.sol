@@ -69,9 +69,30 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
         uint256 maxRequests,
         uint256 timeWindow
     ) external onlyOwner {
+        _validateRateLimitParams(maxRequests, timeWindow);
+        _createUserRateLimit(user, maxRequests, timeWindow);
+        _emitRateLimitCreated(user, "", maxRequests, timeWindow);
+    }
+
+    /**
+     * @dev 속도 제한 매개변수 검증
+     */
+    function _validateRateLimitParams(
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) internal pure {
         require(maxRequests > 0, "Max requests must be greater than 0");
         require(timeWindow > 0, "Time window must be greater than 0");
+    }
 
+    /**
+     * @dev 사용자 속도 제한 생성
+     */
+    function _createUserRateLimit(
+        address user,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) internal {
         userRateLimits[user] = RateLimit({
             maxRequests: maxRequests,
             timeWindow: timeWindow,
@@ -79,10 +100,20 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
             windowStart: block.timestamp,
             isActive: true
         });
+    }
 
+    /**
+     * @dev 속도 제한 생성 이벤트 발생
+     */
+    function _emitRateLimitCreated(
+        address user,
+        string memory functionName,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) internal {
         emit RateLimitCreated(
             user,
-            "",
+            functionName,
             maxRequests,
             timeWindow,
             block.timestamp

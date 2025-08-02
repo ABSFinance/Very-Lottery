@@ -56,22 +56,48 @@ library GasOptimizer {
     function sortAddresses(
         address[] memory array
     ) internal pure returns (address[] memory) {
+        address[] memory sorted = _copyArray(array);
+        _sortArray(sorted);
+        return sorted;
+    }
+
+    /**
+     * @dev 배열 복사
+     */
+    function _copyArray(
+        address[] memory array
+    ) internal pure returns (address[] memory) {
         address[] memory sorted = new address[](array.length);
         for (uint256 i = 0; i < array.length; i++) {
             sorted[i] = array[i];
         }
+        return sorted;
+    }
 
+    /**
+     * @dev 배열 정렬
+     */
+    function _sortArray(address[] memory sorted) internal pure {
         for (uint256 i = 0; i < sorted.length; i++) {
             for (uint256 j = i + 1; j < sorted.length; j++) {
                 if (sorted[i] > sorted[j]) {
-                    address temp = sorted[i];
-                    sorted[i] = sorted[j];
-                    sorted[j] = temp;
+                    _swapElements(sorted, i, j);
                 }
             }
         }
+    }
 
-        return sorted;
+    /**
+     * @dev 요소 교환
+     */
+    function _swapElements(
+        address[] memory sorted,
+        uint256 i,
+        uint256 j
+    ) internal pure {
+        address temp = sorted[i];
+        sorted[i] = sorted[j];
+        sorted[j] = temp;
     }
 
     /**

@@ -34,6 +34,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-foundry-
 
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          export PATH="$HOME/.foundry/bin:$PATH"
+          foundryup stable
+
       - name: Install dependencies
         run: forge install
 
@@ -60,7 +66,7 @@ jobs:
           # Try with coverage profile first (suppress warnings)
           export FOUNDRY_PROFILE=coverage
           export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
-          forge coverage --report lcov && {
+          forge coverage --ir-minimum --report lcov && {
             echo "Coverage with coverage profile succeeded"
             exit 0
           } || {
@@ -145,6 +151,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-foundry-
 
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          export PATH="$HOME/.foundry/bin:$PATH"
+          foundryup stable
+
       - name: Install dependencies
         run: forge install
 
@@ -184,6 +196,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-foundry-
 
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          export PATH="$HOME/.foundry/bin:$PATH"
+          foundryup stable
+
       - name: Install dependencies
         run: forge install
 
@@ -198,6 +216,9 @@ jobs:
           export FOUNDRY_PROFILE=ci
           export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --match-contract CryptolottoFuzz -vv
+
+      - name: Check formatting
+        run: forge fmt --check
 
   performance:
     needs: test
@@ -222,6 +243,12 @@ jobs:
           key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
+
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          export PATH="$HOME/.foundry/bin:$PATH"
+          foundryup stable
 
       - name: Install dependencies
         run: forge install
@@ -268,6 +295,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-foundry-
 
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          export PATH="$HOME/.foundry/bin:$PATH"
+          foundryup stable
+
       - name: Install dependencies
         run: forge install
 
@@ -303,6 +336,12 @@ jobs:
           key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
           restore-keys: |
             ${{ runner.os }}-foundry-
+
+      - name: Install Foundry
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+          export PATH="$HOME/.foundry/bin:$PATH"
+          foundryup stable
 
       - name: Install dependencies
         run: forge install

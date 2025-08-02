@@ -70,9 +70,30 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
         uint256 threshold,
         uint256 timeout
     ) external onlyOwner {
+        _validateCircuitParams(threshold, timeout);
+        _createCircuit(circuitName, threshold, timeout);
+        emit CircuitCreated(circuitName, threshold, timeout, block.timestamp);
+    }
+
+    /**
+     * @dev 서킷 매개변수 검증
+     */
+    function _validateCircuitParams(
+        uint256 threshold,
+        uint256 timeout
+    ) internal pure {
         require(threshold > 0, "Threshold must be greater than 0");
         require(timeout > 0, "Timeout must be greater than 0");
+    }
 
+    /**
+     * @dev 서킷 생성
+     */
+    function _createCircuit(
+        string memory circuitName,
+        uint256 threshold,
+        uint256 timeout
+    ) internal {
         circuits[circuitName] = Circuit({
             state: CircuitState.CLOSED,
             failureCount: 0,
@@ -81,8 +102,6 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
             timeout: timeout,
             isActive: true
         });
-
-        emit CircuitCreated(circuitName, threshold, timeout, block.timestamp);
     }
 
     /**
@@ -93,9 +112,24 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
         uint256 threshold,
         uint256 timeout
     ) external onlyOwner {
-        require(threshold > 0, "Threshold must be greater than 0");
-        require(timeout > 0, "Timeout must be greater than 0");
+        _validateCircuitParams(threshold, timeout);
+        _createAddressCircuit(targetAddress, threshold, timeout);
+        emit CircuitCreated(
+            _addressToString(targetAddress),
+            threshold,
+            timeout,
+            block.timestamp
+        );
+    }
 
+    /**
+     * @dev 주소별 서킷 생성
+     */
+    function _createAddressCircuit(
+        address targetAddress,
+        uint256 threshold,
+        uint256 timeout
+    ) internal {
         addressCircuits[targetAddress] = Circuit({
             state: CircuitState.CLOSED,
             failureCount: 0,
@@ -104,6 +138,15 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
             timeout: timeout,
             isActive: true
         });
+    }
+
+    /**
+     * @dev 주소를 문자열로 변환
+     */
+    function _addressToString(
+        address addr
+    ) internal pure returns (string memory) {
+        return string(abi.encodePacked(addr));
     }
 
     /**

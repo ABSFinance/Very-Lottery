@@ -51,18 +51,55 @@ contract EventLogger is IEventLogger, Ownable {
     ) external override {
         require(loggingEnabled, "Logging is disabled");
 
-        EventLog memory newLog = EventLog({
-            eventType: eventType,
-            message: message,
-            indexedAddress: indexedAddress,
-            data: data,
-            timestamp: block.timestamp,
-            blockNumber: block.number
-        });
+        EventLog memory newLog = _createEventLog(
+            eventType,
+            message,
+            indexedAddress,
+            data
+        );
+        _storeEventLog(newLog, eventType);
+        _emitEventLogged(eventType, message, indexedAddress);
+    }
 
+    /**
+     * @dev 이벤트 로그 생성
+     */
+    function _createEventLog(
+        string memory eventType,
+        string memory message,
+        address indexedAddress,
+        bytes memory data
+    ) internal view returns (EventLog memory) {
+        return
+            EventLog({
+                eventType: eventType,
+                message: message,
+                indexedAddress: indexedAddress,
+                data: data,
+                timestamp: block.timestamp,
+                blockNumber: block.number
+            });
+    }
+
+    /**
+     * @dev 이벤트 로그 저장
+     */
+    function _storeEventLog(
+        EventLog memory newLog,
+        string memory eventType
+    ) internal {
         eventLogs.push(newLog);
         eventTypeCounters[eventType]++;
+    }
 
+    /**
+     * @dev 이벤트 로그 이벤트 발생
+     */
+    function _emitEventLogged(
+        string memory eventType,
+        string memory message,
+        address indexedAddress
+    ) internal {
         emit EventLogged(eventType, message, indexedAddress, block.timestamp);
     }
 

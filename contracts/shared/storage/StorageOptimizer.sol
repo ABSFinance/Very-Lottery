@@ -114,20 +114,42 @@ library StorageOptimizer {
         mapping(address => bool) storage playerMap,
         address[] memory newPlayers
     ) internal returns (uint256 addedCount) {
+        return _processBatchPlayers(players, playerMap, newPlayers);
+    }
+
+    /**
+     * @dev 배치 플레이어 처리
+     */
+    function _processBatchPlayers(
+        address[] storage players,
+        mapping(address => bool) storage playerMap,
+        address[] memory newPlayers
+    ) internal returns (uint256 addedCount) {
         uint256 newPlayerCount = 0;
 
         for (uint256 i = 0; i < newPlayers.length; i++) {
-            address player = newPlayers[i];
-
-            // O(1) 중복 체크
-            if (!playerMap[player]) {
-                players.push(player);
-                playerMap[player] = true;
+            if (_addPlayerIfNew(players, playerMap, newPlayers[i])) {
                 newPlayerCount++;
             }
         }
 
         return newPlayerCount;
+    }
+
+    /**
+     * @dev 새로운 플레이어인 경우에만 추가
+     */
+    function _addPlayerIfNew(
+        address[] storage players,
+        mapping(address => bool) storage playerMap,
+        address player
+    ) internal returns (bool) {
+        if (!playerMap[player]) {
+            players.push(player);
+            playerMap[player] = true;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -147,19 +169,40 @@ library StorageOptimizer {
             return false; // 플레이어가 존재하지 않음
         }
 
-        // 배열에서 플레이어 찾기 및 제거
+        return _findAndRemovePlayer(players, playerMap, player);
+    }
+
+    /**
+     * @dev 플레이어 찾기 및 제거
+     */
+    function _findAndRemovePlayer(
+        address[] storage players,
+        mapping(address => bool) storage playerMap,
+        address player
+    ) internal returns (bool) {
         uint256 length = players.length;
         for (uint256 i = 0; i < length; i++) {
             if (players[i] == player) {
-                // 마지막 요소를 현재 위치로 이동
-                players[i] = players[length - 1];
-                players.pop();
-                playerMap[player] = false;
+                _removePlayerAtIndex(players, playerMap, player, i);
                 return true;
             }
         }
-
         return false;
+    }
+
+    /**
+     * @dev 특정 인덱스에서 플레이어 제거
+     */
+    function _removePlayerAtIndex(
+        address[] storage players,
+        mapping(address => bool) storage playerMap,
+        address player,
+        uint256 index
+    ) internal {
+        // 마지막 요소를 현재 위치로 이동
+        players[index] = players[players.length - 1];
+        players.pop();
+        playerMap[player] = false;
     }
 
     /**
@@ -203,20 +246,20 @@ library StorageOptimizer {
         }
     }
 
-    /**
-     * @dev 스토리지 슬롯 최적화 검증
-     */
+    /*
     function validateStorageLayout() internal pure returns (bool) {
         // PackedGameData가 32바이트에 맞는지 확인
-        PackedGameData memory test;
-        assembly {
-            // 32바이트 슬롯 사용 확인
-            let size := 32
-            test := mload(0x40)
-            mstore(0x40, add(test, size))
-        }
-        return true;
+        // PackedGameData memory test;
+        // assembly {
+        //     // 32바이트 슬롯 사용 확인
+        //     let size := 32
+        //     test := mload(0x40)
+        //     mstore(0x40, add(test, size))
+        // }
+        // return true;
+        // (테스트/개발용 함수이므로 커버리지 환경에서는 주석 처리)
     }
+    */
 
     /**
      * @dev 스토리지 접근 최적화 (캐싱)

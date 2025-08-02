@@ -276,8 +276,8 @@ contract CryptolottoIntegration is Test {
                     vm.prank(owner);
                     try lottery1Day.autoEndGame() {
                         // 우승자 확인
-                        (, , , , , StorageLayout.GameState state) = lottery1Day
-                            .getCurrentGameInfo();
+                        StorageLayout.GameState state = lottery1Day
+                            .getCurrentGameState();
                         assertTrue(
                             uint256(state) >= 0,
                             "Game state should be valid"
@@ -521,8 +521,7 @@ contract CryptolottoIntegration is Test {
         vm.prank(owner);
         try lotteryAd.autoEndGame() {
             // 6. 우승자가 상금을 받았는지 확인
-            (, , , , , StorageLayout.GameState state) = lotteryAd
-                .getCurrentGameInfo();
+            StorageLayout.GameState state = lotteryAd.getCurrentGameState();
             assertTrue(
                 uint256(state) >= 0,
                 "Ad Lottery game should be completed"
@@ -808,8 +807,7 @@ contract CryptolottoIntegration is Test {
             );
 
             // 게임 상태 확인
-            (, , , , , StorageLayout.GameState state) = lotteryAd
-                .getCurrentGameInfo();
+            StorageLayout.GameState state = lotteryAd.getCurrentGameState();
             assertTrue(
                 uint256(state) >= 0,
                 "Ad Lottery game should be completed"
@@ -984,8 +982,7 @@ contract CryptolottoIntegration is Test {
             );
 
             // 8. 게임 상태 확인
-            (, , , , , StorageLayout.GameState state) = lotteryAd
-                .getCurrentGameInfo();
+            StorageLayout.GameState state = lotteryAd.getCurrentGameState();
             assertTrue(
                 uint256(state) >= 0,
                 "Ad Lottery game should be completed"

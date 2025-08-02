@@ -76,13 +76,34 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
         uint256 currentTime = block.timestamp;
         uint256 lastTime = lastInteractionTime[user];
 
-        // 최소 간격 확인
+        _checkMinimumInterval(currentTime, lastTime);
+        _updateInteractionCount(user, currentTime, lastTime);
+        lastInteractionTime[user] = currentTime;
+
+        return true;
+    }
+
+    /**
+     * @dev 최소 간격 확인
+     */
+    function _checkMinimumInterval(
+        uint256 currentTime,
+        uint256 lastTime
+    ) internal view {
         require(
             currentTime >= lastTime + minInteractionInterval,
             "Interaction too frequent"
         );
+    }
 
-        // 시간당 최대 상호작용 수 확인
+    /**
+     * @dev 상호작용 수 업데이트
+     */
+    function _updateInteractionCount(
+        address user,
+        uint256 currentTime,
+        uint256 lastTime
+    ) internal {
         if (currentTime - lastTime >= 3600) {
             // 1시간
             interactionCount[user] = 1;
@@ -93,10 +114,6 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
                 "Too many interactions per hour"
             );
         }
-
-        lastInteractionTime[user] = currentTime;
-
-        return true;
     }
 
     /**

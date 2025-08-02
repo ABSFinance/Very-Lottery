@@ -533,20 +533,18 @@ contract CryptolottoAd is BaseGame {
                 );
                 return;
             }
-            (
-                uint256 gameNumber, // startTime // endTime // jackpot // playerCount // state
-                ,
-                ,
-                ,
-                ,
-
-            ) = getCurrentGameInfo();
+            uint256 gameNumber = getCurrentGameNumber();
+            uint256 startTime = getCurrentGameStartTime();
+            uint256 endTime = getCurrentGameEndTime();
+            uint256 jackpot = getCurrentGameJackpot();
+            uint256 gamePlayerCount = getCurrentGamePlayerCount();
+            StorageLayout.GameState state = getCurrentGameState();
 
             try
                 ICryptolottoStatsAggregator(statsAddress).newWinner(
                     winner,
                     gameNumber,
-                    playerCount,
+                    gamePlayerCount,
                     amount,
                     3, // Ad Lottery 게임 타입
                     winnerIndex
