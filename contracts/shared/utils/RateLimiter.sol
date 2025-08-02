@@ -250,44 +250,73 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
     }
 
     /**
-     * @dev 속도 제한 정보 조회
+     * @dev 사용자 속도 제한 정보 조회
      */
-    function getRateLimitInfo(
+    function getUserRateLimitInfo(
+        address user
+    )
+        external
+        view
+        returns (
+            bool isActive,
+            uint256 currentRequests,
+            uint256 maxRequests,
+            uint256 timeWindow
+        )
+    {
+        RateLimit storage userLimit = userRateLimits[user];
+        return (
+            userLimit.isActive,
+            userLimit.currentRequests,
+            userLimit.maxRequests,
+            userLimit.timeWindow
+        );
+    }
+
+    /**
+     * @dev 함수 속도 제한 정보 조회
+     */
+    function getFunctionRateLimitInfo(
+        string memory functionName
+    )
+        external
+        view
+        returns (
+            bool isActive,
+            uint256 currentRequests,
+            uint256 maxRequests,
+            uint256 timeWindow
+        )
+    {
+        RateLimit storage functionLimit = functionRateLimits[functionName];
+        return (
+            functionLimit.isActive,
+            functionLimit.currentRequests,
+            functionLimit.maxRequests,
+            functionLimit.timeWindow
+        );
+    }
+
+    /**
+     * @dev 사용자 함수 속도 제한 정보 조회
+     */
+    function getUserFunctionRateLimitInfo(
         address user,
         string memory functionName
     )
         external
         view
         returns (
-            bool userLimitActive,
-            uint256 userCurrentRequests,
-            uint256 userMaxRequests,
-            uint256 userTimeWindow,
-            bool functionLimitActive,
-            uint256 functionCurrentRequests,
-            uint256 functionMaxRequests,
-            uint256 functionTimeWindow,
-            bool userFunctionLimitActive,
-            uint256 userFunctionCurrentRequests,
-            uint256 userFunctionMaxRequests,
-            uint256 userFunctionTimeWindow
+            bool isActive,
+            uint256 currentRequests,
+            uint256 maxRequests,
+            uint256 timeWindow
         )
     {
-        RateLimit storage userLimit = userRateLimits[user];
-        RateLimit storage functionLimit = functionRateLimits[functionName];
         RateLimit storage userFunctionLimit = userFunctionRateLimits[user][
             functionName
         ];
-
         return (
-            userLimit.isActive,
-            userLimit.currentRequests,
-            userLimit.maxRequests,
-            userLimit.timeWindow,
-            functionLimit.isActive,
-            functionLimit.currentRequests,
-            functionLimit.maxRequests,
-            functionLimit.timeWindow,
             userFunctionLimit.isActive,
             userFunctionLimit.currentRequests,
             userFunctionLimit.maxRequests,
