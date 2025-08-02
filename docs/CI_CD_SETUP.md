@@ -38,8 +38,8 @@ VERYCHAIN_CHAIN_ID=4613
 ### **ci.yml (메인 CI/CD 파이프라인)**
 
 #### **트리거 조건**
-- `main` 또는 `develop` 브랜치에 push
-- `main` 브랜치로의 Pull Request
+- `master` 또는 `develop` 브랜치에 push
+- `master` 브랜치로의 Pull Request
 
 #### **실행 단계**
 1. **테스트 (test)**
@@ -64,7 +64,7 @@ VERYCHAIN_CHAIN_ID=4613
    - Solhint 실행
    - 코드 포맷팅 검사
 
-6. **배포 (deploy)** - main 브랜치에서만 실행
+6. **배포 (deploy)** - master 브랜치에서만 실행
    - Verychain 배포
    - 릴리즈 생성
 
@@ -127,7 +127,7 @@ forge coverage --report lcov
 - **정기적 로테이션**: Private key 정기적으로 교체
 
 ### **배포 보안**
-- main 브랜치에서만 자동 배포
+- master 브랜치에서만 자동 배포
 - 테스트 통과 후에만 배포
 - 배포 전 보안 검사 필수
 

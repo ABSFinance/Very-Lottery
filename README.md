@@ -52,7 +52,7 @@ Cryptolotto는 Verychain 블록체인 기반의 탈중앙화 복권 플랫폼입
 ./test/run_tests.sh
 
 # GitHub Actions에서 자동 실행
-git push origin main
+git push origin master
 ```
 
 ## 🧪 **테스트 스위트**
