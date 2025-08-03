@@ -298,7 +298,18 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
-          forge script script/Deploy.s.sol --broadcast
+          forge script script/Deploy.s.sol --broadcast --verify
+
+      - name: Create deployment summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Network: Verychain" >> $GITHUB_STEP_SUMMARY
+          echo "- Chain ID: 4613" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployer: ${{ secrets.DEPLOYER_ADDRESS }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- Contracts deployed to Verychain" >> $GITHUB_STEP_SUMMARY
+          echo "- Explorer: https://veryscan.io" >> $GITHUB_STEP_SUMMARY
+          echo "- Veryscan: Free to use, no API key required" >> $GITHUB_STEP_SUMMARY
 
       - name: Create release
         uses: actions/create-release@v1

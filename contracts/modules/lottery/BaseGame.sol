@@ -1116,6 +1116,15 @@ abstract contract BaseGame is
         emit RegistrySet(registryAddress, block.timestamp);
     }
 
+    /**
+     * @notice Set treasury name
+     * @param _treasuryName The treasury name
+     */
+    function setTreasuryName(string memory _treasuryName) external virtual onlyOwner {
+        treasuryName = _treasuryName;
+        emit TreasuryNameSet(_treasuryName, block.timestamp);
+    }
+
     // ============ COMMON INTERNAL FUNCTIONS ============
 
     /**
@@ -1182,6 +1191,7 @@ abstract contract BaseGame is
     event TestModeSet(bool enabled, uint256 timestamp);
     event PurchaseCooldownSet(uint256 cooldown, uint256 timestamp);
     event RegistrySet(address indexed registry, uint256 timestamp);
+    event TreasuryNameSet(string treasuryName, uint256 timestamp);
     event WinnerPayout(address indexed winner, uint256 amount, uint256 timestamp);
     event FounderDistribution(address indexed founder, uint256 amount, uint256 timestamp);
     event GameStatsUpdated(uint256 totalGames, uint256 totalPlayers, uint256 totalPayouts, uint256 timestamp);

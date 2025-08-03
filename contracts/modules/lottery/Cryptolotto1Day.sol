@@ -86,12 +86,15 @@ contract Cryptolotto1Day is BaseGame {
         address, /* distributor */
         address, /* statsA */
         address, /* referralSystem */
-        address, /* _treasuryManager */
-        string memory /* _treasuryName */
+        address _treasuryManager,
+        string memory _treasuryName
     ) public initializer {
         require(owner != address(0), "Invalid owner address");
 
-        __BaseGame_init(owner, address(0)); // registry will be set later
+        // Set treasury name
+        treasuryName = _treasuryName;
+
+        __BaseGame_init(owner, address(0)); // registry will be set later via setRegistry
 
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
         gameStorage.ticketPrice = 0.01 ether;

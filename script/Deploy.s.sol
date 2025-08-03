@@ -54,19 +54,32 @@ contract DeployScript is Script {
     }
 
     function _deployCoreContracts() internal {
+        // Get deployer address
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployer = vm.addr(deployerPrivateKey);
+
         // Deploy core contracts
         ownable = new SimpleOwnable();
         stats = new StatsAggregator();
         fundsDistributor = new FundsDistributor();
         referral = new CryptolottoReferral();
         adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
-        registry = new ContractRegistry(msg.sender);
+        registry = new ContractRegistry(deployer); // Set deployer as owner
         treasuryManager = new TreasuryManager();
 
         // Create treasuries
-        treasuryManager.createTreasury("unique_test_lottery_1day", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_7days", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_ad", 1000000000000000000000);
+        treasuryManager.createTreasury(
+            "unique_test_lottery_1day",
+            1000000000000000000000
+        );
+        treasuryManager.createTreasury(
+            "unique_test_lottery_7days",
+            1000000000000000000000
+        );
+        treasuryManager.createTreasury(
+            "unique_test_lottery_ad",
+            1000000000000000000000
+        );
     }
 
     function _deployLotteryContracts() internal {
@@ -75,17 +88,56 @@ contract DeployScript is Script {
         Cryptolotto7Days implementation7Days = new Cryptolotto7Days();
         CryptolottoAd implementationAd = new CryptolottoAd();
 
-        // Prepare initialization data
-        bytes memory initData1Day = abi.encodeWithSelector(Cryptolotto1Day.initialize.selector);
-        bytes memory initData7Days = abi.encodeWithSelector(Cryptolotto7Days.initialize.selector);
-        bytes memory initDataAd = abi.encodeWithSelector(CryptolottoAd.initialize.selector);
+        // Get deployer address
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployer = vm.addr(deployerPrivateKey);
+
+        // Prepare initialization data with proper parameters
+        bytes memory initData1Day = abi.encodeWithSelector(
+            Cryptolotto1Day.initialize.selector,
+            deployer, // owner
+            address(fundsDistributor), // distributor
+            address(stats), // statsA
+            address(referral), // referralSystem
+            address(treasuryManager), // _treasuryManager
+            "unique_test_lottery_1day" // _treasuryName
+        );
+
+        bytes memory initData7Days = abi.encodeWithSelector(
+            Cryptolotto7Days.initialize.selector,
+            deployer, // owner
+            address(fundsDistributor), // distributor
+            address(stats), // statsA
+            address(referral), // referralSystem
+            address(treasuryManager), // _treasuryManager
+            "unique_test_lottery_7days" // _treasuryName
+        );
+
+        bytes memory initDataAd = abi.encodeWithSelector(
+            CryptolottoAd.initialize.selector,
+            deployer, // owner
+            address(fundsDistributor), // distributor
+            address(stats), // statsA
+            address(referral), // referralSystem
+            address(treasuryManager), // _treasuryManager
+            "unique_test_lottery_ad" // _treasuryName
+        );
 
         // Deploy proxy contracts
-        ERC1967Proxy proxy1Day = new ERC1967Proxy(address(implementation1Day), initData1Day);
+        ERC1967Proxy proxy1Day = new ERC1967Proxy(
+            address(implementation1Day),
+            initData1Day
+        );
 
-        ERC1967Proxy proxy7Days = new ERC1967Proxy(address(implementation7Days), initData7Days);
+        ERC1967Proxy proxy7Days = new ERC1967Proxy(
+            address(implementation7Days),
+            initData7Days
+        );
 
-        ERC1967Proxy proxyAd = new ERC1967Proxy(address(implementationAd), initDataAd);
+        ERC1967Proxy proxyAd = new ERC1967Proxy(
+            address(implementationAd),
+            initDataAd
+        );
 
         // Cast proxies to their respective types
         lottery1Day = Cryptolotto1Day(payable(address(proxy1Day)));
@@ -94,10 +146,15 @@ contract DeployScript is Script {
     }
 
     function _setupContracts() internal {
-        // Set registry for lottery contracts
+        // Set registry for lottery contracts (needed after initialization)
         lottery1Day.setRegistry(address(registry));
         lottery7Days.setRegistry(address(registry));
         lotteryAd.setRegistry(address(registry));
+
+        // Set treasury names for lottery contracts (registry is already set in initialize)
+        lottery1Day.setTreasuryName("unique_test_lottery_1day");
+        lottery7Days.setTreasuryName("unique_test_lottery_7days");
+        lotteryAd.setTreasuryName("unique_test_lottery_ad");
 
         // Set AdToken for Ad Lottery
         lotteryAd.setAdToken(address(adToken));
