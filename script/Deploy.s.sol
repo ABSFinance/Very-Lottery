@@ -68,18 +68,9 @@ contract DeployScript is Script {
         treasuryManager = new TreasuryManager();
 
         // Create treasuries
-        treasuryManager.createTreasury(
-            "unique_test_lottery_1day",
-            1000000000000000000000
-        );
-        treasuryManager.createTreasury(
-            "unique_test_lottery_7days",
-            1000000000000000000000
-        );
-        treasuryManager.createTreasury(
-            "unique_test_lottery_ad",
-            1000000000000000000000
-        );
+        treasuryManager.createTreasury("unique_test_lottery_1day", 1000000000000000000000);
+        treasuryManager.createTreasury("unique_test_lottery_7days", 1000000000000000000000);
+        treasuryManager.createTreasury("unique_test_lottery_ad", 1000000000000000000000);
     }
 
     function _deployLotteryContracts() internal {
@@ -124,20 +115,11 @@ contract DeployScript is Script {
         );
 
         // Deploy proxy contracts
-        ERC1967Proxy proxy1Day = new ERC1967Proxy(
-            address(implementation1Day),
-            initData1Day
-        );
+        ERC1967Proxy proxy1Day = new ERC1967Proxy(address(implementation1Day), initData1Day);
 
-        ERC1967Proxy proxy7Days = new ERC1967Proxy(
-            address(implementation7Days),
-            initData7Days
-        );
+        ERC1967Proxy proxy7Days = new ERC1967Proxy(address(implementation7Days), initData7Days);
 
-        ERC1967Proxy proxyAd = new ERC1967Proxy(
-            address(implementationAd),
-            initDataAd
-        );
+        ERC1967Proxy proxyAd = new ERC1967Proxy(address(implementationAd), initDataAd);
 
         // Cast proxies to their respective types
         lottery1Day = Cryptolotto1Day(payable(address(proxy1Day)));
