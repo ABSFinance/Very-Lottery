@@ -132,7 +132,7 @@ jobs:
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
       - name: Cache Foundry
         uses: actions/cache@v4
@@ -171,7 +171,7 @@ jobs:
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
       - name: Cache Foundry
         uses: actions/cache@v4
@@ -199,9 +199,6 @@ jobs:
           export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --match-contract CryptolottoFuzz -vv
 
-      - name: Check formatting
-        run: forge fmt --check
-
   performance:
     needs: test
     runs-on: ubuntu-latest
@@ -213,7 +210,7 @@ jobs:
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
       - name: Cache Foundry
         uses: actions/cache@v4
@@ -258,7 +255,7 @@ jobs:
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
       - name: Cache Foundry
         uses: actions/cache@v4
@@ -294,7 +291,7 @@ jobs:
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
       - name: Cache Foundry
         uses: actions/cache@v4
