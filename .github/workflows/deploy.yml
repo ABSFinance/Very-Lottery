@@ -34,7 +34,6 @@ jobs:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
           forge script script/Deploy.s.sol \
-            --rpc-url https://rpc.verylabs.io \
             --broadcast \
             --verify
 

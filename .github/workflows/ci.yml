@@ -298,7 +298,7 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
-          forge script script/Deploy.s.sol --rpc-url https://rpc.verylabs.io --broadcast
+          forge script script/Deploy.s.sol --broadcast
 
       - name: Create release
         uses: actions/create-release@v1
