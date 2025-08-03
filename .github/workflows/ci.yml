@@ -8,7 +8,6 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  FOUNDRY_DISABLE_NIGHTLY_WARNING: true
 
 jobs:
   test:
@@ -40,13 +39,11 @@ jobs:
       - name: Run tests
         run: |
           export FOUNDRY_PROFILE=ci
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --gas-report
 
       - name: Run specific test suites
         run: |
           export FOUNDRY_PROFILE=ci
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --match-contract Cryptolotto -vv
           forge test --match-contract CryptolottoIntegration -vv
           forge test --match-contract CryptolottoFuzz -vv
@@ -59,7 +56,6 @@ jobs:
           
           # Try with coverage profile first (suppress warnings)
           export FOUNDRY_PROFILE=coverage
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge coverage --ir-minimum --report lcov && {
             echo "Coverage with coverage profile succeeded"
             exit 0
@@ -68,21 +64,18 @@ jobs:
             
             # Reset to default profile
             unset FOUNDRY_PROFILE
-            export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
             forge coverage --report lcov && {
               echo "Coverage with default profile succeeded"
               exit 0
             } || {
               echo "Coverage with default profile failed, trying --via-ir..."
               
-              export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
               forge coverage --report lcov --via-ir 2>/dev/null && {
                 echo "Coverage with --via-ir succeeded"
                 exit 0
               } || {
                 echo "Coverage with --via-ir failed, trying basic coverage..."
                 
-                export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
                 forge coverage --report lcov 2>/dev/null && {
                   echo "Basic coverage succeeded"
                   exit 0
@@ -90,7 +83,6 @@ jobs:
                   echo "All coverage methods failed, generating summary only..."
                   
                   # Try to generate at least a summary
-                  export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
                   forge coverage --report summary 2>/dev/null || {
                     echo "Even summary generation failed"
                     echo "Creating empty lcov.info file"
@@ -151,7 +143,6 @@ jobs:
       - name: Build contracts
         run: |
           export FOUNDRY_PROFILE=ci
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge build
 
       - name: Upload artifacts
@@ -190,13 +181,11 @@ jobs:
       - name: Run security tests
         run: |
           export FOUNDRY_PROFILE=ci
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --match-contract CryptolottoSecurity -vv
 
       - name: Run fuzzing tests
         run: |
           export FOUNDRY_PROFILE=ci
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --match-contract CryptolottoFuzz -vv
 
   performance:
@@ -229,13 +218,11 @@ jobs:
       - name: Run performance tests
         run: |
           export FOUNDRY_PROFILE=ci
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --match-contract CryptolottoPerformance -vv
 
       - name: Generate gas report
         run: |
           export FOUNDRY_PROFILE=ci
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge test --gas-report > gas_report.txt
 
       - name: Upload gas report
@@ -311,7 +298,6 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
-          export FOUNDRY_DISABLE_NIGHTLY_WARNING=true
           forge script script/Deploy.s.sol --rpc-url https://rpc.verylabs.io --broadcast
 
       - name: Create release

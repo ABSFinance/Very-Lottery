@@ -34,11 +34,7 @@ extra_output = ["metadata", "storageLayout"]
 extra_output_files = ["metadata", "storageLayout"]
 
 [rpc_endpoints]
-verynetwork = "https://rpc.verynetwork.com"
-verynetwork-testnet = "https://testnet-rpc.verynetwork.com"
+verychain = "https://rpc.verylabs.io"
 
 [etherscan]
-verynetwork = { key = "" }
-verynetwork-testnet = { key = "" }
-
-# Veryscan is free to use, no API key required 
+verychain = { key = "", url = "https://veryscan.io" }

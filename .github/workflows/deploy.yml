@@ -35,7 +35,8 @@ jobs:
         run: |
           forge script script/Deploy.s.sol \
             --rpc-url https://rpc.verylabs.io \
-            --broadcast
+            --broadcast \
+            --verify
 
       - name: Create deployment summary
         run: |
