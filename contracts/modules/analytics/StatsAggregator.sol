@@ -16,7 +16,7 @@ contract StatsAggregator is Ownable {
     /**
      * @notice Constructor for the StatsAggregator contract
      */
-    constructor() Ownable(msg.sender) {}
+    constructor() Ownable() {}
 
     /**
      * @notice Emitted when a new winner is selected
@@ -147,8 +147,14 @@ contract StatsAggregator is Ownable {
      * @return totalWon Total amount won
      * @return hasWon Whether the player has won at least once
      */
-    function getPlayerStats(address player) public view returns (uint256 wins, uint256 totalWon, bool hasWon) {
-        return (winnerCount[player], totalWinnings[player], winnerCount[player] > 0);
+    function getPlayerStats(
+        address player
+    ) public view returns (uint256 wins, uint256 totalWon, bool hasWon) {
+        return (
+            winnerCount[player],
+            totalWinnings[player],
+            winnerCount[player] > 0
+        );
     }
 
     /**
@@ -157,7 +163,13 @@ contract StatsAggregator is Ownable {
      * @return topPlayers Array of top player addresses
      * @return scores Array of player scores
      */
-    function getTopPlayers(uint256 count) public view returns (address[] memory topPlayers, uint256[] memory scores) {
+    function getTopPlayers(
+        uint256 count
+    )
+        public
+        view
+        returns (address[] memory topPlayers, uint256[] memory scores)
+    {
         address[] storage players = allPlayers;
         uint256 length = players.length;
         uint256 found = 0;
@@ -188,7 +200,9 @@ contract StatsAggregator is Ownable {
      * @param count Number of winners to retrieve
      * @return topWinners Array of top winner addresses
      */
-    function getTopWinners(uint256 count) public view returns (address[] memory topWinners) {
+    function getTopWinners(
+        uint256 count
+    ) public view returns (address[] memory topWinners) {
         // Use fixed size array for gas optimization
         topWinners = new address[](count);
         uint256 found = 0;
@@ -215,10 +229,15 @@ contract StatsAggregator is Ownable {
      * @return winnerCounts Array of win counts
      * @return totalWinningsArray Array of total winnings
      */
-    function getBatchWinnerStats(address[] calldata players)
+    function getBatchWinnerStats(
+        address[] calldata players
+    )
         external
         view
-        returns (uint256[] memory winnerCounts, uint256[] memory totalWinningsArray)
+        returns (
+            uint256[] memory winnerCounts,
+            uint256[] memory totalWinningsArray
+        )
     {
         // Gas optimized duplicate removal
         address[] memory uniquePlayers = players.removeDuplicatesFromMemory();
@@ -242,10 +261,16 @@ contract StatsAggregator is Ownable {
      * @return scores Array of player scores
      * @return winRates Array of win rates
      */
-    function getTopPlayerAnalysis(uint256 count)
+    function getTopPlayerAnalysis(
+        uint256 count
+    )
         external
         view
-        returns (address[] memory players, uint256[] memory scores, uint256[] memory winRates)
+        returns (
+            address[] memory players,
+            uint256[] memory scores,
+            uint256[] memory winRates
+        )
     {
         (players, scores) = getTopPlayers(count);
         winRates = new uint256[](count);

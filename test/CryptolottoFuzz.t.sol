@@ -21,7 +21,11 @@ contract CryptolottoFuzz is Test {
     }
 
     /// @dev 무작위 티켓 구매 fuzzing
-    function testFuzz_BuyTicket(uint256 ticketCount, address player, address referrer) public {
+    function testFuzz_BuyTicket(
+        uint256 ticketCount,
+        address player,
+        address referrer
+    ) public {
         vm.assume(ticketCount > 0 && ticketCount <= 100);
         vm.assume(player != address(0));
         vm.assume(player != referrer);
@@ -117,7 +121,11 @@ contract CryptolottoFuzz is Test {
     }
 
     /// @dev AdToken 작업 Fuzzing 테스트
-    function testFuzz_AdTokenOps(uint256 amount, uint256 transferAmount, address recipient) public {
+    function testFuzz_AdTokenOps(
+        uint256 amount,
+        uint256 transferAmount,
+        address recipient
+    ) public {
         vm.assume(amount > 0 && amount <= 1000 ether);
         vm.assume(transferAmount > 0 && transferAmount <= amount);
         vm.assume(recipient != address(0) && recipient != address(this));
@@ -134,7 +142,10 @@ contract CryptolottoFuzz is Test {
     function testInvariant_AdTokenBalance() public view {
         uint256 totalSupply = adToken.totalSupply();
         uint256 contractBalance = adToken.balanceOf(address(adLottery));
-        assertTrue(totalSupply >= contractBalance, "totalSupply >= contractBalance");
+        assertTrue(
+            totalSupply >= contractBalance,
+            "totalSupply >= contractBalance"
+        );
     }
 
     /// @dev 불변성: 게임 설정
@@ -143,11 +154,15 @@ contract CryptolottoFuzz is Test {
             ,
             /* uint256 _ticketPrice */
             uint256 gameDuration,
-            uint256 maxTicketsPerPlayer, /* bool _isActive */
+            uint256 maxTicketsPerPlayer /* bool _isActive */,
+
         ) = lottery.getGameConfig();
 
         // 기본 검증만 수행
         assertTrue(gameDuration >= 0, "gameDuration must be non-negative");
-        assertTrue(maxTicketsPerPlayer >= 0, "maxTicketsPerPlayer must be non-negative");
+        assertTrue(
+            maxTicketsPerPlayer >= 0,
+            "maxTicketsPerPlayer must be non-negative"
+        );
     }
 }

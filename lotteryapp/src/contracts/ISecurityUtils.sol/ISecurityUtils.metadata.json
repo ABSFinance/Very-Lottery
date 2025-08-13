@@ -1,0 +1,184 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "blacklistAddress"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "detectSuspiciousActivity"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getUserStats",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "isBlacklisted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastInteraction",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "interactionCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "canInteract",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "isBlacklisted",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordInteraction",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newMinInterval",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newMaxInteractions",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateRateLimits"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "whitelistAddress"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {},
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/shared/interfaces/ISecurityUtils.sol": "ISecurityUtils"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/shared/interfaces/ISecurityUtils.sol": {
+      "keccak256": "0x46955a27c8c2918edf68e48e6b8f975df4a7a7fad5c1fa83b30c6e926742bdf1",
+      "urls": [
+        "bzz-raw://8ddb6a80413a8b045c481edd3e792057272b283039007f89e39ec90f73a15b94",
+        "dweb:/ipfs/QmTv5FuEgX1qHABiPmBsJ5gKTEttqUmgE2bU8unyUf56sc"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 import "forge-std/Script.sol";
 import "../contracts/modules/lottery/Cryptolotto1Day.sol";
@@ -30,10 +30,11 @@ contract DeployScript is Script {
     function setUp() public {}
 
     function run() public {
+        // 환경변수에서 private key 가져오기
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
 
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(deployerPrivateKey);
 
         // Deploy core contracts
         _deployCoreContracts();
@@ -55,8 +56,7 @@ contract DeployScript is Script {
 
     function _deployCoreContracts() internal {
         // Get deployer address
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployer = vm.addr(deployerPrivateKey);
+        address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
 
         // Deploy core contracts
         ownable = new SimpleOwnable();
@@ -68,9 +68,18 @@ contract DeployScript is Script {
         treasuryManager = new TreasuryManager();
 
         // Create treasuries
-        treasuryManager.createTreasury("unique_test_lottery_1day", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_7days", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_ad", 1000000000000000000000);
+        treasuryManager.createTreasury(
+            "unique_test_lottery_1day",
+            1000000000000000000000
+        );
+        treasuryManager.createTreasury(
+            "unique_test_lottery_7days",
+            1000000000000000000000
+        );
+        treasuryManager.createTreasury(
+            "unique_test_lottery_ad",
+            1000000000000000000000
+        );
     }
 
     function _deployLotteryContracts() internal {
@@ -80,8 +89,7 @@ contract DeployScript is Script {
         CryptolottoAd implementationAd = new CryptolottoAd();
 
         // Get deployer address
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployer = vm.addr(deployerPrivateKey);
+        address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
 
         // Prepare initialization data with proper parameters
         bytes memory initData1Day = abi.encodeWithSelector(
@@ -115,11 +123,20 @@ contract DeployScript is Script {
         );
 
         // Deploy proxy contracts
-        ERC1967Proxy proxy1Day = new ERC1967Proxy(address(implementation1Day), initData1Day);
+        ERC1967Proxy proxy1Day = new ERC1967Proxy(
+            address(implementation1Day),
+            initData1Day
+        );
 
-        ERC1967Proxy proxy7Days = new ERC1967Proxy(address(implementation7Days), initData7Days);
+        ERC1967Proxy proxy7Days = new ERC1967Proxy(
+            address(implementation7Days),
+            initData7Days
+        );
 
-        ERC1967Proxy proxyAd = new ERC1967Proxy(address(implementationAd), initDataAd);
+        ERC1967Proxy proxyAd = new ERC1967Proxy(
+            address(implementationAd),
+            initDataAd
+        );
 
         // Cast proxies to their respective types
         lottery1Day = Cryptolotto1Day(payable(address(proxy1Day)));
@@ -168,14 +185,13 @@ contract DeployScript is Script {
         contracts[4] = address(ownable);
         contracts[5] = address(adToken);
         contracts[6] = address(lottery1Day);
-        contracts[7] = address(lottery7Days);
+        contracts[7] = address(lotteryAd);
 
         registry.registerBatchContracts(names, contracts);
     }
 
-    function _logDeploymentSummary() internal view {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployer = vm.addr(deployerPrivateKey);
+    function _logDeploymentSummary() internal {
+        address deployer = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
         // Log deployed addresses
         console.log("=== DEPLOYMENT SUMMARY ===");
@@ -191,5 +207,20 @@ contract DeployScript is Script {
         console.log("Cryptolotto7Days deployed at:", address(lottery7Days));
         console.log("CryptolottoAd deployed at:", address(lotteryAd));
         console.log("=== DEPLOYMENT COMPLETE ===");
+
+        // Log addresses for manual copy
+        console.log("=== CONTRACT ADDRESSES ===");
+        console.log("DEPLOYER_ADDRESS=", deployer);
+        console.log("CRYPTOLOTTO_1DAY=", address(lottery1Day));
+        console.log("CRYPTOLOTTO_7DAYS=", address(lottery7Days));
+        console.log("CRYPTOLOTTO_AD=", address(lotteryAd));
+        console.log("TREASURY_MANAGER=", address(treasuryManager));
+        console.log("CONTRACT_REGISTRY=", address(registry));
+        console.log("STATS_AGGREGATOR=", address(stats));
+        console.log("FUNDS_DISTRIBUTOR=", address(fundsDistributor));
+        console.log("CRYPTOLOTTO_REFERRAL=", address(referral));
+        console.log("AD_TOKEN=", address(adToken));
+        console.log("OWNABLE=", address(ownable));
+        console.log("=== END ADDRESSES ===");
     }
 }

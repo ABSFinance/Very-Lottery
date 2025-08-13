@@ -1,0 +1,654 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "game",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "players",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint8",
+            "name": "gameType",
+            "type": "uint8",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "winnerIndex",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Winner",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "allPlayers",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "gameWinners",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address[]",
+            "name": "players",
+            "type": "address[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getBatchWinnerStats",
+        "outputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "winnerCounts",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "totalWinningsArray",
+            "type": "uint256[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "game",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getGameWinner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getPlayerStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "wins",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWon",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasWon",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "count",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getTopPlayerAnalysis",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "players",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "scores",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "winRates",
+            "type": "uint256[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "count",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getTopPlayers",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "topPlayers",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "scores",
+            "type": "uint256[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "count",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getTopWinners",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "topWinners",
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getTotalWinnings",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getWinnerCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "game",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "players",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "gameType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "winnerIndex",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "newWinner"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "playerScores",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "totalWinnings",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "winnerCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "getBatchWinnerStats(address[])": {
+          "params": {
+            "players": "Array of player addresses to query"
+          },
+          "returns": {
+            "totalWinningsArray": "Array of total winnings",
+            "winnerCounts": "Array of win counts"
+          }
+        },
+        "getGameWinner(uint256)": {
+          "params": {
+            "game": "The game number"
+          },
+          "returns": {
+            "_0": "Address of the winner"
+          }
+        },
+        "getPlayerStats(address)": {
+          "params": {
+            "player": "The player address"
+          },
+          "returns": {
+            "hasWon": "Whether the player has won at least once",
+            "totalWon": "Total amount won",
+            "wins": "Number of wins"
+          }
+        },
+        "getTopPlayerAnalysis(uint256)": {
+          "params": {
+            "count": "Number of players to analyze"
+          },
+          "returns": {
+            "players": "Array of player addresses",
+            "scores": "Array of player scores",
+            "winRates": "Array of win rates"
+          }
+        },
+        "getTopPlayers(uint256)": {
+          "params": {
+            "count": "Number of players to retrieve"
+          },
+          "returns": {
+            "scores": "Array of player scores",
+            "topPlayers": "Array of top player addresses"
+          }
+        },
+        "getTopWinners(uint256)": {
+          "params": {
+            "count": "Number of winners to retrieve"
+          },
+          "returns": {
+            "topWinners": "Array of top winner addresses"
+          }
+        },
+        "getTotalWinnings(address)": {
+          "params": {
+            "player": "The player address"
+          },
+          "returns": {
+            "_0": "Total amount won by the player"
+          }
+        },
+        "getWinnerCount(address)": {
+          "params": {
+            "player": "The player address"
+          },
+          "returns": {
+            "_0": "Number of wins for the player"
+          }
+        },
+        "newWinner(address,uint256,uint256,uint256,uint8,uint256)": {
+          "params": {
+            "amount": "Amount won",
+            "game": "Game number",
+            "gameType": "Type of game",
+            "players": "Number of players in game",
+            "winner": "Winner address",
+            "winnerIndex": "Winner index in players array"
+          }
+        },
+        "owner()": {
+          "details": "Returns the address of the current owner."
+        },
+        "renounceOwnership()": {
+          "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+        },
+        "transferOwnership(address)": {
+          "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "allPlayers(uint256)": {
+          "notice": "Array of all players who have participated"
+        },
+        "constructor": {
+          "notice": "Constructor for the StatsAggregator contract"
+        },
+        "gameWinners(uint256)": {
+          "notice": "Mapping of game numbers to winner addresses"
+        },
+        "getBatchWinnerStats(address[])": {
+          "notice": "Get batch winner statistics (gas optimized)"
+        },
+        "getGameWinner(uint256)": {
+          "notice": "Get winner of a specific game"
+        },
+        "getPlayerStats(address)": {
+          "notice": "Get comprehensive player statistics"
+        },
+        "getTopPlayerAnalysis(uint256)": {
+          "notice": "Get top player analysis (gas optimized)"
+        },
+        "getTopPlayers(uint256)": {
+          "notice": "Get top players (gas optimized version)"
+        },
+        "getTopWinners(uint256)": {
+          "notice": "Get top winners (gas optimized version)"
+        },
+        "getTotalWinnings(address)": {
+          "notice": "Get total winnings for a specific player"
+        },
+        "getWinnerCount(address)": {
+          "notice": "Get winner count for a specific player"
+        },
+        "newWinner(address,uint256,uint256,uint256,uint8,uint256)": {
+          "notice": "Record a new winner and update statistics"
+        },
+        "playerScores(address)": {
+          "notice": "Mapping of player addresses to their scores"
+        },
+        "totalWinnings(address)": {
+          "notice": "Mapping of player addresses to their total winnings"
+        },
+        "winnerCount(address)": {
+          "notice": "Mapping of player addresses to their win count"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/modules/analytics/StatsAggregator.sol": "StatsAggregator"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/modules/analytics/StatsAggregator.sol": {
+      "keccak256": "0x383fce56a74239d9e6ae26cdc5366719347333d4f3243aeea8c76108e0f551d1",
+      "urls": [
+        "bzz-raw://127879c5d57cda05cfd41603ed93fea5b8dc4200c8f0316ef2669ba98141df1a",
+        "dweb:/ipfs/QmdffxeB5Qzqp8vwYoFdqZ95QTeNB5GJhPDSWsf6RtSRzh"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/GasOptimizer.sol": {
+      "keccak256": "0x1b6870383897803ddf57896964421ad4a582bdc62d25701d5d1c6d15f8627f13",
+      "urls": [
+        "bzz-raw://5addeff7a3df26ee300968fb4b1b19c0f127a8335095ea055264a70aa706795b",
+        "dweb:/ipfs/QmZXprNbgDiBkJxPgF3nZM3G7Ev2bHkzX2jfBtiWUjynBF"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
+      "urls": [
+        "bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
+        "dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "keccak256": "0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2",
+      "urls": [
+        "bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12",
+        "dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

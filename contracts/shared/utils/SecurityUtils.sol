@@ -65,7 +65,10 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @param newMaxInteractions New maximum interactions
      */
     event RateLimitUpdated(
-        uint256 oldMinInterval, uint256 newMinInterval, uint256 oldMaxInteractions, uint256 newMaxInteractions
+        uint256 oldMinInterval,
+        uint256 newMinInterval,
+        uint256 oldMaxInteractions,
+        uint256 newMaxInteractions
     );
 
     /**
@@ -74,7 +77,11 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @param reason The reason for suspicion
      * @param timestamp When the activity was detected
      */
-    event SuspiciousActivityDetected(address indexed account, string reason, uint256 timestamp);
+    event SuspiciousActivityDetected(
+        address indexed account,
+        string reason,
+        uint256 timestamp
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -86,7 +93,7 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @param owner The owner of the contract
      */
     function initialize(address owner) public initializer {
-        __Ownable_init(owner);
+        __Ownable_init();
     }
 
     /**
@@ -147,7 +154,10 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @param currentTime Current timestamp
      * @param lastTime Last interaction timestamp
      */
-    function _checkMinimumInterval(uint256 currentTime, uint256 lastTime) internal view {
+    function _checkMinimumInterval(
+        uint256 currentTime,
+        uint256 lastTime
+    ) internal view {
         if (currentTime < lastTime + minInteractionInterval) {
             revert InteractionTooFrequent();
         }
@@ -159,7 +169,11 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @param currentTime Current timestamp
      * @param lastTime Last interaction timestamp
      */
-    function _updateInteractionCount(address user, uint256 currentTime, uint256 lastTime) internal {
+    function _updateInteractionCount(
+        address user,
+        uint256 currentTime,
+        uint256 lastTime
+    ) internal {
         if (currentTime - lastTime >= 3600) {
             // 1시간
             interactionCount[user] = 1;
@@ -176,7 +190,10 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @param newMinInterval New minimum interval in seconds
      * @param newMaxInteractions New maximum interactions per hour
      */
-    function updateRateLimits(uint256 newMinInterval, uint256 newMaxInteractions) external onlyOwner {
+    function updateRateLimits(
+        uint256 newMinInterval,
+        uint256 newMaxInteractions
+    ) external onlyOwner {
         if (newMinInterval == 0) {
             revert InvalidRateLimitParameters();
         }
@@ -190,7 +207,12 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
         minInteractionInterval = newMinInterval;
         maxInteractionsPerHour = newMaxInteractions;
 
-        emit RateLimitUpdated(oldMinInterval, newMinInterval, oldMaxInteractions, newMaxInteractions);
+        emit RateLimitUpdated(
+            oldMinInterval,
+            newMinInterval,
+            oldMaxInteractions,
+            newMaxInteractions
+        );
     }
 
     /**
@@ -198,7 +220,10 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @param user The user address
      * @param reason The reason for suspicion
      */
-    function detectSuspiciousActivity(address user, string calldata reason) external {
+    function detectSuspiciousActivity(
+        address user,
+        string calldata reason
+    ) external {
         emit SuspiciousActivityDetected(user, reason, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
@@ -211,7 +236,9 @@ contract SecurityUtils is Initializable, OwnableUpgradeable {
      * @return minInterval Minimum interval setting
      * @return maxInteractions Maximum interactions setting
      */
-    function getUserStats(address user)
+    function getUserStats(
+        address user
+    )
         external
         view
         returns (

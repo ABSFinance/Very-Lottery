@@ -1,0 +1,570 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "version",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "StorageInitialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "fromVersion",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "toVersion",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "StorageMigrated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "operation",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "gasSaved",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "StorageOptimized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "accessPermissions",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "authorizedAccess",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "daysOld",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "cleanupOldData"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "currentVersion",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAnalyticsStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinners",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getGameStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalJackpot",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getStorageHealth",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "version",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSlots",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "usedSlots",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getTreasuryStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalDeposits",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWithdrawals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalFees",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "string[]",
+            "name": "permissions",
+            "type": "string[]"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "grantAccess"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "permission",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "hasPermission",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "initializeStorage"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newVersion",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "migrateStorage"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "optimizeGameStorage"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "optimizeUserStorage"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "revokeAccess"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "supportedVersions",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "cleanupOldData(uint256)": {
+          "details": "스토리지 정리 (오래된 데이터 삭제)"
+        },
+        "getAnalyticsStats()": {
+          "details": "분석 통계 조회"
+        },
+        "getGameStats()": {
+          "details": "게임 통계 조회"
+        },
+        "getStorageHealth()": {
+          "details": "스토리지 상태 확인"
+        },
+        "getTreasuryStats()": {
+          "details": "재무 통계 조회"
+        },
+        "grantAccess(address,string[])": {
+          "details": "접근 권한 부여"
+        },
+        "hasPermission(address,string)": {
+          "details": "접근 권한 확인"
+        },
+        "initializeStorage()": {
+          "details": "스토리지 초기화"
+        },
+        "migrateStorage(uint256)": {
+          "details": "스토리지 마이그레이션"
+        },
+        "optimizeGameStorage(uint256)": {
+          "details": "게임 데이터 최적화"
+        },
+        "optimizeUserStorage(address)": {
+          "details": "사용자 데이터 최적화"
+        },
+        "owner()": {
+          "details": "Returns the address of the current owner."
+        },
+        "renounceOwnership()": {
+          "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+        },
+        "revokeAccess(address)": {
+          "details": "접근 권한 해제"
+        },
+        "transferOwnership(address)": {
+          "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/shared/storage/StorageManager.sol": "StorageManager"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/shared/storage/StorageAccess.sol": {
+      "keccak256": "0x9e62e58d2ef187df53a17c2cb76327e8285cfa988354260b5c2fef938f21a354",
+      "urls": [
+        "bzz-raw://4e35c548af411e97bd2c887b10c4c23ebbe631b70095e50d88b5238c6cf72c34",
+        "dweb:/ipfs/QmX4usJV5MPoc9ATqmm2dzuRBgS64aVWgA7vQUoqpqz5TT"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageLayout.sol": {
+      "keccak256": "0x35d8e8867cfba6ed38b653a0e8259ab1685c5d8152e5456a1e6347e5760b3429",
+      "urls": [
+        "bzz-raw://ad225ac91f0b323101be262c76bd5ee0cead833aef69afa7f0c2b73bb4920281",
+        "dweb:/ipfs/Qmcbqp1r6hapZNM75139ivZqZYxAxtyo8Hr2vEeLDscXc3"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageManager.sol": {
+      "keccak256": "0xd99b4d3f2b5566cbd0795b84ddc3e0f288b6c094bb6b028321836c3b4c3a7ef3",
+      "urls": [
+        "bzz-raw://9034059827b8d257fefe0cc5f34b63b3ee59165d3eab9e419eab312d3415831c",
+        "dweb:/ipfs/QmeQv3TJhcFbaSMkEfkeTmCQW3suESKQHBy9x78Me5844i"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageOptimizer.sol": {
+      "keccak256": "0x472fdcf002d3a3c345910cc9892d7563d5977f2bcc0bda4a9d43bf6d08f84a41",
+      "urls": [
+        "bzz-raw://bf9e17ef99cd8edcd412ca28955487bbb16b422e90675646f4d4ae111032d5f8",
+        "dweb:/ipfs/QmYAgz1iZ6dE1jA78vspUBs4jyMQJBrt6mWVcnHQJFXHyU"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
+      "urls": [
+        "bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
+        "dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "keccak256": "0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2",
+      "urls": [
+        "bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12",
+        "dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

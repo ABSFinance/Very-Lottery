@@ -1,0 +1,921 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "CircuitAlreadyExists"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "CircuitBreakerDisabled"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "CircuitNotFound"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "CircuitNotHalfOpen"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "CircuitNotOpen"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidAddress"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidCircuitParams"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidFunctionName"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidInitialization"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "NotInitializing"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "CircuitBreakerToggled",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "CircuitClosed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "CircuitCreated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "CircuitHalfOpened",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "failureCount",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "CircuitOpened",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint64",
+            "name": "version",
+            "type": "uint64",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Initialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "addressCircuits",
+        "outputs": [
+          {
+            "internalType": "enum CircuitBreaker.CircuitState",
+            "name": "state",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "failureCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastFailureTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "targetAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "checkAddressCircuit",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "checkCircuit",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "functionName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "checkFunctionCircuit",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "circuitBreakerEnabled",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "circuits",
+        "outputs": [
+          {
+            "internalType": "enum CircuitBreaker.CircuitState",
+            "name": "state",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "failureCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastFailureTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "targetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createAddressCircuit"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createCircuit"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "functionName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createFunctionCircuit"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "defaultThreshold",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "defaultTimeout",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "functionCircuits",
+        "outputs": [
+          {
+            "internalType": "enum CircuitBreaker.CircuitState",
+            "name": "state",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "failureCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastFailureTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getCircuitInfo",
+        "outputs": [
+          {
+            "internalType": "enum CircuitBreaker.CircuitState",
+            "name": "state",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "failureCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastFailureTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "initialize"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "targetAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordAddressFailure"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "targetAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordAddressSuccess"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordFailure"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "functionName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordFunctionFailure"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "functionName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordFunctionSuccess"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordSuccess"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "toggleCircuitBreaker"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "checkAddressCircuit(address)": {
+          "params": {
+            "targetAddress": "Address to check"
+          },
+          "returns": {
+            "_0": "Whether address circuit is open"
+          }
+        },
+        "checkCircuit(string)": {
+          "params": {
+            "circuitName": "Name of the circuit"
+          },
+          "returns": {
+            "_0": "Whether circuit is open"
+          }
+        },
+        "checkFunctionCircuit(string)": {
+          "params": {
+            "functionName": "Name of the function"
+          },
+          "returns": {
+            "_0": "Whether function circuit is open"
+          }
+        },
+        "createAddressCircuit(address,uint256,uint256)": {
+          "params": {
+            "targetAddress": "Address to create circuit for",
+            "threshold": "Failure threshold",
+            "timeout": "Timeout period"
+          }
+        },
+        "createCircuit(string,uint256,uint256)": {
+          "params": {
+            "circuitName": "Name of the circuit",
+            "threshold": "Failure threshold",
+            "timeout": "Timeout period"
+          }
+        },
+        "createFunctionCircuit(string,uint256,uint256)": {
+          "params": {
+            "functionName": "Name of the function",
+            "threshold": "Failure threshold",
+            "timeout": "Timeout period"
+          }
+        },
+        "getCircuitInfo(string)": {
+          "params": {
+            "circuitName": "Name of the circuit"
+          },
+          "returns": {
+            "failureCount": "Number of failures",
+            "isActive": "Whether circuit is active",
+            "lastFailureTime": "Last failure timestamp",
+            "state": "Circuit state",
+            "threshold": "Failure threshold",
+            "timeout": "Timeout period"
+          }
+        },
+        "initialize(address)": {
+          "params": {
+            "owner": "Owner of the contract"
+          }
+        },
+        "owner()": {
+          "details": "Returns the address of the current owner."
+        },
+        "recordAddressFailure(address)": {
+          "params": {
+            "targetAddress": "Address to record failure for"
+          }
+        },
+        "recordAddressSuccess(address)": {
+          "params": {
+            "targetAddress": "Address to record success for"
+          }
+        },
+        "recordFailure(string)": {
+          "params": {
+            "circuitName": "Name of the circuit"
+          }
+        },
+        "recordFunctionFailure(string)": {
+          "params": {
+            "functionName": "Name of the function"
+          }
+        },
+        "recordFunctionSuccess(string)": {
+          "params": {
+            "functionName": "Name of the function"
+          }
+        },
+        "recordSuccess(string)": {
+          "params": {
+            "circuitName": "Name of the circuit"
+          }
+        },
+        "renounceOwnership()": {
+          "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+        },
+        "transferOwnership(address)": {
+          "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "addressCircuits(address)": {
+          "notice": "Mapping of addresses to circuit information"
+        },
+        "checkAddressCircuit(address)": {
+          "notice": "Check if an address circuit is open"
+        },
+        "checkCircuit(string)": {
+          "notice": "Check if a circuit is open"
+        },
+        "checkFunctionCircuit(string)": {
+          "notice": "Check if a function circuit is open"
+        },
+        "circuitBreakerEnabled()": {
+          "notice": "Whether circuit breaker is enabled"
+        },
+        "circuits(string)": {
+          "notice": "Mapping of circuit names to circuit information"
+        },
+        "createAddressCircuit(address,uint256,uint256)": {
+          "notice": "Create a circuit for a specific address"
+        },
+        "createCircuit(string,uint256,uint256)": {
+          "notice": "Create a new circuit"
+        },
+        "createFunctionCircuit(string,uint256,uint256)": {
+          "notice": "Create a circuit for a specific function"
+        },
+        "defaultThreshold()": {
+          "notice": "Default failure threshold"
+        },
+        "defaultTimeout()": {
+          "notice": "Default timeout period"
+        },
+        "functionCircuits(string)": {
+          "notice": "Mapping of function names to circuit information"
+        },
+        "getCircuitInfo(string)": {
+          "notice": "Get circuit information"
+        },
+        "initialize(address)": {
+          "notice": "Initialize the circuit breaker contract"
+        },
+        "recordAddressFailure(address)": {
+          "notice": "Record a failure for an address circuit"
+        },
+        "recordAddressSuccess(address)": {
+          "notice": "Record a success for an address circuit"
+        },
+        "recordFailure(string)": {
+          "notice": "Record a failure for a circuit"
+        },
+        "recordFunctionFailure(string)": {
+          "notice": "Record a failure for a function circuit"
+        },
+        "recordFunctionSuccess(string)": {
+          "notice": "Record a success for a function circuit"
+        },
+        "recordSuccess(string)": {
+          "notice": "Record a success for a circuit"
+        },
+        "toggleCircuitBreaker()": {
+          "notice": "Toggle circuit breaker functionality"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/shared/utils/CircuitBreaker.sol": "CircuitBreaker"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/shared/utils/CircuitBreaker.sol": {
+      "keccak256": "0x2de2e9fcdc250d4f8e98d46f0fccd087e4b60ed0714471843cdad23acca49193",
+      "urls": [
+        "bzz-raw://e13fe64da87eed06b5f10345f6926de696f31f29e2e87aa1e82971c40f4aac7b",
+        "dweb:/ipfs/QmSMb1yrT7yNq9Hy1b1uNLBEhdcn6MB9iSnDGLF25Z6HtS"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+      "keccak256": "0xc163fcf9bb10138631a9ba5564df1fa25db9adff73bd9ee868a8ae1858fe093a",
+      "urls": [
+        "bzz-raw://9706d43a0124053d9880f6e31a59f31bc0a6a3dc1acd66ce0a16e1111658c5f6",
+        "dweb:/ipfs/QmUFmfowzkRwGtDu36cXV9SPTBHJ3n7dG9xQiK5B28jTf2"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "keccak256": "0xdb4d24ee2c087c391d587cd17adfe5b3f9d93b3110b1388c2ab6c7c0ad1dcd05",
+      "urls": [
+        "bzz-raw://ab7b6d5b9e2b88176312967fe0f0e78f3d9a1422fa5e4b64e2440c35869b5d08",
+        "dweb:/ipfs/QmXKYWWyzcLg1B2k7Sb1qkEXgLCYfXecR9wYW5obRzWP1Q"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "keccak256": "0xdbef5f0c787055227243a7318ef74c8a5a1108ca3a07f2b3a00ef67769e1e397",
+      "urls": [
+        "bzz-raw://08e39f23d5b4692f9a40803e53a8156b72b4c1f9902a88cd65ba964db103dab9",
+        "dweb:/ipfs/QmPKn6EYDgpga7KtpkA8wV2yJCYGMtc9K4LkJfhKX2RVSV"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

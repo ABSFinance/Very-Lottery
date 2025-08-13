@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -51,11 +51,30 @@ contract SystemManager is Initializable, OwnableUpgradeable {
     event SystemActivated(uint256 timestamp);
     event SystemDeactivated(uint256 timestamp);
     event SystemCheckPerformed(uint256 timestamp, bool isHealthy);
-    event ContractAddressUpdated(string contractName, address oldAddress, address newAddress);
-    event SecurityAlertTriggered(address indexed user, string reason, uint256 timestamp);
-    event AnalyticsUpdated(address indexed user, uint256 volume, uint256 timestamp);
-    event RateLimitExceeded(address indexed user, string indexed functionName, uint256 timestamp);
-    event CircuitBreakerTriggered(string indexed circuitName, uint256 timestamp);
+    event ContractAddressUpdated(
+        string contractName,
+        address oldAddress,
+        address newAddress
+    );
+    event SecurityAlertTriggered(
+        address indexed user,
+        string reason,
+        uint256 timestamp
+    );
+    event AnalyticsUpdated(
+        address indexed user,
+        uint256 volume,
+        uint256 timestamp
+    );
+    event RateLimitExceeded(
+        address indexed user,
+        string indexed functionName,
+        uint256 timestamp
+    );
+    event CircuitBreakerTriggered(
+        string indexed circuitName,
+        uint256 timestamp
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -74,17 +93,32 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         address _circuitBreaker,
         address _treasuryManager
     ) public initializer {
-        __Ownable_init(owner);
+        __Ownable_init();
 
-        require(_emergencyManager != address(0), "Invalid emergency manager address");
+        require(
+            _emergencyManager != address(0),
+            "Invalid emergency manager address"
+        );
         require(_configManager != address(0), "Invalid config manager address");
         require(_securityUtils != address(0), "Invalid security utils address");
-        require(_monitoringSystem != address(0), "Invalid monitoring system address");
+        require(
+            _monitoringSystem != address(0),
+            "Invalid monitoring system address"
+        );
         require(_eventLogger != address(0), "Invalid event logger address");
-        require(_analyticsEngine != address(0), "Invalid analytics engine address");
+        require(
+            _analyticsEngine != address(0),
+            "Invalid analytics engine address"
+        );
         require(_rateLimiter != address(0), "Invalid rate limiter address");
-        require(_circuitBreaker != address(0), "Invalid circuit breaker address");
-        require(_treasuryManager != address(0), "Invalid treasury manager address");
+        require(
+            _circuitBreaker != address(0),
+            "Invalid circuit breaker address"
+        );
+        require(
+            _treasuryManager != address(0),
+            "Invalid treasury manager address"
+        );
 
         emergencyManager = IEmergencyManager(_emergencyManager);
         configManager = IConfigManager(_configManager);
@@ -152,7 +186,9 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         }
 
         // Check monitoring system
-        try monitoringSystem.performHealthCheck() returns (bool monitoringHealthy) {
+        try monitoringSystem.performHealthCheck() returns (
+            bool monitoringHealthy
+        ) {
             if (!monitoringHealthy) {
                 isHealthy = false;
             }
@@ -161,7 +197,13 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         }
 
         // Check analytics engine
-        try analyticsEngine.getAnalyticsStats() returns (bool, uint256, uint256, uint256, uint256) {
+        try analyticsEngine.getAnalyticsStats() returns (
+            bool,
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        ) {
             // Analytics engine is responsive
         } catch {
             isHealthy = false;
@@ -169,7 +211,18 @@ contract SystemManager is Initializable, OwnableUpgradeable {
 
         // Check rate limiter
         try rateLimiter.getRateLimitInfo(address(0), "") returns (
-            bool, uint256, uint256, uint256, bool, uint256, uint256, uint256, bool, uint256, uint256, uint256
+            bool,
+            uint256,
+            uint256,
+            uint256,
+            bool,
+            uint256,
+            uint256,
+            uint256,
+            bool,
+            uint256,
+            uint256,
+            uint256
         ) {
             // Rate limiter is responsive
         } catch {
@@ -178,7 +231,12 @@ contract SystemManager is Initializable, OwnableUpgradeable {
 
         // Check circuit breaker
         try circuitBreaker.getCircuitInfo("") returns (
-            ICircuitBreaker.CircuitState, uint256, uint256, uint256, uint256, bool
+            ICircuitBreaker.CircuitState,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            bool
         ) {
             // Circuit breaker is responsive
         } catch {
@@ -215,7 +273,13 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         uint8 fee,
         uint256 maxTicketsPerPlayer
     ) external onlyOwner {
-        configManager.updateGameConfig(gameType, ticketPrice, gameDuration, fee, maxTicketsPerPlayer);
+        configManager.updateGameConfig(
+            gameType,
+            ticketPrice,
+            gameDuration,
+            fee,
+            maxTicketsPerPlayer
+        );
     }
 
     /**
@@ -229,45 +293,68 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         securityUtils.whitelistAddress(target);
     }
 
-    function updateRateLimits(uint256 newMinInterval, uint256 newMaxInteractions) external onlyOwner {
+    function updateRateLimits(
+        uint256 newMinInterval,
+        uint256 newMaxInteractions
+    ) external onlyOwner {
         securityUtils.updateRateLimits(newMinInterval, newMaxInteractions);
     }
 
     /**
      * @dev 고급 보안 관련 함수들
      */
-    function setUserRateLimit(address user, uint256 maxRequests, uint256 timeWindow) external onlyOwner {
+    function setUserRateLimit(
+        address user,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) external onlyOwner {
         rateLimiter.setUserRateLimit(user, maxRequests, timeWindow);
     }
 
-    function setFunctionRateLimit(string memory functionName, uint256 maxRequests, uint256 timeWindow)
-        external
-        onlyOwner
-    {
+    function setFunctionRateLimit(
+        string memory functionName,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) external onlyOwner {
         rateLimiter.setFunctionRateLimit(functionName, maxRequests, timeWindow);
     }
 
-    function createCircuit(string memory circuitName, uint256 threshold, uint256 timeout) external onlyOwner {
+    function createCircuit(
+        string memory circuitName,
+        uint256 threshold,
+        uint256 timeout
+    ) external onlyOwner {
         circuitBreaker.createCircuit(circuitName, threshold, timeout);
     }
 
-    function recordCircuitFailure(string memory circuitName) external onlyOwner {
+    function recordCircuitFailure(
+        string memory circuitName
+    ) external onlyOwner {
         circuitBreaker.recordFailure(circuitName);
         emit CircuitBreakerTriggered(circuitName, block.timestamp);
     }
 
-    function recordCircuitSuccess(string memory circuitName) external onlyOwner {
+    function recordCircuitSuccess(
+        string memory circuitName
+    ) external onlyOwner {
         circuitBreaker.recordSuccess(circuitName);
     }
 
     /**
      * @dev 모니터링 관련 함수들
      */
-    function updateSystemMetrics(uint256 transactions, uint256 volume, uint256 users) external onlyOwner {
+    function updateSystemMetrics(
+        uint256 transactions,
+        uint256 volume,
+        uint256 users
+    ) external onlyOwner {
         monitoringSystem.updateMetrics(transactions, volume, users);
     }
 
-    function createAlert(string memory message, uint256 severity) external onlyOwner {
+    function createAlert(
+        string memory message,
+        uint256 severity
+    ) external onlyOwner {
         monitoringSystem.createAlert(message, severity);
     }
 
@@ -278,10 +365,12 @@ contract SystemManager is Initializable, OwnableUpgradeable {
     /**
      * @dev 로깅 관련 함수들
      */
-    function logEvent(string memory eventType, string memory message, address indexedAddress, bytes memory data)
-        external
-        onlyOwner
-    {
+    function logEvent(
+        string memory eventType,
+        string memory message,
+        address indexedAddress,
+        bytes memory data
+    ) external onlyOwner {
         eventLogger.logEvent(eventType, message, indexedAddress, data);
     }
 
@@ -300,7 +389,14 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         uint256 winnings,
         uint256 referralEarnings
     ) external onlyOwner {
-        analyticsEngine.updateUserAnalytics(user, transactions, volume, gamesPlayed, winnings, referralEarnings);
+        analyticsEngine.updateUserAnalytics(
+            user,
+            transactions,
+            volume,
+            gamesPlayed,
+            winnings,
+            referralEarnings
+        );
         emit AnalyticsUpdated(user, volume, block.timestamp);
     }
 
@@ -313,7 +409,12 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         uint256 totalWinnings
     ) external onlyOwner {
         analyticsEngine.updateGameAnalytics(
-            gameType, totalGames, totalPlayers, totalVolume, averageTicketPrice, totalWinnings
+            gameType,
+            totalGames,
+            totalPlayers,
+            totalVolume,
+            averageTicketPrice,
+            totalWinnings
         );
     }
 
@@ -326,7 +427,12 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         uint256 systemFees
     ) external onlyOwner {
         analyticsEngine.updateSystemAnalytics(
-            totalUsers, totalVolume, totalTransactions, activeGames, totalWinnings, systemFees
+            totalUsers,
+            totalVolume,
+            totalTransactions,
+            activeGames,
+            totalWinnings,
+            systemFees
         );
     }
 
@@ -354,28 +460,53 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         bool rateLimiterHealthy = true;
         bool circuitBreakerHealthy = true;
 
-        try securityUtils.getUserStats(address(0)) returns (bool, uint256, uint256, bool) {
+        try securityUtils.getUserStats(address(0)) returns (
+            bool,
+            uint256,
+            uint256,
+            bool
+        ) {
             // Security utils is responsive
         } catch {
             securityHealthy = false;
         }
 
         try monitoringSystem.getSystemStats() returns (
-            IMonitoringSystem.SystemMetrics memory, uint256, uint256, uint256
+            IMonitoringSystem.SystemMetrics memory,
+            uint256,
+            uint256,
+            uint256
         ) {
             // Monitoring system is responsive
         } catch {
             monitoringHealthy = false;
         }
 
-        try analyticsEngine.getAnalyticsStats() returns (bool, uint256, uint256, uint256, uint256) {
+        try analyticsEngine.getAnalyticsStats() returns (
+            bool,
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        ) {
             // Analytics engine is responsive
         } catch {
             analyticsHealthy = false;
         }
 
         try rateLimiter.getRateLimitInfo(address(0), "") returns (
-            bool, uint256, uint256, uint256, bool, uint256, uint256, uint256, bool, uint256, uint256, uint256
+            bool,
+            uint256,
+            uint256,
+            uint256,
+            bool,
+            uint256,
+            uint256,
+            uint256,
+            bool,
+            uint256,
+            uint256,
+            uint256
         ) {
             // Rate limiter is responsive
         } catch {
@@ -383,7 +514,12 @@ contract SystemManager is Initializable, OwnableUpgradeable {
         }
 
         try circuitBreaker.getCircuitInfo("") returns (
-            ICircuitBreaker.CircuitState, uint256, uint256, uint256, uint256, bool
+            ICircuitBreaker.CircuitState,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            bool
         ) {
             // Circuit breaker is responsive
         } catch {
@@ -406,7 +542,10 @@ contract SystemManager is Initializable, OwnableUpgradeable {
     /**
      * @dev 보안 알림 트리거
      */
-    function triggerSecurityAlert(address user, string memory reason) external onlyOwner {
+    function triggerSecurityAlert(
+        address user,
+        string memory reason
+    ) external onlyOwner {
         securityUtils.detectSuspiciousActivity(user, reason);
         emit SecurityAlertTriggered(user, reason, block.timestamp);
     }
@@ -423,7 +562,10 @@ contract SystemManager is Initializable, OwnableUpgradeable {
      * @dev 긴급 정지 확인 수정자
      */
     modifier whenNotEmergencyPaused() {
-        require(!emergencyManager.isEmergencyPaused(), "System is in emergency pause");
+        require(
+            !emergencyManager.isEmergencyPaused(),
+            "System is in emergency pause"
+        );
         _;
     }
 
@@ -439,7 +581,10 @@ contract SystemManager is Initializable, OwnableUpgradeable {
      * @dev 속도 제한 확인 수정자
      */
     modifier rateLimited(address user, string memory functionName) {
-        require(rateLimiter.checkRateLimit(user, functionName), "Rate limit exceeded");
+        require(
+            rateLimiter.checkRateLimit(user, functionName),
+            "Rate limit exceeded"
+        );
         _;
     }
 
@@ -447,7 +592,10 @@ contract SystemManager is Initializable, OwnableUpgradeable {
      * @dev 서킷 브레이커 확인 수정자
      */
     modifier circuitBreakerCheck(string memory circuitName) {
-        require(circuitBreaker.checkCircuit(circuitName), "Circuit breaker is open");
+        require(
+            circuitBreaker.checkCircuit(circuitName),
+            "Circuit breaker is open"
+        );
         _;
     }
 }

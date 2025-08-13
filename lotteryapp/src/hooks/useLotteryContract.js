@@ -27,25 +27,41 @@ const useLotteryContract = (contractAddress = null) => {
     // Use provided contract address
     const address = contractAddress || "0x0000000000000000000000000000000000000000";
 
-    // Cryptolotto contract interface - actual functions
+    // Cryptolotto contract interface - updated for new contract structure
     const contractInterface = [
-        "function game() view returns (uint)",
-        "function ticketPrice() view returns (uint)",
-        "function isActive() view returns (bool)",
-        "function getPlayedGamePlayers() view returns (uint)",
-        "function getPlayedGameJackpot() view returns (uint)",
-        "function getPlayersInGame(uint) view returns (uint)",
-        "function getGameJackpot(uint) view returns (uint)",
-        "function buyTicket(address) payable",
-        "function start()",
-        "function toogleActive()",
-        "function changeTicketPrice(uint)",
-        "function ownable() view returns (address)",
-        "function stats() view returns (address)",
-        "function referralInstance() view returns (address)",
-        "function fundsDistributor() view returns (address)",
-        "event Ticket(address indexed _address, uint indexed _game, uint _number, uint _time)",
-        "event Game(uint _game, uint indexed _time)"
+        // Game functions
+        "function buyTicket(address referrer, uint256 ticketCount) payable",
+        "function getCurrentGameNumber() view returns (uint256)",
+        "function getCurrentGamePlayerCount() view returns (uint256)",
+        "function getCurrentGameJackpot() view returns (uint256)",
+        "function getCurrentGameState() view returns (uint8)",
+        "function getRemainingGameTime() view returns (uint256)",
+        "function getCurrentGameEndTime() view returns (uint256)",
+        "function getGameConfig() view returns (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive)",
+        "function getPlayerInfo(address player) view returns (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent)",
+        "function getContractBalance() view returns (uint256)",
+        
+        // Admin functions
+        "function emergencyPause(string memory reason)",
+        "function emergencyResume()",
+        "function setTestMode(bool enabled)",
+        "function setPurchaseCooldown(uint256 newCooldown)",
+        "function resetPlayerCooldown(address player)",
+        "function setRegistry(address registryAddress)",
+        "function setTreasuryName(string memory _treasuryName)",
+        
+        // Game state functions
+        "function checkAndEndGame()",
+        "function autoEndGame()",
+        "function isGameTimeExpired() view returns (bool)",
+        "function getGameInfo() view returns (uint256 currentGameNumber, uint256 startTime, uint256 duration, uint256 remainingTime, bool timeExpired, uint256 playerCount, uint256 currentJackpot)",
+        
+        // Events
+        "event TicketPurchased(address indexed player, uint256 indexed gameNumber, uint256 ticketIndex, uint256 timestamp)",
+        "event WinnerSelected(address indexed winner, uint256 indexed gameNumber, uint256 jackpot, uint256 playerCount, uint256 timestamp)",
+        "event GameEnded(uint256 indexed gameNumber, uint256 totalPlayers, uint256 totalJackpot, uint256 timestamp)",
+        "event EmergencyPaused(address indexed by, string reason, uint256 timestamp)",
+        "event EmergencyResumed(address indexed by, uint256 timestamp)"
     ];
 
     const contractConfig = useMemo(() => ({

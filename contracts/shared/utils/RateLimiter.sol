@@ -44,7 +44,8 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
     /**
      * @notice User-function specific rate limits
      */
-    mapping(address => mapping(string => RateLimit)) public userFunctionRateLimits;
+    mapping(address => mapping(string => RateLimit))
+        public userFunctionRateLimits;
 
     // Global settings
     /**
@@ -69,7 +70,11 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param timestamp When the limit was created
      */
     event RateLimitCreated(
-        address indexed user, string indexed functionName, uint256 maxRequests, uint256 timeWindow, uint256 timestamp
+        address indexed user,
+        string indexed functionName,
+        uint256 maxRequests,
+        uint256 timeWindow,
+        uint256 timestamp
     );
 
     /**
@@ -81,7 +86,11 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param timestamp When the limit was updated
      */
     event RateLimitUpdated(
-        address indexed user, string indexed functionName, uint256 oldMax, uint256 newMax, uint256 timestamp
+        address indexed user,
+        string indexed functionName,
+        uint256 oldMax,
+        uint256 newMax,
+        uint256 timestamp
     );
 
     /**
@@ -90,7 +99,11 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param functionName The function name
      * @param timestamp When the limit was exceeded
      */
-    event RateLimitExceededEvent(address indexed user, string indexed functionName, uint256 timestamp);
+    event RateLimitExceededEvent(
+        address indexed user,
+        string indexed functionName,
+        uint256 timestamp
+    );
 
     /**
      * @notice Emitted when rate limiting is toggled
@@ -109,7 +122,7 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param owner The owner of the contract
      */
     function initialize(address owner) public initializer {
-        __Ownable_init(owner);
+        __Ownable_init();
         rateLimitingEnabled = true;
     }
 
@@ -119,7 +132,11 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param maxRequests Maximum requests allowed
      * @param timeWindow Time window in seconds
      */
-    function setUserRateLimit(address user, uint256 maxRequests, uint256 timeWindow) external onlyOwner {
+    function setUserRateLimit(
+        address user,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) external onlyOwner {
         _validateRateLimitParams(maxRequests, timeWindow);
         _createUserRateLimit(user, maxRequests, timeWindow);
         _emitRateLimitCreated(user, "", maxRequests, timeWindow);
@@ -130,7 +147,10 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param maxRequests Maximum requests to validate
      * @param timeWindow Time window to validate
      */
-    function _validateRateLimitParams(uint256 maxRequests, uint256 timeWindow) internal pure {
+    function _validateRateLimitParams(
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) internal pure {
         if (maxRequests == 0) {
             revert InvalidMaxRequests();
         }
@@ -145,7 +165,11 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param maxRequests Maximum requests allowed
      * @param timeWindow Time window in seconds
      */
-    function _createUserRateLimit(address user, uint256 maxRequests, uint256 timeWindow) internal {
+    function _createUserRateLimit(
+        address user,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) internal {
         userRateLimits[user] = RateLimit({
             maxRequests: maxRequests,
             timeWindow: timeWindow,
@@ -162,10 +186,19 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param maxRequests Maximum requests allowed
      * @param timeWindow Time window in seconds
      */
-    function _emitRateLimitCreated(address user, string memory functionName, uint256 maxRequests, uint256 timeWindow)
-        internal
-    {
-        emit RateLimitCreated(user, functionName, maxRequests, timeWindow, block.timestamp); // solhint-disable-line not-rely-on-time
+    function _emitRateLimitCreated(
+        address user,
+        string memory functionName,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) internal {
+        emit RateLimitCreated(
+            user,
+            functionName,
+            maxRequests,
+            timeWindow,
+            block.timestamp
+        ); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -174,10 +207,11 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param maxRequests Maximum requests allowed
      * @param timeWindow Time window in seconds
      */
-    function setFunctionRateLimit(string calldata functionName, uint256 maxRequests, uint256 timeWindow)
-        external
-        onlyOwner
-    {
+    function setFunctionRateLimit(
+        string calldata functionName,
+        uint256 maxRequests,
+        uint256 timeWindow
+    ) external onlyOwner {
         if (maxRequests == 0) {
             revert InvalidMaxRequests();
         }
@@ -193,7 +227,12 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
             isActive: true
         });
 
-        _emitRateLimitCreated(address(0), functionName, maxRequests, timeWindow);
+        _emitRateLimitCreated(
+            address(0),
+            functionName,
+            maxRequests,
+            timeWindow
+        );
     }
 
     /**
@@ -233,7 +272,10 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param functionName The function name
      * @return bool True if the request is allowed, false otherwise
      */
-    function checkRateLimit(address user, string calldata functionName) external returns (bool) {
+    function checkRateLimit(
+        address user,
+        string calldata functionName
+    ) external returns (bool) {
         if (!rateLimitingEnabled) {
             return true; // Allow if rate limiting is disabled
         }
@@ -253,7 +295,9 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
         }
 
         // Check user-function specific rate limit
-        RateLimit storage userFunctionLimit = userFunctionRateLimits[user][functionName];
+        RateLimit storage userFunctionLimit = userFunctionRateLimits[user][
+            functionName
+        ];
         if (userFunctionLimit.isActive) {
             allowed = allowed && _checkAndUpdateRateLimit(userFunctionLimit);
         }
@@ -271,7 +315,9 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param limit The rate limit to check and update
      * @return bool True if the request is allowed, false otherwise
      */
-    function _checkAndUpdateRateLimit(RateLimit storage limit) internal returns (bool) {
+    function _checkAndUpdateRateLimit(
+        RateLimit storage limit
+    ) internal returns (bool) {
         // Check if window has expired
         if (block.timestamp >= limit.windowStart + limit.timeWindow) {
             // solhint-disable-line not-rely-on-time
@@ -302,7 +348,9 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @notice Disable function-specific rate limit
      * @param functionName The function name
      */
-    function disableFunctionRateLimit(string calldata functionName) external onlyOwner {
+    function disableFunctionRateLimit(
+        string calldata functionName
+    ) external onlyOwner {
         functionRateLimits[functionName].isActive = false;
     }
 
@@ -311,7 +359,10 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param user The user address
      * @param functionName The function name
      */
-    function disableUserFunctionRateLimit(address user, string calldata functionName) external onlyOwner {
+    function disableUserFunctionRateLimit(
+        address user,
+        string calldata functionName
+    ) external onlyOwner {
         userFunctionRateLimits[user][functionName].isActive = false;
     }
 
@@ -328,7 +379,10 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @param newMaxRequests New default maximum requests
      * @param newTimeWindow New default time window in seconds
      */
-    function updateDefaultSettings(uint256 newMaxRequests, uint256 newTimeWindow) external onlyOwner {
+    function updateDefaultSettings(
+        uint256 newMaxRequests,
+        uint256 newTimeWindow
+    ) external onlyOwner {
         if (newMaxRequests == 0) {
             revert InvalidMaxRequests();
         }
@@ -348,13 +402,25 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @return maxRequests Maximum requests allowed
      * @return timeWindow Time window in seconds
      */
-    function getUserRateLimitInfo(address user)
+    function getUserRateLimitInfo(
+        address user
+    )
         external
         view
-        returns (bool isActive, uint256 currentRequests, uint256 maxRequests, uint256 timeWindow)
+        returns (
+            bool isActive,
+            uint256 currentRequests,
+            uint256 maxRequests,
+            uint256 timeWindow
+        )
     {
         RateLimit storage userLimit = userRateLimits[user];
-        return (userLimit.isActive, userLimit.currentRequests, userLimit.maxRequests, userLimit.timeWindow);
+        return (
+            userLimit.isActive,
+            userLimit.currentRequests,
+            userLimit.maxRequests,
+            userLimit.timeWindow
+        );
     }
 
     /**
@@ -365,14 +431,25 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @return maxRequests Maximum requests allowed
      * @return timeWindow Time window in seconds
      */
-    function getFunctionRateLimitInfo(string calldata functionName)
+    function getFunctionRateLimitInfo(
+        string calldata functionName
+    )
         external
         view
-        returns (bool isActive, uint256 currentRequests, uint256 maxRequests, uint256 timeWindow)
+        returns (
+            bool isActive,
+            uint256 currentRequests,
+            uint256 maxRequests,
+            uint256 timeWindow
+        )
     {
         RateLimit storage functionLimit = functionRateLimits[functionName];
-        return
-            (functionLimit.isActive, functionLimit.currentRequests, functionLimit.maxRequests, functionLimit.timeWindow);
+        return (
+            functionLimit.isActive,
+            functionLimit.currentRequests,
+            functionLimit.maxRequests,
+            functionLimit.timeWindow
+        );
     }
 
     /**
@@ -384,12 +461,22 @@ contract RateLimiter is Initializable, OwnableUpgradeable {
      * @return maxRequests Maximum requests allowed
      * @return timeWindow Time window in seconds
      */
-    function getUserFunctionRateLimitInfo(address user, string calldata functionName)
+    function getUserFunctionRateLimitInfo(
+        address user,
+        string calldata functionName
+    )
         external
         view
-        returns (bool isActive, uint256 currentRequests, uint256 maxRequests, uint256 timeWindow)
+        returns (
+            bool isActive,
+            uint256 currentRequests,
+            uint256 maxRequests,
+            uint256 timeWindow
+        )
     {
-        RateLimit storage userFunctionLimit = userFunctionRateLimits[user][functionName];
+        RateLimit storage userFunctionLimit = userFunctionRateLimits[user][
+            functionName
+        ];
         return (
             userFunctionLimit.isActive,
             userFunctionLimit.currentRequests,

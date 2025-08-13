@@ -1,0 +1,2797 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "AddressEmptyCode"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "implementation",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "ERC1967InvalidImplementation"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "ERC1967NonPayable"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "FailedCall"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidInitialization"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "NotInitializing"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "ReentrancyGuardReentrantCall"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "UUPSUnauthorizedCallContext"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "slot",
+            "type": "bytes32"
+          }
+        ],
+        "type": "error",
+        "name": "UUPSUnsupportedProxiableUUID"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdLotteryFeeCollected",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "oldFee",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "newFee",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdLotteryFeeUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "gasUsed",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "playerCount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "jackpot",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdLotteryPerformanceMetrics",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "eventType",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdLotterySecurityEvent",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "prizeAmount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdLotteryWinnerSelected",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "ticketCount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "adTokensUsed",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdTicketPurchased",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "adToken",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdTokenSet",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "contractName",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "ContractNotFound",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "distributor",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "DeveloperFeeSent",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "operation",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "DistributorError",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "by",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "EmergencyPaused",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "by",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "EmergencyResumed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "referralFee",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "adLotteryFee",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "developerFee",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "FeeDistributed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "founder",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "FounderDistribution",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "oldValue",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "newValue",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GameDurationUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalJackpot",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GameEnded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "gasUsed",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "playerCount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "jackpot",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GamePerformanceMetrics",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "eventType",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GameSecurityEvent",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "enum StorageLayout.GameState",
+            "name": "state",
+            "type": "uint8",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GameStateChanged",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalGames",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPayouts",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GameStatsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint64",
+            "name": "version",
+            "type": "uint64",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Initialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "JackpotDistributed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "oldValue",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "newValue",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "MaxTicketsPerPlayerUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "PlayerCooldownReset",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "cooldown",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "PurchaseCooldownSet",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "operation",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "ReferralError",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "operation",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "contractName",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "RegistryError",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "registry",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "RegistrySet",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "operation",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "StatsError",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TestModeSet",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "oldPrice",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "newPrice",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TicketPriceChanged",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "ticketIndex",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TicketPurchased",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TreasuryFundsDeposited",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TreasuryFundsWithdrawn",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "treasuryName",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TreasuryNameSet",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "operation",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TreasuryOperationFailed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "TreasuryTransferFailed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "implementation",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "Upgraded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "WinnerPayout",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "jackpot",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "playerCount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "WinnerSelected",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "stateMutability": "payable",
+        "type": "fallback"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_GAME_DURATION",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_LOTTERY_FEE",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_LOTTERY_FEE_MAX",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_LOTTERY_FEE_PERCENT",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_LOTTERY_PRIZE",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_MAX_TICKETS",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_TICKET_PRICE",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "DEVELOPER_FEE_PERCENT",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "MAX_BLOCK_DELAY",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "MIN_BLOCK_DELAY",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "PURCHASE_COOLDOWN",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "REFERRAL_FEE_PERCENT",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "TOTAL_FEE_PERCENT",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "UPGRADE_INTERFACE_VERSION",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "adLotteryFee",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "adToken",
+        "outputs": [
+          {
+            "internalType": "contract IAdToken",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "autoEndGame"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "ticketCount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "buyAdTicket"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "ticketCounts",
+            "type": "uint256[]"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "buyAdTicketBatch"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "referrer",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ticketCount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function",
+        "name": "buyTicket"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "checkAndEndGame"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "emergencyPause"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "emergencyResume"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdLotteryFeeInfo",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "currentFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalCollected",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdLotteryGameHistory",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "jackpot",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "playerCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "endTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum StorageLayout.GameState",
+            "name": "gameState",
+            "type": "uint8"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdLotteryGameStatus",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentGameId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "playerCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "jackpot",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "remainingTime",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdLotteryInfo",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "currentGameId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ticketPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameDuration",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxTickets",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "adLotteryFeePercent",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "adTokenBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdLotteryStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalTickets",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBurnedTokens",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPrizes",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeGames",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdTokenBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdTokenBurnedAmount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAdTokenTotalSupply",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getContractBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getCurrentGameEndTime",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getCurrentGameJackpot",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getCurrentGameNumber",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getCurrentGamePlayerCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getCurrentGameState",
+        "outputs": [
+          {
+            "internalType": "enum StorageLayout.GameState",
+            "name": "",
+            "type": "uint8"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getDetailedAdLotteryStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBurnedTokens",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "averageTicketsPerGame",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "successRate",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getGameConfig",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "ticketPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameDuration",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxTicketsPerPlayer",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isActive",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getGameInfo",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "currentGameNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "startTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "duration",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "remainingTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "timeExpired",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "playerCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentJackpot",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getPlayerAnalytics",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalTicketsPurchased",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gamesParticipated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivityTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "averageTicketsPerGame",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getPlayerInfo",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "ticketCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastPurchaseTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSpent",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getRemainingGameTime",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "_treasuryName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "initialize"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "isGameTimeExpired",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "lastPurchaseTime",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "ownable",
+        "outputs": [
+          {
+            "internalType": "contract IOwnable",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "proxiableUUID",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "registry",
+        "outputs": [
+          {
+            "internalType": "contract ContractRegistry",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "resetPlayerCooldown"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newFee",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setAdLotteryFee"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "adTokenAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setAdToken"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newCooldown",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setPurchaseCooldown"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "registryAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setRegistry"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setTestMode"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_treasuryName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setTreasuryName"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "treasuryName",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newImplementation",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function",
+        "name": "upgradeToAndCall"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "withdrawAdTokens"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "payable",
+        "type": "receive"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "autoEndGame()": {
+          "details": "자동 게임 종료 (누구나 호출 가능)"
+        },
+        "buyAdTicket(uint256)": {
+          "custom:error": "\"Ticket count must be greater than 0\" - 티켓 수가 0 이하일 때\"Exceeds max tickets per game\" - 최대 티켓 수 초과 시\"Insufficient AD tokens\" - Ad Token 잔액 부족 시\"AD token transfer failed\" - Ad Token 전송 실패 시\"Invalid sender address\" - 잘못된 발신자 주소\"Game is not active\" - 게임이 비활성 상태\"Ad Token not set\" - Ad Token 주소가 설정되지 않음",
+          "custom:security": "nonReentrant",
+          "details": "Ad Token으로 티켓 구매",
+          "params": {
+            "ticketCount": "구매할 티켓 수 (1-100개)"
+          }
+        },
+        "buyAdTicketBatch(uint256[])": {
+          "details": "가스 최적화된 Ad 티켓 구매"
+        },
+        "buyTicket(address,uint256)": {
+          "params": {
+            "referrer": "The referrer address",
+            "ticketCount": "The number of tickets to buy"
+          }
+        },
+        "checkAndEndGame()": {
+          "details": "게임 종료 확인 및 처리"
+        },
+        "constructor": {
+          "custom:oz-upgrades-unsafe-allow": "constructor"
+        },
+        "emergencyPause(string)": {
+          "params": {
+            "reason": "The reason for pausing"
+          }
+        },
+        "getAdLotteryFeeInfo()": {
+          "details": "Ad Lottery 수수료 정보 조회",
+          "returns": {
+            "currentFee": "현재 수수료 비율",
+            "maxFee": "최대 수수료 비율",
+            "totalCollected": "총 수집된 수수료"
+          }
+        },
+        "getAdLotteryGameHistory(uint256)": {
+          "details": "Ad Lottery 게임 히스토리 조회",
+          "params": {
+            "gameId": "게임 ID"
+          },
+          "returns": {
+            "endTime": "종료 시간",
+            "gameNumber": "게임 번호",
+            "gameState": "게임 상태",
+            "jackpot": "잭팟 금액",
+            "playerCount": "플레이어 수"
+          }
+        },
+        "getAdLotteryGameStatus()": {
+          "details": "Ad Lottery 게임 상태 조회",
+          "returns": {
+            "currentGameId": "현재 게임 ID",
+            "isActive": "게임 활성 상태",
+            "jackpot": "현재 잭팟",
+            "playerCount": "현재 플레이어 수",
+            "remainingTime": "남은 시간"
+          }
+        },
+        "getAdLotteryInfo()": {
+          "details": "Ad Lottery 게임 정보 조회",
+          "returns": {
+            "adLotteryFeePercent": "Ad Lottery 수수료 비율",
+            "adTokenBalance": "Ad Token 잔액",
+            "currentGameId": "현재 게임 ID",
+            "gameDuration": "게임 지속 시간",
+            "isActive": "활성 상태",
+            "maxTickets": "최대 티켓 수",
+            "ticketPrice": "티켓 가격"
+          }
+        },
+        "getAdLotteryStats()": {
+          "details": "Ad Lottery 통계 정보 조회",
+          "returns": {
+            "activeGames": "활성 게임 수",
+            "totalBurnedTokens": "총 소각된 Ad Token 양",
+            "totalPrizes": "총 지급된 상금",
+            "totalTickets": "총 티켓 판매량"
+          }
+        },
+        "getAdTokenBalance()": {
+          "details": "Ad Token 잔액 조회",
+          "returns": {
+            "_0": "balance Ad Token 잔액"
+          }
+        },
+        "getAdTokenBurnedAmount()": {
+          "details": "Ad Token 소각된 양 조회",
+          "returns": {
+            "_0": "burnedAmount 소각된 Ad Token 양"
+          }
+        },
+        "getAdTokenTotalSupply()": {
+          "details": "Ad Token 총 공급량 조회",
+          "returns": {
+            "_0": "totalSupply Ad Token 총 공급량"
+          }
+        },
+        "getContractBalance()": {
+          "returns": {
+            "_0": "The contract balance"
+          }
+        },
+        "getCurrentGameEndTime()": {
+          "returns": {
+            "_0": "The current game end time"
+          }
+        },
+        "getCurrentGameJackpot()": {
+          "returns": {
+            "_0": "The current game jackpot amount"
+          }
+        },
+        "getCurrentGameNumber()": {
+          "returns": {
+            "_0": "The current game number"
+          }
+        },
+        "getCurrentGamePlayerCount()": {
+          "returns": {
+            "_0": "The current game player count"
+          }
+        },
+        "getCurrentGameState()": {
+          "returns": {
+            "_0": "The current game state"
+          }
+        },
+        "getDetailedAdLotteryStats()": {
+          "details": "Ad Lottery 상세 통계 조회",
+          "returns": {
+            "averageTicketsPerGame": "게임당 평균 티켓 수",
+            "successRate": "성공률",
+            "totalBurnedTokens": "총 소각된 토큰",
+            "totalGames": "총 게임 수",
+            "totalPlayers": "총 플레이어 수"
+          }
+        },
+        "getGameConfig()": {
+          "returns": {
+            "gameDuration": "The game duration",
+            "isActive": "Whether the game is active",
+            "maxTicketsPerPlayer": "The maximum tickets per player",
+            "ticketPrice": "The ticket price"
+          }
+        },
+        "getGameInfo()": {
+          "details": "게임 정보 조회"
+        },
+        "getPlayerAnalytics(address)": {
+          "details": "플레이어 활동 분석",
+          "params": {
+            "player": "분석할 플레이어 주소"
+          },
+          "returns": {
+            "averageTicketsPerGame": "게임당 평균 티켓 수",
+            "gamesParticipated": "참여한 게임 수",
+            "lastActivityTime": "마지막 활동 시간",
+            "totalTicketsPurchased": "총 구매한 티켓 수"
+          }
+        },
+        "getPlayerInfo(address)": {
+          "params": {
+            "player": "The player address"
+          },
+          "returns": {
+            "lastPurchaseTime": "The last purchase time",
+            "ticketCount": "The number of tickets purchased",
+            "totalSpent": "The total amount spent"
+          }
+        },
+        "getRemainingGameTime()": {
+          "returns": {
+            "_0": "The remaining game time in seconds"
+          }
+        },
+        "initialize(address,address,address,address,address,string)": {
+          "custom:security": "initializer",
+          "details": "컨트랙트 초기화",
+          "params": {
+            "_treasuryName": "Treasury 이름",
+            "owner": "컨트랙트 소유자 주소"
+          }
+        },
+        "isGameTimeExpired()": {
+          "details": "게임 시간 만료 확인"
+        },
+        "owner()": {
+          "details": "Returns the address of the current owner."
+        },
+        "proxiableUUID()": {
+          "details": "Implementation of the ERC-1822 {proxiableUUID} function. This returns the storage slot used by the implementation. It is used to validate the implementation's compatibility when performing an upgrade. IMPORTANT: A proxy pointing at a proxiable contract should not be considered proxiable itself, because this risks bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier."
+        },
+        "renounceOwnership()": {
+          "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+        },
+        "resetPlayerCooldown(address)": {
+          "params": {
+            "player": "The player address"
+          }
+        },
+        "setAdLotteryFee(uint256)": {
+          "custom:error": "\"Fee cannot exceed 10%\" - 수수료가 10% 초과 시",
+          "custom:security": "onlyOwner",
+          "details": "Ad Lottery 수수료 비율 설정",
+          "params": {
+            "newFee": "새로운 수수료 비율 (0-10%)"
+          }
+        },
+        "setAdToken(address)": {
+          "params": {
+            "adTokenAddress": "The Ad Token contract address"
+          }
+        },
+        "setPurchaseCooldown(uint256)": {
+          "params": {
+            "newCooldown": "The new cooldown time"
+          }
+        },
+        "setRegistry(address)": {
+          "params": {
+            "registryAddress": "The registry address"
+          }
+        },
+        "setTestMode(bool)": {
+          "params": {
+            "enabled": "Whether test mode is enabled"
+          }
+        },
+        "setTreasuryName(string)": {
+          "params": {
+            "_treasuryName": "The treasury name"
+          }
+        },
+        "transferOwnership(address)": {
+          "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        },
+        "upgradeToAndCall(address,bytes)": {
+          "custom:oz-upgrades-unsafe-allow-reachable": "delegatecall",
+          "details": "Upgrade the implementation of the proxy to `newImplementation`, and subsequently execute the function call encoded in `data`. Calls {_authorizeUpgrade}. Emits an {Upgraded} event."
+        },
+        "withdrawAdTokens(uint256)": {
+          "custom:error": "\"Amount must be greater than 0\" - 금액이 0 이하일 때\"Insufficient AD tokens\" - Ad Token 잔액 부족 시\"AD token transfer failed\" - Ad Token 전송 실패 시\"Invalid amount\" - 잘못된 금액",
+          "custom:security": "onlyOwner",
+          "details": "Ad Token 인출 (관리자만)",
+          "params": {
+            "amount": "인출할 금액"
+          }
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "buyAdTicket(uint256)": {
+          "notice": "사용자가 Ad Token을 사용하여 티켓을 구매합니다구매된 Ad Token은 즉시 소각됩니다"
+        },
+        "buyAdTicketBatch(uint256[])": {
+          "notice": "배치 처리를 통한 가스 최적화"
+        },
+        "buyTicket(address,uint256)": {
+          "notice": "Buy tickets for the current game"
+        },
+        "emergencyPause(string)": {
+          "notice": "Emergency pause the contract"
+        },
+        "emergencyResume()": {
+          "notice": "Emergency resume the contract"
+        },
+        "getContractBalance()": {
+          "notice": "Get contract balance"
+        },
+        "getCurrentGameEndTime()": {
+          "notice": "Get current game end time"
+        },
+        "getCurrentGameJackpot()": {
+          "notice": "Get current game jackpot"
+        },
+        "getCurrentGameNumber()": {
+          "notice": "Get current game number"
+        },
+        "getCurrentGamePlayerCount()": {
+          "notice": "Get current game player count"
+        },
+        "getCurrentGameState()": {
+          "notice": "Get current game state"
+        },
+        "getGameConfig()": {
+          "notice": "Get game configuration"
+        },
+        "getPlayerInfo(address)": {
+          "notice": "Get player information"
+        },
+        "getRemainingGameTime()": {
+          "notice": "Get remaining game time"
+        },
+        "initialize(address,address,address,address,address,string)": {
+          "notice": "Ad Lottery 게임을 초기화하고 필요한 설정을 구성합니다"
+        },
+        "ownable()": {
+          "notice": "Ownable contract instance"
+        },
+        "registry()": {
+          "notice": "Contract registry for managing contract addresses"
+        },
+        "resetPlayerCooldown(address)": {
+          "notice": "Reset player cooldown"
+        },
+        "setAdLotteryFee(uint256)": {
+          "notice": "관리자만 호출 가능하며, 수수료 비율을 변경합니다"
+        },
+        "setAdToken(address)": {
+          "notice": "Set Ad Token address"
+        },
+        "setPurchaseCooldown(uint256)": {
+          "notice": "Set purchase cooldown"
+        },
+        "setRegistry(address)": {
+          "notice": "Set registry address"
+        },
+        "setTestMode(bool)": {
+          "notice": "Set test mode"
+        },
+        "setTreasuryName(string)": {
+          "notice": "Set treasury name"
+        },
+        "treasuryName()": {
+          "notice": "Treasury name for fund management"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/modules/lottery/CryptolottoAd.sol": "CryptolottoAd"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/modules/analytics/AnalyticsEngine.sol": {
+      "keccak256": "0x68a3fe84513afec5004559307d98a915f139023ae2cfc786b6adf839bd90a74c",
+      "urls": [
+        "bzz-raw://342e4dd69f73958e5ad2c44a5190d3fac46dd9a0f3be963e318318d7ff8acf0e",
+        "dweb:/ipfs/Qmctk82vWVx8HG8JfzxUAZVxHTTcEwPj9piC4JYRzdpwxa"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/analytics/MonitoringSystem.sol": {
+      "keccak256": "0x56ffab924a66fea9f400388dcad17a70509ed500bedbc3060d3d0194fbe49dad",
+      "urls": [
+        "bzz-raw://fab9566ef991fc0b3bb176283ae93676c5cbc5ac44d876b7aaa4d8983aaac40b",
+        "dweb:/ipfs/QmZe1PkEyX8dP5ou2SshfdN1Qrm24rquQQpih572CXQgNb"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/analytics/StatsAggregator.sol": {
+      "keccak256": "0x383fce56a74239d9e6ae26cdc5366719347333d4f3243aeea8c76108e0f551d1",
+      "urls": [
+        "bzz-raw://127879c5d57cda05cfd41603ed93fea5b8dc4200c8f0316ef2669ba98141df1a",
+        "dweb:/ipfs/QmdffxeB5Qzqp8vwYoFdqZ95QTeNB5GJhPDSWsf6RtSRzh"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/lottery/BaseGame.sol": {
+      "keccak256": "0x8cee6de6b22dc2b868c35572641347b41f9ceae3027ac6afa8ec738ae9d9e68f",
+      "urls": [
+        "bzz-raw://6ca129e439adc6cb7330a5e3b92144b5b136fd24265b4a0434071250c3750c6d",
+        "dweb:/ipfs/QmcA65n7Y2R8XUYf9Hi2BhkM4b6Gh6K65nvNFhNTghbPBr"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/lottery/CryptolottoAd.sol": {
+      "keccak256": "0xce2491d25c48b971275dd2caf25efd17b4788020cbfc0030e0951c8623225eb3",
+      "urls": [
+        "bzz-raw://2741c0ce6bfe4b283fcb218e94527ed3fcc2d12c23c407f869cd5e0769f1546e",
+        "dweb:/ipfs/QmXnFDpgAn68D3yU6GrDfSi9boxr5AvC55pd8mMPnPJfGo"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/treasury/CryptolottoReferral.sol": {
+      "keccak256": "0xba6c33fac6cb0c408e4278e462454348854ad54810d10544a0f40c3bb881bf5c",
+      "urls": [
+        "bzz-raw://31d963d0db625889df1306d11fc2fb3a992b294ac13489d8bd12d2a3d8f9df00",
+        "dweb:/ipfs/QmRbR2uNanGKRaGq4W2fx5VGKH1dkco3xnYaBqNzTMsHcD"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/treasury/FundsDistributor.sol": {
+      "keccak256": "0x88b60c26a5980fb069f1e829e106bb7d758c72cb083d8b1380fe590e66ee9081",
+      "urls": [
+        "bzz-raw://f0a12449fb64062235773c5e7cae2e22e01067ca8e5705dd1ee4838d5dcb6cac",
+        "dweb:/ipfs/QmRybfiAgtzpzQ3GWgTYhAVM796PUiA1EbdY9HY75iA2f5"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IAdToken.sol": {
+      "keccak256": "0x278eca7e2a2a9fe5fe7a66e374d0260efe70628cbddde0acd5b6c69af5b8dc8a",
+      "urls": [
+        "bzz-raw://6382d44d5b09ba60e58398b9879649f3735e3c6055ce0545aa3b21e035d862db",
+        "dweb:/ipfs/QmPcMFVhEHjCrARPx1s8JnEWoDvPMToXcb12CwN6Gx5GJF"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IAnalyticsEngine.sol": {
+      "keccak256": "0x9f415e7d41f19eb209782ccba2337cf054235aa8c7a7b8a2a7d492ebcbf78db9",
+      "urls": [
+        "bzz-raw://5ee64be0be8a49c6195f6da719c94453deb158eaa7ec146636f352697d85f1d4",
+        "dweb:/ipfs/QmeGDw2uvYEzvXqfitofN8EuKSaDJ2qEBNKvyw4oUHZYsg"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ICryptolottoReferral.sol": {
+      "keccak256": "0x25aa6cce01d71e204003776761a6b79a80e3000bdd2bd67b3bd1a6dda1f59c4d",
+      "urls": [
+        "bzz-raw://ac8a8bd0ef9d6d40fa255a116ef60e19e1c4a8b00334a210b7f44552b14c57ae",
+        "dweb:/ipfs/Qmap68yMy5GkwDMEz3TXcGD67CxwTCHcsCSGqTkf2cqopt"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ICryptolottoStatsAggregator.sol": {
+      "keccak256": "0x3949cc1e620873a9f982f6341f44c755dadb82a901d767f35bbb4041d1840b6d",
+      "urls": [
+        "bzz-raw://513972ba589d9962757ff7476d11d08c42bba0f24a0aa76bc69967827bd4b2b9",
+        "dweb:/ipfs/QmZzaghvH2v8eB23wkosE6M6JkpyA25TnZPyRHFauEFjWm"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IFundsDistributor.sol": {
+      "keccak256": "0x1ea124443a3556a9e9cb6cd98f1cc1385b86aae0621190f71dd8335cb60440d5",
+      "urls": [
+        "bzz-raw://aabcf80a397ff9da0afd1187fbcf81ec1019a7a5744663954dae4cac3c5cfeae",
+        "dweb:/ipfs/QmbT7hbkuWGuScnkeUHnwoBpb4UMNqpeqn5LxY3so4GWXR"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IOwnable.sol": {
+      "keccak256": "0x7435e3e66069c024ef2b6696301352ad17a2fa616c6dbce308af0c7951332282",
+      "urls": [
+        "bzz-raw://cfa7e7aa1b5097f57b8c3d8c133166e86e157ff08f9e732fb2324c76419aa7ef",
+        "dweb:/ipfs/Qmf8rHUh2HNMxCrhQpsMpfQhQTkmUU8m1UVYaoZava59AY"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ITreasuryManager.sol": {
+      "keccak256": "0x47141f0107d03257ee00ef2153936c138f105e39190a98564e58f4a6b596f76c",
+      "urls": [
+        "bzz-raw://d91efe955872cb09e40ea6be79dbe560d29f0d4c92f41798f765dfc5881a67ec",
+        "dweb:/ipfs/QmWeqPSRdk3yY2CvMBMUjbv7pwK7RzSTB3rFV65QfE5TbM"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageAccess.sol": {
+      "keccak256": "0x9e62e58d2ef187df53a17c2cb76327e8285cfa988354260b5c2fef938f21a354",
+      "urls": [
+        "bzz-raw://4e35c548af411e97bd2c887b10c4c23ebbe631b70095e50d88b5238c6cf72c34",
+        "dweb:/ipfs/QmX4usJV5MPoc9ATqmm2dzuRBgS64aVWgA7vQUoqpqz5TT"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageLayout.sol": {
+      "keccak256": "0x35d8e8867cfba6ed38b653a0e8259ab1685c5d8152e5456a1e6347e5760b3429",
+      "urls": [
+        "bzz-raw://ad225ac91f0b323101be262c76bd5ee0cead833aef69afa7f0c2b73bb4920281",
+        "dweb:/ipfs/Qmcbqp1r6hapZNM75139ivZqZYxAxtyo8Hr2vEeLDscXc3"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageOptimizer.sol": {
+      "keccak256": "0x472fdcf002d3a3c345910cc9892d7563d5977f2bcc0bda4a9d43bf6d08f84a41",
+      "urls": [
+        "bzz-raw://bf9e17ef99cd8edcd412ca28955487bbb16b422e90675646f4d4ae111032d5f8",
+        "dweb:/ipfs/QmYAgz1iZ6dE1jA78vspUBs4jyMQJBrt6mWVcnHQJFXHyU"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/ContractRegistry.sol": {
+      "keccak256": "0x2679c9a642ec49f4fe5b99b39742e5ad8269c25faecd59108390b6d57c04747c",
+      "urls": [
+        "bzz-raw://9f3e30115f43c1d84aff8cab6687c65354aa8019c546f82a6e41dda030f727c5",
+        "dweb:/ipfs/QmQELtKrCywNhwKPaD2rpgM1f35f1iKzM6FomYNGmH9E6H"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/GasOptimizer.sol": {
+      "keccak256": "0x1b6870383897803ddf57896964421ad4a582bdc62d25701d5d1c6d15f8627f13",
+      "urls": [
+        "bzz-raw://5addeff7a3df26ee300968fb4b1b19c0f127a8335095ea055264a70aa706795b",
+        "dweb:/ipfs/QmZXprNbgDiBkJxPgF3nZM3G7Ev2bHkzX2jfBtiWUjynBF"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+      "keccak256": "0xc163fcf9bb10138631a9ba5564df1fa25db9adff73bd9ee868a8ae1858fe093a",
+      "urls": [
+        "bzz-raw://9706d43a0124053d9880f6e31a59f31bc0a6a3dc1acd66ce0a16e1111658c5f6",
+        "dweb:/ipfs/QmUFmfowzkRwGtDu36cXV9SPTBHJ3n7dG9xQiK5B28jTf2"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "keccak256": "0xdb4d24ee2c087c391d587cd17adfe5b3f9d93b3110b1388c2ab6c7c0ad1dcd05",
+      "urls": [
+        "bzz-raw://ab7b6d5b9e2b88176312967fe0f0e78f3d9a1422fa5e4b64e2440c35869b5d08",
+        "dweb:/ipfs/QmXKYWWyzcLg1B2k7Sb1qkEXgLCYfXecR9wYW5obRzWP1Q"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol": {
+      "keccak256": "0x574a7451e42724f7de29e2855c392a8a5020acd695169466a18459467d719d63",
+      "urls": [
+        "bzz-raw://5bc189f63b639ee173dd7b6fecc39baf7113bf161776aea22b34c57fdd1872ec",
+        "dweb:/ipfs/QmZAf2VtjDLRULqjJkde6LNsxAg12tUqpPqgUQQZbAjgtZ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "keccak256": "0xdbef5f0c787055227243a7318ef74c8a5a1108ca3a07f2b3a00ef67769e1e397",
+      "urls": [
+        "bzz-raw://08e39f23d5b4692f9a40803e53a8156b72b4c1f9902a88cd65ba964db103dab9",
+        "dweb:/ipfs/QmPKn6EYDgpga7KtpkA8wV2yJCYGMtc9K4LkJfhKX2RVSV"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol": {
+      "keccak256": "0x361126a17677994081cd9cb69c3f50cffff6e920d25cb7e428acdb1ae41d1866",
+      "urls": [
+        "bzz-raw://19ae787a7dd001269cd60a394b1a5261b78925a0fc3a6f927beb2986a9aa56cf",
+        "dweb:/ipfs/QmYLfXiuKmcRgTDBEDXMMjXU8t6JxsspUmjxYzqWS55oEv"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
+      "urls": [
+        "bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
+        "dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol": {
+      "keccak256": "0xbf2aefe54b76d7f7bcd4f6da1080b7b1662611937d870b880db584d09cea56b5",
+      "urls": [
+        "bzz-raw://f5e7e2f12e0feec75296e57f51f82fdaa8bd1551f4b8cc6560442c0bf60f818c",
+        "dweb:/ipfs/QmcW9wDMaQ8RbQibMarfp17a3bABzY5KraWe2YDwuUrUoz"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol": {
+      "keccak256": "0x82f757819bf2429a0d4db141b99a4bbe5039e4ef86dfb94e2e6d40577ed5b28b",
+      "urls": [
+        "bzz-raw://37c30ed931e19fb71fdb806bb504cfdb9913b7127545001b64d4487783374422",
+        "dweb:/ipfs/QmUBHpv4hm3ZmwJ4GH8BeVzK4mv41Q6vBbWXxn8HExPXza"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol": {
+      "keccak256": "0x19fdfb0f3b89a230e7dbd1cf416f1a6b531a3ee5db4da483f946320fc74afc0e",
+      "urls": [
+        "bzz-raw://3490d794728f5bfecb46820431adaff71ba374141545ec20b650bb60353fac23",
+        "dweb:/ipfs/QmPsfxjVpMcZbpE7BH93DzTpEaktESigEw4SmDzkXuJ4WR"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol": {
+      "keccak256": "0xa1ad192cd45317c788618bef5cb1fb3ca4ce8b230f6433ac68cc1d850fb81618",
+      "urls": [
+        "bzz-raw://b43447bb85a53679d269a403c693b9d88d6c74177dfb35eddca63abaf7cf110a",
+        "dweb:/ipfs/QmXSDmpd4bNZj1PDgegr6C4w1jDaWHXCconC3rYiw9TSkQ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol": {
+      "keccak256": "0x20462ddb2665e9521372c76b001d0ce196e59dbbd989de9af5576cad0bd5628b",
+      "urls": [
+        "bzz-raw://f417fd12aeec8fbfaceaa30e3a08a0724c0bc39de363e2acf6773c897abbaf6d",
+        "dweb:/ipfs/QmU4Hko6sApdweVM92CsiuLKkCk8HfyBeutF89PCTz5Tye"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol": {
+      "keccak256": "0x86b7b71a6aedefdad89b607378eeab1dcc5389b9ea7d17346d08af01d7190994",
+      "urls": [
+        "bzz-raw://1dc2db8d94a21eac8efe03adf574c419b08536409b416057a2b5b95cb772c43c",
+        "dweb:/ipfs/QmZfqJCKVU1ScuX2A7s8WZdQEaikwJbDH5JBrBdKTUT4Gu"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+      "keccak256": "0x74ed01eb66b923d0d0cfe3be84604ac04b76482a55f9dd655e1ef4d367f95bc2",
+      "urls": [
+        "bzz-raw://5282825a626cfe924e504274b864a652b0023591fa66f06a067b25b51ba9b303",
+        "dweb:/ipfs/QmeCfPykghhMc81VJTrHTC7sF6CRvaA1FXVq2pJhwYp1dV"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+      "keccak256": "0xd6fa4088198f04eef10c5bce8a2f4d60554b7ec4b987f684393c01bf79b94d9f",
+      "urls": [
+        "bzz-raw://f95ee0bbd4dd3ac730d066ba3e785ded4565e890dbec2fa7d3b9fe3bad9d0d6e",
+        "dweb:/ipfs/QmSLr6bHkPFWT7ntj34jmwfyskpwo97T9jZUrk5sz3sdtR"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Address.sol": {
+      "keccak256": "0x6d0ae6e206645341fd122d278c2cb643dea260c190531f2f3f6a0426e77b00c0",
+      "urls": [
+        "bzz-raw://032d1201d839435be2c85b72e33206b3ea980c569d6ebf7fa57d811ab580a82f",
+        "dweb:/ipfs/QmeqQjAtMvdZT2tG7zm39itcRJkuwu8AEReK6WRnLJ18DD"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "keccak256": "0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2",
+      "urls": [
+        "bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12",
+        "dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Errors.sol": {
+      "keccak256": "0x6afa713bfd42cf0f7656efa91201007ac465e42049d7de1d50753a373648c123",
+      "urls": [
+        "bzz-raw://ba1d02f4847670a1b83dec9f7d37f0b0418d6043447b69f3a29a5f9efc547fcf",
+        "dweb:/ipfs/QmQ7iH2keLNUKgq2xSWcRmuBE5eZ3F5whYAkAGzCNNoEWB"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol": {
+      "keccak256": "0xcf74f855663ce2ae00ed8352666b7935f6cddea2932fdf2c3ecd30a9b1cd0e97",
+      "urls": [
+        "bzz-raw://9f660b1f351b757dfe01438e59888f31f33ded3afcf5cb5b0d9bf9aa6f320a8b",
+        "dweb:/ipfs/QmarDJ5hZEgBtCmmrVzEZWjub9769eD686jmzb2XpSU1cM"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

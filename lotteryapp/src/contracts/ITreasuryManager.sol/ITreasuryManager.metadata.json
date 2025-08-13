@@ -1,0 +1,183 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "addAuthorizedContract"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "treasuryName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initialBalance",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createTreasury"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "treasuryName",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function",
+        "name": "depositFunds"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "treasuryName",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "withdrawFunds"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "depositFunds(string,address,uint256)": {
+          "params": {
+            "amount": "The amount to deposit",
+            "treasuryName": "The treasury name",
+            "user": "The user address"
+          }
+        },
+        "getBalance()": {
+          "returns": {
+            "_0": "The treasury balance"
+          }
+        },
+        "withdrawFunds(string,address,uint256)": {
+          "params": {
+            "amount": "The amount to withdraw",
+            "to": "The address to withdraw to",
+            "treasuryName": "The treasury name"
+          }
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "depositFunds(string,address,uint256)": {
+          "notice": "Deposit funds to specific treasury"
+        },
+        "getBalance()": {
+          "notice": "Get treasury balance"
+        },
+        "withdrawFunds(string,address,uint256)": {
+          "notice": "Withdraw funds from treasury"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/shared/interfaces/ITreasuryManager.sol": "ITreasuryManager"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/shared/interfaces/ITreasuryManager.sol": {
+      "keccak256": "0x47141f0107d03257ee00ef2153936c138f105e39190a98564e58f4a6b596f76c",
+      "urls": [
+        "bzz-raw://d91efe955872cb09e40ea6be79dbe560d29f0d4c92f41798f765dfc5881a67ec",
+        "dweb:/ipfs/QmWeqPSRdk3yY2CvMBMUjbv7pwK7RzSTB3rFV65QfE5TbM"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

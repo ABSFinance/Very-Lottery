@@ -1,0 +1,1595 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_address",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "val",
+            "type": "uint256[]",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_array",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "int256[]",
+            "name": "val",
+            "type": "int256[]",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_array",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address[]",
+            "name": "val",
+            "type": "address[]",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_array",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_bytes",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_bytes32",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "int256",
+            "name": "",
+            "type": "int256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_int",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "val",
+            "type": "address",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_address",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "val",
+            "type": "uint256[]",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_array",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "int256[]",
+            "name": "val",
+            "type": "int256[]",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_array",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "address[]",
+            "name": "val",
+            "type": "address[]",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_array",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "bytes",
+            "name": "val",
+            "type": "bytes",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_bytes",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "bytes32",
+            "name": "val",
+            "type": "bytes32",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_bytes32",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "int256",
+            "name": "val",
+            "type": "int256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "decimals",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_decimal_int",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "val",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "decimals",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_decimal_uint",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "int256",
+            "name": "val",
+            "type": "int256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_int",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "val",
+            "type": "string",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_string",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "key",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "val",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_named_uint",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_string",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "log_uint",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "logs",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "AD_TICKET_PRICE",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "INITIAL_BALANCE",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "IS_TEST",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "TICKET_PRICE",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_adLotteryWinnerPrizeDistributionInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_completeSystemScenarioInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_exactAccumulatedPrizeFromMultipleGamesInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_exactAdLotteryPrizeAmountInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_exactFeeCalculationAndDistributionInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_exactFeePercentagesInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_exactPrizeDistributionInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "_feeAccumulationAndDistributionInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "_systemMonitoringInternal"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "adToken",
+        "outputs": [
+          {
+            "internalType": "contract AdToken",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "contractRegistry",
+        "outputs": [
+          {
+            "internalType": "contract ContractRegistry",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "excludeArtifacts",
+        "outputs": [
+          {
+            "internalType": "string[]",
+            "name": "excludedArtifacts_",
+            "type": "string[]"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "excludeContracts",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "excludedContracts_",
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "excludeSelectors",
+        "outputs": [
+          {
+            "internalType": "struct StdInvariant.FuzzSelector[]",
+            "name": "excludedSelectors_",
+            "type": "tuple[]",
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes4[]",
+                "name": "selectors",
+                "type": "bytes4[]"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "excludeSenders",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "excludedSenders_",
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "failed",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "lottery1Day",
+        "outputs": [
+          {
+            "internalType": "contract Cryptolotto1Day",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "lottery7Days",
+        "outputs": [
+          {
+            "internalType": "contract Cryptolotto7Days",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "lotteryAd",
+        "outputs": [
+          {
+            "internalType": "contract CryptolottoAd",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "player1",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "player2",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "player3",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "player4",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "player5",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "referral",
+        "outputs": [
+          {
+            "internalType": "contract CryptolottoReferral",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "referrer1",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "referrer2",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setUp"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "stats",
+        "outputs": [
+          {
+            "internalType": "contract StatsAggregator",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "targetArtifactSelectors",
+        "outputs": [
+          {
+            "internalType": "struct StdInvariant.FuzzArtifactSelector[]",
+            "name": "targetedArtifactSelectors_",
+            "type": "tuple[]",
+            "components": [
+              {
+                "internalType": "string",
+                "name": "artifact",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes4[]",
+                "name": "selectors",
+                "type": "bytes4[]"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "targetArtifacts",
+        "outputs": [
+          {
+            "internalType": "string[]",
+            "name": "targetedArtifacts_",
+            "type": "string[]"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "targetContracts",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "targetedContracts_",
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "targetInterfaces",
+        "outputs": [
+          {
+            "internalType": "struct StdInvariant.FuzzInterface[]",
+            "name": "targetedInterfaces_",
+            "type": "tuple[]",
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "string[]",
+                "name": "artifacts",
+                "type": "string[]"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "targetSelectors",
+        "outputs": [
+          {
+            "internalType": "struct StdInvariant.FuzzSelector[]",
+            "name": "targetedSelectors_",
+            "type": "tuple[]",
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes4[]",
+                "name": "selectors",
+                "type": "bytes4[]"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "targetSenders",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "targetedSenders_",
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testAdLotteryWinnerPrizeDistribution"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testCompleteSystemScenario"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testErrorRecovery"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testExactAccumulatedPrizeFromMultipleGames"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testExactAdLotteryPrizeAmount"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testExactFeeCalculationAndDistribution"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testExactFeePercentages"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testExactPrizeDistribution"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testFeeAccumulationAndDistribution"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testFeeDistribution"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testGameEndAndWinnerSelection"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testGasOptimization"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testHighVolumeTransactions"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testMultiGameOperation"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "testReferralSystem"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "testSystemInitialization"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "testSystemMonitoring"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "treasuryManager",
+        "outputs": [
+          {
+            "internalType": "contract TreasuryManager",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "testAdLotteryWinnerPrizeDistribution()": {
+          "details": "Ad Lottery 우승자 상금 분배 통합 테스트"
+        },
+        "testCompleteSystemScenario()": {
+          "details": "전체 시스템 통합 시나리오 테스트"
+        },
+        "testErrorRecovery()": {
+          "details": "에러 복구 테스트"
+        },
+        "testExactAccumulatedPrizeFromMultipleGames()": {
+          "details": "다중 게임에서 누적된 정확한 상금 검증 테스트"
+        },
+        "testExactAdLotteryPrizeAmount()": {
+          "details": "Ad Lottery 우승자 상금 정확한 금액 검증 테스트"
+        },
+        "testExactFeeCalculationAndDistribution()": {
+          "details": "정확한 수수료 계산 및 분배 검증 테스트"
+        },
+        "testExactFeePercentages()": {
+          "details": "정확한 수수료 비율 검증 테스트"
+        },
+        "testExactPrizeDistribution()": {
+          "details": "정확한 상금 분배 검증 테스트"
+        },
+        "testFeeAccumulationAndDistribution()": {
+          "details": "수수료 누적 및 분배 검증 테스트"
+        },
+        "testFeeDistribution()": {
+          "details": "수수료 분배 시스템 테스트"
+        },
+        "testGameEndAndWinnerSelection()": {
+          "details": "게임 종료 및 우승자 선정 테스트"
+        },
+        "testGasOptimization()": {
+          "details": "가스 최적화 테스트"
+        },
+        "testHighVolumeTransactions()": {
+          "details": "대용량 트랜잭션 처리 테스트"
+        },
+        "testMultiGameOperation()": {
+          "details": "다중 게임 동시 운영 테스트"
+        },
+        "testReferralSystem()": {
+          "details": "리퍼럴 시스템 테스트"
+        },
+        "testSystemInitialization()": {
+          "details": "전체 시스템 초기화 테스트"
+        },
+        "testSystemMonitoring()": {
+          "details": "시스템 상태 모니터링 테스트"
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "test/CryptolottoIntegration.t.sol": "CryptolottoIntegration"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/modules/analytics/AnalyticsEngine.sol": {
+      "keccak256": "0x68a3fe84513afec5004559307d98a915f139023ae2cfc786b6adf839bd90a74c",
+      "urls": [
+        "bzz-raw://342e4dd69f73958e5ad2c44a5190d3fac46dd9a0f3be963e318318d7ff8acf0e",
+        "dweb:/ipfs/Qmctk82vWVx8HG8JfzxUAZVxHTTcEwPj9piC4JYRzdpwxa"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/analytics/MonitoringSystem.sol": {
+      "keccak256": "0x56ffab924a66fea9f400388dcad17a70509ed500bedbc3060d3d0194fbe49dad",
+      "urls": [
+        "bzz-raw://fab9566ef991fc0b3bb176283ae93676c5cbc5ac44d876b7aaa4d8983aaac40b",
+        "dweb:/ipfs/QmZe1PkEyX8dP5ou2SshfdN1Qrm24rquQQpih572CXQgNb"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/analytics/StatsAggregator.sol": {
+      "keccak256": "0x383fce56a74239d9e6ae26cdc5366719347333d4f3243aeea8c76108e0f551d1",
+      "urls": [
+        "bzz-raw://127879c5d57cda05cfd41603ed93fea5b8dc4200c8f0316ef2669ba98141df1a",
+        "dweb:/ipfs/QmdffxeB5Qzqp8vwYoFdqZ95QTeNB5GJhPDSWsf6RtSRzh"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/lottery/AdToken.sol": {
+      "keccak256": "0xd967886f2fdb318f7256d52572f734b1d1dc084c7322a0800313345008a67a4d",
+      "urls": [
+        "bzz-raw://fd59dbead382093a180ee896b52cf80fb9f79bd4957e6b39593e41de002df6b3",
+        "dweb:/ipfs/QmNzWLm2nbZCjSgEnGx8tcWrDGjDjoKojfrbaE6PDTnqvr"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/lottery/BaseGame.sol": {
+      "keccak256": "0x8cee6de6b22dc2b868c35572641347b41f9ceae3027ac6afa8ec738ae9d9e68f",
+      "urls": [
+        "bzz-raw://6ca129e439adc6cb7330a5e3b92144b5b136fd24265b4a0434071250c3750c6d",
+        "dweb:/ipfs/QmcA65n7Y2R8XUYf9Hi2BhkM4b6Gh6K65nvNFhNTghbPBr"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/lottery/Cryptolotto1Day.sol": {
+      "keccak256": "0x60ede56fb59a6dbe8b7beb7c430498e6d25bd61ae1584d1fa6e1279102e8a354",
+      "urls": [
+        "bzz-raw://ae328c643d12813242a4e36cf52ec90ad6578befbaebf20acaf0cbd53feac97c",
+        "dweb:/ipfs/QmYAJ7PdEcMio6U2kdUMRvP8B6J2UBPGSuB9JDGGxsKYmE"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/lottery/Cryptolotto7Days.sol": {
+      "keccak256": "0x68db168a7f7adf897ef4611ce5ba33530e08f8851fe1d9cc527dcbb847f5577f",
+      "urls": [
+        "bzz-raw://5c918c3ee1b711bd7da443ce30350c500cf66fa165ecfb1f7f044b8d8da32bd9",
+        "dweb:/ipfs/QmdvyV7kCpsakDVK13Gp3neA9HfZVzPzTowgaNXNd2EVsW"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/lottery/CryptolottoAd.sol": {
+      "keccak256": "0xce2491d25c48b971275dd2caf25efd17b4788020cbfc0030e0951c8623225eb3",
+      "urls": [
+        "bzz-raw://2741c0ce6bfe4b283fcb218e94527ed3fcc2d12c23c407f869cd5e0769f1546e",
+        "dweb:/ipfs/QmXnFDpgAn68D3yU6GrDfSi9boxr5AvC55pd8mMPnPJfGo"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/treasury/CryptolottoReferral.sol": {
+      "keccak256": "0xba6c33fac6cb0c408e4278e462454348854ad54810d10544a0f40c3bb881bf5c",
+      "urls": [
+        "bzz-raw://31d963d0db625889df1306d11fc2fb3a992b294ac13489d8bd12d2a3d8f9df00",
+        "dweb:/ipfs/QmRbR2uNanGKRaGq4W2fx5VGKH1dkco3xnYaBqNzTMsHcD"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/treasury/FundsDistributor.sol": {
+      "keccak256": "0x88b60c26a5980fb069f1e829e106bb7d758c72cb083d8b1380fe590e66ee9081",
+      "urls": [
+        "bzz-raw://f0a12449fb64062235773c5e7cae2e22e01067ca8e5705dd1ee4838d5dcb6cac",
+        "dweb:/ipfs/QmRybfiAgtzpzQ3GWgTYhAVM796PUiA1EbdY9HY75iA2f5"
+      ],
+      "license": "MIT"
+    },
+    "contracts/modules/treasury/TreasuryManager.sol": {
+      "keccak256": "0x80e4c4df1f2f3b31c79e6d7bb5e8d18a7f62d101bd36cd2738c93382f2500a3b",
+      "urls": [
+        "bzz-raw://78d317e75c5cb93d04371d585066ffb7d255287285844ff5c41979f4104653f3",
+        "dweb:/ipfs/QmXadYZX6GqZwns5A3CraiL2SXR4msHQ3MpYazecQo5zR8"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IAdToken.sol": {
+      "keccak256": "0x278eca7e2a2a9fe5fe7a66e374d0260efe70628cbddde0acd5b6c69af5b8dc8a",
+      "urls": [
+        "bzz-raw://6382d44d5b09ba60e58398b9879649f3735e3c6055ce0545aa3b21e035d862db",
+        "dweb:/ipfs/QmPcMFVhEHjCrARPx1s8JnEWoDvPMToXcb12CwN6Gx5GJF"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IAnalyticsEngine.sol": {
+      "keccak256": "0x9f415e7d41f19eb209782ccba2337cf054235aa8c7a7b8a2a7d492ebcbf78db9",
+      "urls": [
+        "bzz-raw://5ee64be0be8a49c6195f6da719c94453deb158eaa7ec146636f352697d85f1d4",
+        "dweb:/ipfs/QmeGDw2uvYEzvXqfitofN8EuKSaDJ2qEBNKvyw4oUHZYsg"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ICryptolottoReferral.sol": {
+      "keccak256": "0x25aa6cce01d71e204003776761a6b79a80e3000bdd2bd67b3bd1a6dda1f59c4d",
+      "urls": [
+        "bzz-raw://ac8a8bd0ef9d6d40fa255a116ef60e19e1c4a8b00334a210b7f44552b14c57ae",
+        "dweb:/ipfs/Qmap68yMy5GkwDMEz3TXcGD67CxwTCHcsCSGqTkf2cqopt"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ICryptolottoStatsAggregator.sol": {
+      "keccak256": "0x3949cc1e620873a9f982f6341f44c755dadb82a901d767f35bbb4041d1840b6d",
+      "urls": [
+        "bzz-raw://513972ba589d9962757ff7476d11d08c42bba0f24a0aa76bc69967827bd4b2b9",
+        "dweb:/ipfs/QmZzaghvH2v8eB23wkosE6M6JkpyA25TnZPyRHFauEFjWm"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IFundsDistributor.sol": {
+      "keccak256": "0x1ea124443a3556a9e9cb6cd98f1cc1385b86aae0621190f71dd8335cb60440d5",
+      "urls": [
+        "bzz-raw://aabcf80a397ff9da0afd1187fbcf81ec1019a7a5744663954dae4cac3c5cfeae",
+        "dweb:/ipfs/QmbT7hbkuWGuScnkeUHnwoBpb4UMNqpeqn5LxY3so4GWXR"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IOwnable.sol": {
+      "keccak256": "0x7435e3e66069c024ef2b6696301352ad17a2fa616c6dbce308af0c7951332282",
+      "urls": [
+        "bzz-raw://cfa7e7aa1b5097f57b8c3d8c133166e86e157ff08f9e732fb2324c76419aa7ef",
+        "dweb:/ipfs/Qmf8rHUh2HNMxCrhQpsMpfQhQTkmUU8m1UVYaoZava59AY"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ITreasuryManager.sol": {
+      "keccak256": "0x47141f0107d03257ee00ef2153936c138f105e39190a98564e58f4a6b596f76c",
+      "urls": [
+        "bzz-raw://d91efe955872cb09e40ea6be79dbe560d29f0d4c92f41798f765dfc5881a67ec",
+        "dweb:/ipfs/QmWeqPSRdk3yY2CvMBMUjbv7pwK7RzSTB3rFV65QfE5TbM"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageAccess.sol": {
+      "keccak256": "0x9e62e58d2ef187df53a17c2cb76327e8285cfa988354260b5c2fef938f21a354",
+      "urls": [
+        "bzz-raw://4e35c548af411e97bd2c887b10c4c23ebbe631b70095e50d88b5238c6cf72c34",
+        "dweb:/ipfs/QmX4usJV5MPoc9ATqmm2dzuRBgS64aVWgA7vQUoqpqz5TT"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageLayout.sol": {
+      "keccak256": "0x35d8e8867cfba6ed38b653a0e8259ab1685c5d8152e5456a1e6347e5760b3429",
+      "urls": [
+        "bzz-raw://ad225ac91f0b323101be262c76bd5ee0cead833aef69afa7f0c2b73bb4920281",
+        "dweb:/ipfs/Qmcbqp1r6hapZNM75139ivZqZYxAxtyo8Hr2vEeLDscXc3"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/storage/StorageOptimizer.sol": {
+      "keccak256": "0x472fdcf002d3a3c345910cc9892d7563d5977f2bcc0bda4a9d43bf6d08f84a41",
+      "urls": [
+        "bzz-raw://bf9e17ef99cd8edcd412ca28955487bbb16b422e90675646f4d4ae111032d5f8",
+        "dweb:/ipfs/QmYAgz1iZ6dE1jA78vspUBs4jyMQJBrt6mWVcnHQJFXHyU"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/ContractRegistry.sol": {
+      "keccak256": "0x2679c9a642ec49f4fe5b99b39742e5ad8269c25faecd59108390b6d57c04747c",
+      "urls": [
+        "bzz-raw://9f3e30115f43c1d84aff8cab6687c65354aa8019c546f82a6e41dda030f727c5",
+        "dweb:/ipfs/QmQELtKrCywNhwKPaD2rpgM1f35f1iKzM6FomYNGmH9E6H"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/GasOptimizer.sol": {
+      "keccak256": "0x1b6870383897803ddf57896964421ad4a582bdc62d25701d5d1c6d15f8627f13",
+      "urls": [
+        "bzz-raw://5addeff7a3df26ee300968fb4b1b19c0f127a8335095ea055264a70aa706795b",
+        "dweb:/ipfs/QmZXprNbgDiBkJxPgF3nZM3G7Ev2bHkzX2jfBtiWUjynBF"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/Base.sol": {
+      "keccak256": "0xa3735a6618a3014e42bb4329ad143e3b2c59cd95094350202e4c4a06c9d585dd",
+      "urls": [
+        "bzz-raw://eef9db48d94726ec3d3fa3a84a8d520903705190f7ee7a04a065335a6aeeac4d",
+        "dweb:/ipfs/QmSWmNny7TkzyqRPjGdpERAJuBwwznrGPLUqS4DZy5fX5z"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdAssertions.sol": {
+      "keccak256": "0x4584f551c3a875c26423c1e50a77179bc2f9c9c1ee6d0f0c6be0f89ca5ee8270",
+      "urls": [
+        "bzz-raw://ef118876a862b60ba8a6612b8b3f3a6c226e11a0071a2e9695f021586d1bfdbe",
+        "dweb:/ipfs/QmXd2vD91PkvoFWasFkgbDi89PctmgsHVxGvGNyhjmRK2b"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdChains.sol": {
+      "keccak256": "0xd3edaf57db178f839d97ccee0009c2b7b20f78c2adca9028a6013acb8d5b4c5e",
+      "urls": [
+        "bzz-raw://0f17329ac1d25d3e6657ca240dee0a3f9b2cf22a64a05b87dac15252dee74351",
+        "dweb:/ipfs/QmPHxkEwgVpQNbU52s58RmmegrkYGj8bNKTVSW8rZm3dBm"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdCheats.sol": {
+      "keccak256": "0x0fa6ec03602648b62cce41aab2096e6b7e052f2846075d967b6958dd586db746",
+      "urls": [
+        "bzz-raw://cd84e2ca9c1eaed6b76768cc12bb8c1af8289170ea8b7706f58d516460d79c41",
+        "dweb:/ipfs/QmQ7BK7co6DE4eWUqMyv11s5eHYkS1tyx8tDSZGZVtf2aK"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdConstants.sol": {
+      "keccak256": "0x319ccdabfa2c0b2428301445873270ffea20f0e039d4fd5e6eeba65158e4e534",
+      "urls": [
+        "bzz-raw://b633f9d3a719e1d035ce7daa6cc051ddf89a72d34200d14cec37728e245cdabc",
+        "dweb:/ipfs/QmRP7HQJpHMx1CsFrY8tXVVx1DQmi2dcb2BoGfiWaA923r"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdError.sol": {
+      "keccak256": "0xbf477b11a42d7611696956546bcfaa29317d1166bf65e402344599c05943fc77",
+      "urls": [
+        "bzz-raw://bc2e117d1135e030862b96a6526a43feb38d396cc79857f1fb696d4eff0e5fd6",
+        "dweb:/ipfs/QmdSuQ5RrQudTLsNmWXGEeVJX8gR5U9XPm6m4dwwuQnJrj"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdInvariant.sol": {
+      "keccak256": "0x4dab3021edfa9511bbdd80c48f060ef62eaf457f99eaf841f561fc2557d9a08d",
+      "urls": [
+        "bzz-raw://07668628673174cf8f27f8f4e1f862bab775013ec247eb34f698c5005f229391",
+        "dweb:/ipfs/QmPJsiiYwmCZXMsHmQv5tg8VF3CAhNdat7WnKLTWZZH2v5"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdJson.sol": {
+      "keccak256": "0xbc0132abe1c2accc2867c0f03667afffdf92f3e95a581bb03c9557eaa38ea500",
+      "urls": [
+        "bzz-raw://eb6fab37dc73c219cfbb7b4f4998bcf7677ca5397a867e850f40232192073974",
+        "dweb:/ipfs/QmUHsbVdp9SKmgek7ZfPcLTKrpZFXpqaqt4sVejzxGEQL3"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdMath.sol": {
+      "keccak256": "0xd90ad4fd8aeaeb8929964e686e769fdedd5eded3fc3815df194a0ab9f91a3fb2",
+      "urls": [
+        "bzz-raw://7919b70f636c7b805223992f28ad1ad0145d6c1385b5931a3589aface5fe6c92",
+        "dweb:/ipfs/QmY7FRaULwoGgFteF8GawjQJRfasNgpWnU2aiMsFrYpuTC"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdStorage.sol": {
+      "keccak256": "0xb91ab24383a5872b894fc93325eef1add6cbbf981628f18e860068bf88bb7dcc",
+      "urls": [
+        "bzz-raw://2651e33b9ac8fc5803ed0a43078c1bf4fa90a0b0347aafd95776b02daccdcc57",
+        "dweb:/ipfs/QmbdRyPuGJdZgnCuMnp7c1WsBo1Spf7j1KMmws1Z5rd4BQ"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdStyle.sol": {
+      "keccak256": "0x43e2a8a9b9c2574dabe74f11adf6f782df218f463540e3b5b563609fe108597d",
+      "urls": [
+        "bzz-raw://51363ca97404cf4128e1141428949768c31929e75e014b02c85e887fbbb4f1b8",
+        "dweb:/ipfs/QmVhtbQc2fU4rRmbcfBtz34mAgG4BAZBsbna1Ca4SkoPsK"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdToml.sol": {
+      "keccak256": "0x58a72c765ed3f7ff6b105509689658795b8a3739b8931772a497155878381861",
+      "urls": [
+        "bzz-raw://b4a3746f4fabaeb980bd77d9e091d3904ee38a6c0e191bfa8ba6874c6f8558a3",
+        "dweb:/ipfs/QmUfFDMEn461FgGEXt5HicyGD54sc28sLaQ9JRWDMBKed8"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/StdUtils.sol": {
+      "keccak256": "0x7274081e11c05164fd8eadde4de8305c033e58a43008dea58065f3170ccf0737",
+      "urls": [
+        "bzz-raw://e9801614b6c9d3e472982e6cc68f5f1ad03682f84eafb686be65633c7132d138",
+        "dweb:/ipfs/QmcQSUcrm2A7XuektnxJjvYGmZtBeA6LKPxCXRqdXBX776"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/Test.sol": {
+      "keccak256": "0x3dda6083a83dfa3e8526e97bcc28e862ee2442dd58fe94d5c426d65b8e38f73c",
+      "urls": [
+        "bzz-raw://33f8c02e4dabdab86a6825125856446a8657eacd712318b51b7818e4a6f6e3f4",
+        "dweb:/ipfs/QmRKSjVnrk54yr8wTK2e6QxRjiuba2H8HJSKunHAkdo7RG"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/Vm.sol": {
+      "keccak256": "0xaae88142a348064677cf81169ea0ca706be3e99e2a0f13a01878ff8d52cf6b25",
+      "urls": [
+        "bzz-raw://da4fb0ed1b31381c7e60ee386acc72796e8a8325c83739ec9a3678e2f841073c",
+        "dweb:/ipfs/Qmb4MU6FpAi8Wt5kUQ3wa7ooHnfMVbdd9zuvnqbTehLmxJ"
+      ],
+      "license": "MIT OR Apache-2.0"
+    },
+    "lib/forge-std/src/console.sol": {
+      "keccak256": "0x4bbf47eb762cef93729d6ef15e78789957147039b113e5d4df48e3d3fd16d0f5",
+      "urls": [
+        "bzz-raw://af9e3a7c3d82fb5b10b57ca4d1a82f2acbef80c077f6f6ef0cc0187c7bfd9f57",
+        "dweb:/ipfs/QmR9VzmnBDJpgiDP6CHT6truehukF9HpYvuP6kRiJbDwPP"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/console2.sol": {
+      "keccak256": "0x3b8fe79f48f065a4e4d35362171304a33784c3a90febae5f2787805a438de12f",
+      "urls": [
+        "bzz-raw://61de63af08803549299e68b6e6e88d40f3c5afac450e4ee0a228c66a61ba003d",
+        "dweb:/ipfs/QmWVoQ5rrVxnczD4ZZoPbD4PC9Z3uExJtzjD4awTqd14MZ"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/interfaces/IMulticall3.sol": {
+      "keccak256": "0x7aac1389150499a922d1f9ef5749c908cef127cb2075b92fa17e9cb611263d0a",
+      "urls": [
+        "bzz-raw://d95ebb7c7c463e08ebc12dab639945752fb2480acfc6e86da32f72732a7fd0c0",
+        "dweb:/ipfs/QmNXK8P8oPWwajsQHvAHw3JPyQidPLCGQN3hWu1Lk6PBL2"
+      ],
+      "license": "MIT"
+    },
+    "lib/forge-std/src/safeconsole.sol": {
+      "keccak256": "0xbef9786cb49d3eade757bad87568c49c8c8f35721f0193c95ffb055d9e466e11",
+      "urls": [
+        "bzz-raw://3bafd2b0b2d28068d329f95ea8a1fbce3719c257fcb863fc01abcbafd8d531ab",
+        "dweb:/ipfs/QmUeaFjKWTVDBsHVfSob4mwt6A5hTnKDz22HaUXeZhypa3"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+      "keccak256": "0xc163fcf9bb10138631a9ba5564df1fa25db9adff73bd9ee868a8ae1858fe093a",
+      "urls": [
+        "bzz-raw://9706d43a0124053d9880f6e31a59f31bc0a6a3dc1acd66ce0a16e1111658c5f6",
+        "dweb:/ipfs/QmUFmfowzkRwGtDu36cXV9SPTBHJ3n7dG9xQiK5B28jTf2"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "keccak256": "0xdb4d24ee2c087c391d587cd17adfe5b3f9d93b3110b1388c2ab6c7c0ad1dcd05",
+      "urls": [
+        "bzz-raw://ab7b6d5b9e2b88176312967fe0f0e78f3d9a1422fa5e4b64e2440c35869b5d08",
+        "dweb:/ipfs/QmXKYWWyzcLg1B2k7Sb1qkEXgLCYfXecR9wYW5obRzWP1Q"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol": {
+      "keccak256": "0x574a7451e42724f7de29e2855c392a8a5020acd695169466a18459467d719d63",
+      "urls": [
+        "bzz-raw://5bc189f63b639ee173dd7b6fecc39baf7113bf161776aea22b34c57fdd1872ec",
+        "dweb:/ipfs/QmZAf2VtjDLRULqjJkde6LNsxAg12tUqpPqgUQQZbAjgtZ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "keccak256": "0xdbef5f0c787055227243a7318ef74c8a5a1108ca3a07f2b3a00ef67769e1e397",
+      "urls": [
+        "bzz-raw://08e39f23d5b4692f9a40803e53a8156b72b4c1f9902a88cd65ba964db103dab9",
+        "dweb:/ipfs/QmPKn6EYDgpga7KtpkA8wV2yJCYGMtc9K4LkJfhKX2RVSV"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol": {
+      "keccak256": "0x361126a17677994081cd9cb69c3f50cffff6e920d25cb7e428acdb1ae41d1866",
+      "urls": [
+        "bzz-raw://19ae787a7dd001269cd60a394b1a5261b78925a0fc3a6f927beb2986a9aa56cf",
+        "dweb:/ipfs/QmYLfXiuKmcRgTDBEDXMMjXU8t6JxsspUmjxYzqWS55oEv"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
+      "urls": [
+        "bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
+        "dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol": {
+      "keccak256": "0xbf2aefe54b76d7f7bcd4f6da1080b7b1662611937d870b880db584d09cea56b5",
+      "urls": [
+        "bzz-raw://f5e7e2f12e0feec75296e57f51f82fdaa8bd1551f4b8cc6560442c0bf60f818c",
+        "dweb:/ipfs/QmcW9wDMaQ8RbQibMarfp17a3bABzY5KraWe2YDwuUrUoz"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol": {
+      "keccak256": "0x82f757819bf2429a0d4db141b99a4bbe5039e4ef86dfb94e2e6d40577ed5b28b",
+      "urls": [
+        "bzz-raw://37c30ed931e19fb71fdb806bb504cfdb9913b7127545001b64d4487783374422",
+        "dweb:/ipfs/QmUBHpv4hm3ZmwJ4GH8BeVzK4mv41Q6vBbWXxn8HExPXza"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol": {
+      "keccak256": "0x19fdfb0f3b89a230e7dbd1cf416f1a6b531a3ee5db4da483f946320fc74afc0e",
+      "urls": [
+        "bzz-raw://3490d794728f5bfecb46820431adaff71ba374141545ec20b650bb60353fac23",
+        "dweb:/ipfs/QmPsfxjVpMcZbpE7BH93DzTpEaktESigEw4SmDzkXuJ4WR"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol": {
+      "keccak256": "0xa3066ff86b94128a9d3956a63a0511fa1aae41bd455772ab587b32ff322acb2e",
+      "urls": [
+        "bzz-raw://bf7b192fd82acf6187970c80548f624b1b9c80425b62fa49e7fdb538a52de049",
+        "dweb:/ipfs/QmWXG1YCde1tqDYTbNwjkZDWVgPEjzaQGSDqWkyKLzaNua"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol": {
+      "keccak256": "0xa1ad192cd45317c788618bef5cb1fb3ca4ce8b230f6433ac68cc1d850fb81618",
+      "urls": [
+        "bzz-raw://b43447bb85a53679d269a403c693b9d88d6c74177dfb35eddca63abaf7cf110a",
+        "dweb:/ipfs/QmXSDmpd4bNZj1PDgegr6C4w1jDaWHXCconC3rYiw9TSkQ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/Proxy.sol": {
+      "keccak256": "0xc3f2ec76a3de8ed7a7007c46166f5550c72c7709e3fc7e8bb3111a7191cdedbd",
+      "urls": [
+        "bzz-raw://e73efb4c2ca655882dc237c6b4f234a9bd36d97159d8fcaa837eb01171f726ac",
+        "dweb:/ipfs/QmTNnnv7Gu5fs5G1ZMh7Fexp8N4XUs3XrNAngjcxgiss3e"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol": {
+      "keccak256": "0x20462ddb2665e9521372c76b001d0ce196e59dbbd989de9af5576cad0bd5628b",
+      "urls": [
+        "bzz-raw://f417fd12aeec8fbfaceaa30e3a08a0724c0bc39de363e2acf6773c897abbaf6d",
+        "dweb:/ipfs/QmU4Hko6sApdweVM92CsiuLKkCk8HfyBeutF89PCTz5Tye"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol": {
+      "keccak256": "0x86b7b71a6aedefdad89b607378eeab1dcc5389b9ea7d17346d08af01d7190994",
+      "urls": [
+        "bzz-raw://1dc2db8d94a21eac8efe03adf574c419b08536409b416057a2b5b95cb772c43c",
+        "dweb:/ipfs/QmZfqJCKVU1ScuX2A7s8WZdQEaikwJbDH5JBrBdKTUT4Gu"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+      "keccak256": "0x74ed01eb66b923d0d0cfe3be84604ac04b76482a55f9dd655e1ef4d367f95bc2",
+      "urls": [
+        "bzz-raw://5282825a626cfe924e504274b864a652b0023591fa66f06a067b25b51ba9b303",
+        "dweb:/ipfs/QmeCfPykghhMc81VJTrHTC7sF6CRvaA1FXVq2pJhwYp1dV"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Burnable.sol": {
+      "keccak256": "0x2659248df25e34000ed214b3dc8da2160bc39874c992b477d9e2b1b3283dc073",
+      "urls": [
+        "bzz-raw://c345af1b0e7ea28d1216d6a04ab28f5534a5229b9edf9ca3cd0e84950ae58d26",
+        "dweb:/ipfs/QmY63jtSrYpLRe8Gj1ep2vMDCKxGNNG3hnNVKBVnrs2nmA"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+      "keccak256": "0xd6fa4088198f04eef10c5bce8a2f4d60554b7ec4b987f684393c01bf79b94d9f",
+      "urls": [
+        "bzz-raw://f95ee0bbd4dd3ac730d066ba3e785ded4565e890dbec2fa7d3b9fe3bad9d0d6e",
+        "dweb:/ipfs/QmSLr6bHkPFWT7ntj34jmwfyskpwo97T9jZUrk5sz3sdtR"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Address.sol": {
+      "keccak256": "0x6d0ae6e206645341fd122d278c2cb643dea260c190531f2f3f6a0426e77b00c0",
+      "urls": [
+        "bzz-raw://032d1201d839435be2c85b72e33206b3ea980c569d6ebf7fa57d811ab580a82f",
+        "dweb:/ipfs/QmeqQjAtMvdZT2tG7zm39itcRJkuwu8AEReK6WRnLJ18DD"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "keccak256": "0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2",
+      "urls": [
+        "bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12",
+        "dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Errors.sol": {
+      "keccak256": "0x6afa713bfd42cf0f7656efa91201007ac465e42049d7de1d50753a373648c123",
+      "urls": [
+        "bzz-raw://ba1d02f4847670a1b83dec9f7d37f0b0418d6043447b69f3a29a5f9efc547fcf",
+        "dweb:/ipfs/QmQ7iH2keLNUKgq2xSWcRmuBE5eZ3F5whYAkAGzCNNoEWB"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol": {
+      "keccak256": "0x11a5a79827df29e915a12740caf62fe21ebe27c08c9ae3e09abe9ee3ba3866d3",
+      "urls": [
+        "bzz-raw://3cf0c69ab827e3251db9ee6a50647d62c90ba580a4d7bbff21f2bea39e7b2f4a",
+        "dweb:/ipfs/QmZiKwtKU1SBX4RGfQtY7PZfiapbbu6SZ9vizGQD9UHjRA"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol": {
+      "keccak256": "0xcf74f855663ce2ae00ed8352666b7935f6cddea2932fdf2c3ecd30a9b1cd0e97",
+      "urls": [
+        "bzz-raw://9f660b1f351b757dfe01438e59888f31f33ded3afcf5cb5b0d9bf9aa6f320a8b",
+        "dweb:/ipfs/QmarDJ5hZEgBtCmmrVzEZWjub9769eD686jmzb2XpSU1cM"
+      ],
+      "license": "MIT"
+    },
+    "test/CryptolottoIntegration.t.sol": {
+      "keccak256": "0x61ff92bc14d69c86e25207e338ea0bce32d66de971c08a46cff4f1f7d9383be2",
+      "urls": [
+        "bzz-raw://0f35fa3d566198bbca29e42f67040b49e53db86a17f4e0e89c7a23ffe9b12839",
+        "dweb:/ipfs/QmPaE8kYacPYqgCiKT2n7uq4R5Q2dVbqAVQt9N5B4xsjq7"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

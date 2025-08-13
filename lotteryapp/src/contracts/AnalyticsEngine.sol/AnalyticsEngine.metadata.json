@@ -1,0 +1,1375 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "AnalyticsDisabled"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidGameType"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidInitialization"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidUser"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "NotInitializing"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "AnalyticsToggled",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "gameNumber",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "playerCount",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "jackpot",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "winner",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GameAnalyticsCompleted",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "gameType",
+            "type": "uint8",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "games",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "players",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "GameAnalyticsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint64",
+            "name": "version",
+            "type": "uint64",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Initialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "avgGameDuration",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "avgPlayersPerGame",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "avgJackpot",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "PerformanceMetricsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "gamesPlayed",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSpent",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWon",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "PlayerAnalyticsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "dailyRevenue",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "weeklyRevenue",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "monthlyRevenue",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "RevenueAnalyticsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalGames",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "SystemAnalyticsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "UserAnalyticsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "analyticsEnabled",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address[]",
+            "name": "users",
+            "type": "address[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "analyzeUserActivity",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "activeUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address[]",
+            "name": "users",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dayCount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "analyzeUserActivityByPeriod",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "activeUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8[]",
+            "name": "gameTypes",
+            "type": "uint8[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "compareGameTypes",
+        "outputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "volumes",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "players",
+            "type": "uint256[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "dailyTransactions",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "dailyUsers",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "dailyVolume",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "gameAnalytics",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "averageTicketPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinnings",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastGameTime",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAnalyticsStats",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "updateTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "day",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getDailyStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "users",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "gameType",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getGameAnalytics",
+        "outputs": [
+          {
+            "internalType": "struct AnalyticsEngine.GameAnalytics",
+            "name": "",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "totalGames",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalPlayers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "averageTicketPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalWinnings",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastGameTime",
+                "type": "uint256"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "startDay",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "endDay",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getPeriodStats",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getSystemAnalytics",
+        "outputs": [
+          {
+            "internalType": "struct AnalyticsEngine.SystemAnalytics",
+            "name": "",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "totalUsers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalTransactions",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "activeGames",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalWinnings",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "systemFees",
+                "type": "uint256"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function",
+        "name": "getTopUsers",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "",
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getUserAnalytics",
+        "outputs": [
+          {
+            "internalType": "struct AnalyticsEngine.UserAnalytics",
+            "name": "",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "totalTransactions",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastActivity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "gamesPlayed",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalWinnings",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "referralEarnings",
+                "type": "uint256"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "initialize"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "lastUpdateTime",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "systemAnalytics",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinnings",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "systemFees",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "toggleAnalytics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "day",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "users",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateDailyStats"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "gameType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "averageTicketPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinnings",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateGameAnalytics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinnings",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "systemFees",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateSystemAnalytics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gamesPlayed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "winnings",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "referralEarnings",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateUserAnalytics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "userAnalytics",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gamesPlayed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinnings",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "referralEarnings",
+            "type": "uint256"
+          }
+        ]
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "analyzeUserActivity(address[])": {
+          "params": {
+            "users": "Array of users to analyze"
+          },
+          "returns": {
+            "activeUsers": "Number of active users",
+            "totalVolume": "Total volume"
+          }
+        },
+        "analyzeUserActivityByPeriod(address[],uint256)": {
+          "params": {
+            "dayCount": "Period in days",
+            "users": "Array of users to analyze"
+          },
+          "returns": {
+            "activeUsers": "Number of active users",
+            "totalVolume": "Total volume"
+          }
+        },
+        "compareGameTypes(uint8[])": {
+          "params": {
+            "gameTypes": "Array of game types to compare"
+          },
+          "returns": {
+            "players": "Player count for each game type",
+            "volumes": "Volume for each game type"
+          }
+        },
+        "constructor": {
+          "details": "Disables initializers to prevent re-initialization"
+        },
+        "getAnalyticsStats()": {
+          "returns": {
+            "enabled": "Whether analytics is enabled",
+            "totalTransactions": "Total transactions",
+            "totalUsers": "Total number of users",
+            "totalVolume": "Total volume",
+            "updateTime": "Last update timestamp"
+          }
+        },
+        "getDailyStats(uint256)": {
+          "params": {
+            "day": "The day number"
+          },
+          "returns": {
+            "transactions": "Daily transactions",
+            "users": "Daily users",
+            "volume": "Daily volume"
+          }
+        },
+        "getGameAnalytics(uint8)": {
+          "params": {
+            "gameType": "The game type"
+          },
+          "returns": {
+            "_0": "GameAnalytics structure"
+          }
+        },
+        "getPeriodStats(uint256,uint256)": {
+          "params": {
+            "endDay": "End day number",
+            "startDay": "Start day number"
+          },
+          "returns": {
+            "totalTransactions": "Total transactions for the period",
+            "totalUsers": "Total users for the period",
+            "totalVolume": "Total volume for the period"
+          }
+        },
+        "getSystemAnalytics()": {
+          "returns": {
+            "_0": "SystemAnalytics structure"
+          }
+        },
+        "getTopUsers(uint256)": {
+          "returns": {
+            "_0": "Array of top user addresses"
+          }
+        },
+        "getUserAnalytics(address)": {
+          "params": {
+            "user": "The user address"
+          },
+          "returns": {
+            "_0": "UserAnalytics structure"
+          }
+        },
+        "initialize(address)": {
+          "params": {
+            "owner": "The owner of the contract"
+          }
+        },
+        "owner()": {
+          "details": "Returns the address of the current owner."
+        },
+        "renounceOwnership()": {
+          "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+        },
+        "transferOwnership(address)": {
+          "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        },
+        "updateDailyStats(uint256,uint256,uint256,uint256)": {
+          "params": {
+            "day": "The day number",
+            "transactions": "Daily transactions",
+            "users": "Daily users",
+            "volume": "Daily volume"
+          }
+        },
+        "updateGameAnalytics(uint8,uint256,uint256,uint256,uint256,uint256)": {
+          "params": {
+            "averageTicketPrice": "Average ticket price",
+            "gameType": "The type of game",
+            "totalGames": "Total number of games",
+            "totalPlayers": "Total number of players",
+            "totalVolume": "Total volume",
+            "totalWinnings": "Total winnings"
+          }
+        },
+        "updateSystemAnalytics(uint256,uint256,uint256,uint256,uint256,uint256)": {
+          "params": {
+            "activeGames": "Number of active games",
+            "systemFees": "System fees",
+            "totalTransactions": "Total transactions",
+            "totalUsers": "Total number of users",
+            "totalVolume": "Total volume",
+            "totalWinnings": "Total winnings"
+          }
+        },
+        "updateUserAnalytics(address,uint256,uint256,uint256,uint256,uint256)": {
+          "params": {
+            "gamesPlayed": "Number of games played",
+            "referralEarnings": "Referral earnings",
+            "transactions": "Number of transactions",
+            "user": "The user address",
+            "volume": "Total volume",
+            "winnings": "Total winnings"
+          }
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "analyticsEnabled()": {
+          "notice": "Whether analytics is enabled"
+        },
+        "analyzeUserActivity(address[])": {
+          "notice": "Analyze user activity (gas optimized)"
+        },
+        "analyzeUserActivityByPeriod(address[],uint256)": {
+          "notice": "Analyze user activity by period (gas optimized)"
+        },
+        "compareGameTypes(uint8[])": {
+          "notice": "Compare statistics by game type (gas optimized)"
+        },
+        "constructor": {
+          "notice": "Constructor for the AnalyticsEngine contract"
+        },
+        "dailyTransactions(uint256)": {
+          "notice": "Daily transactions by day"
+        },
+        "dailyUsers(uint256)": {
+          "notice": "Daily users by day"
+        },
+        "dailyVolume(uint256)": {
+          "notice": "Daily volume by day"
+        },
+        "gameAnalytics(uint8)": {
+          "notice": "Mapping of game types to their analytics"
+        },
+        "getAnalyticsStats()": {
+          "notice": "Get analytics statistics"
+        },
+        "getDailyStats(uint256)": {
+          "notice": "Get daily statistics"
+        },
+        "getGameAnalytics(uint8)": {
+          "notice": "Get game analytics"
+        },
+        "getPeriodStats(uint256,uint256)": {
+          "notice": "Get period statistics"
+        },
+        "getSystemAnalytics()": {
+          "notice": "Get system analytics"
+        },
+        "getTopUsers(uint256)": {
+          "notice": "Get top users by activity"
+        },
+        "getUserAnalytics(address)": {
+          "notice": "Get user analytics"
+        },
+        "initialize(address)": {
+          "notice": "Initialize the analytics engine contract"
+        },
+        "lastUpdateTime()": {
+          "notice": "Last update timestamp"
+        },
+        "systemAnalytics()": {
+          "notice": "System-wide analytics"
+        },
+        "toggleAnalytics()": {
+          "notice": "Toggle analytics on/off"
+        },
+        "updateDailyStats(uint256,uint256,uint256,uint256)": {
+          "notice": "Update daily statistics"
+        },
+        "updateGameAnalytics(uint8,uint256,uint256,uint256,uint256,uint256)": {
+          "notice": "Update game analytics data"
+        },
+        "updateSystemAnalytics(uint256,uint256,uint256,uint256,uint256,uint256)": {
+          "notice": "Update system analytics data"
+        },
+        "updateUserAnalytics(address,uint256,uint256,uint256,uint256,uint256)": {
+          "notice": "Update user analytics data"
+        },
+        "userAnalytics(address)": {
+          "notice": "Mapping of user addresses to their analytics"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/modules/analytics/AnalyticsEngine.sol": "AnalyticsEngine"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/modules/analytics/AnalyticsEngine.sol": {
+      "keccak256": "0x68a3fe84513afec5004559307d98a915f139023ae2cfc786b6adf839bd90a74c",
+      "urls": [
+        "bzz-raw://342e4dd69f73958e5ad2c44a5190d3fac46dd9a0f3be963e318318d7ff8acf0e",
+        "dweb:/ipfs/Qmctk82vWVx8HG8JfzxUAZVxHTTcEwPj9piC4JYRzdpwxa"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/GasOptimizer.sol": {
+      "keccak256": "0x1b6870383897803ddf57896964421ad4a582bdc62d25701d5d1c6d15f8627f13",
+      "urls": [
+        "bzz-raw://5addeff7a3df26ee300968fb4b1b19c0f127a8335095ea055264a70aa706795b",
+        "dweb:/ipfs/QmZXprNbgDiBkJxPgF3nZM3G7Ev2bHkzX2jfBtiWUjynBF"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+      "keccak256": "0xc163fcf9bb10138631a9ba5564df1fa25db9adff73bd9ee868a8ae1858fe093a",
+      "urls": [
+        "bzz-raw://9706d43a0124053d9880f6e31a59f31bc0a6a3dc1acd66ce0a16e1111658c5f6",
+        "dweb:/ipfs/QmUFmfowzkRwGtDu36cXV9SPTBHJ3n7dG9xQiK5B28jTf2"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "keccak256": "0xdb4d24ee2c087c391d587cd17adfe5b3f9d93b3110b1388c2ab6c7c0ad1dcd05",
+      "urls": [
+        "bzz-raw://ab7b6d5b9e2b88176312967fe0f0e78f3d9a1422fa5e4b64e2440c35869b5d08",
+        "dweb:/ipfs/QmXKYWWyzcLg1B2k7Sb1qkEXgLCYfXecR9wYW5obRzWP1Q"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "keccak256": "0xdbef5f0c787055227243a7318ef74c8a5a1108ca3a07f2b3a00ef67769e1e397",
+      "urls": [
+        "bzz-raw://08e39f23d5b4692f9a40803e53a8156b72b4c1f9902a88cd65ba964db103dab9",
+        "dweb:/ipfs/QmPKn6EYDgpga7KtpkA8wV2yJCYGMtc9K4LkJfhKX2RVSV"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

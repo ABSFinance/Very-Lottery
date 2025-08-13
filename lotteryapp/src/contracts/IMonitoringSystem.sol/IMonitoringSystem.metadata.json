@@ -1,0 +1,273 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "severity",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createAlert"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getActiveAlerts",
+        "outputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "",
+            "type": "uint256[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "alertId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAlert",
+        "outputs": [
+          {
+            "internalType": "struct IMonitoringSystem.Alert",
+            "name": "",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "string",
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "severity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "isResolved",
+                "type": "bool"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getSystemStats",
+        "outputs": [
+          {
+            "internalType": "struct IMonitoringSystem.SystemMetrics",
+            "name": "metrics",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "totalTransactions",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "activeUsers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastUpdate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "isHealthy",
+                "type": "bool"
+              }
+            ]
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalAlerts",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeAlerts",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "monitoredContracts",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "performHealthCheck",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "registerContract"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "alertId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "resolveAlert"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "unregisterContract"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "users",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateMetrics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newMinTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newMaxResponseTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newHealthCheckInterval",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateThresholds"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {},
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/shared/interfaces/IMonitoringSystem.sol": "IMonitoringSystem"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/shared/interfaces/IMonitoringSystem.sol": {
+      "keccak256": "0xf4176b2ef0bc2c9655c4f597aea1b3816dfebaa15168a5aab111ca3853095bf9",
+      "urls": [
+        "bzz-raw://5b5573f32521508f2aa2cd5825156221437db747b4b212ed562091639e750e03",
+        "dweb:/ipfs/QmcHiCxo3FBgDEPMwZ7o23LziPp7tk3G2BBSHjqrciLb6U"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -26,7 +26,6 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
         CLOSED, // Normal operation
         OPEN, // Circuit is open (failing)
         HALF_OPEN // Testing if circuit can close
-
     }
 
     // Circuit information struct
@@ -76,7 +75,10 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param timestamp Creation timestamp
      */
     event CircuitCreated(
-        string indexed circuitName, uint256 indexed threshold, uint256 indexed timeout, uint256 timestamp
+        string indexed circuitName,
+        uint256 indexed threshold,
+        uint256 indexed timeout,
+        uint256 timestamp
     );
     /**
      * @notice Emitted when a circuit is opened
@@ -84,7 +86,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param failureCount Number of failures
      * @param timestamp Opening timestamp
      */
-    event CircuitOpened(string indexed circuitName, uint256 indexed failureCount, uint256 indexed timestamp);
+    event CircuitOpened(
+        string indexed circuitName,
+        uint256 indexed failureCount,
+        uint256 indexed timestamp
+    );
     /**
      * @notice Emitted when a circuit is closed
      * @param circuitName Name of the circuit
@@ -96,20 +102,26 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param circuitName Name of the circuit
      * @param timestamp Half-opening timestamp
      */
-    event CircuitHalfOpened(string indexed circuitName, uint256 indexed timestamp);
+    event CircuitHalfOpened(
+        string indexed circuitName,
+        uint256 indexed timestamp
+    );
     /**
      * @notice Emitted when circuit breaker is toggled
      * @param enabled Whether circuit breaker is enabled
      * @param timestamp Toggle timestamp
      */
-    event CircuitBreakerToggled(bool indexed enabled, uint256 indexed timestamp);
+    event CircuitBreakerToggled(
+        bool indexed enabled,
+        uint256 indexed timestamp
+    );
 
     /**
      * @notice Initialize the circuit breaker contract
      * @param owner Owner of the contract
      */
     function initialize(address owner) public initializer {
-        __Ownable_init(owner);
+        __Ownable_init();
         circuitBreakerEnabled = true;
         defaultThreshold = 5;
         defaultTimeout = 300; // 5 minutes
@@ -121,7 +133,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param threshold Failure threshold
      * @param timeout Timeout period
      */
-    function createCircuit(string calldata circuitName, uint256 threshold, uint256 timeout) external onlyOwner {
+    function createCircuit(
+        string calldata circuitName,
+        uint256 threshold,
+        uint256 timeout
+    ) external onlyOwner {
         _validateCircuitParams(threshold, timeout);
         if (circuits[circuitName].isActive) revert CircuitAlreadyExists();
         _createCircuit(circuitName, threshold, timeout);
@@ -132,7 +148,10 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param threshold Failure threshold
      * @param timeout Timeout period
      */
-    function _validateCircuitParams(uint256 threshold, uint256 timeout) internal pure {
+    function _validateCircuitParams(
+        uint256 threshold,
+        uint256 timeout
+    ) internal pure {
         if (threshold == 0) revert InvalidCircuitParams();
         if (timeout == 0) revert InvalidCircuitParams();
     }
@@ -143,7 +162,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param threshold Failure threshold
      * @param timeout Timeout period
      */
-    function _createCircuit(string calldata circuitName, uint256 threshold, uint256 timeout) internal {
+    function _createCircuit(
+        string calldata circuitName,
+        uint256 threshold,
+        uint256 timeout
+    ) internal {
         circuits[circuitName] = Circuit({
             state: CircuitState.CLOSED,
             failureCount: 0,
@@ -162,7 +185,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param threshold Failure threshold
      * @param timeout Timeout period
      */
-    function createAddressCircuit(address targetAddress, uint256 threshold, uint256 timeout) external onlyOwner {
+    function createAddressCircuit(
+        address targetAddress,
+        uint256 threshold,
+        uint256 timeout
+    ) external onlyOwner {
         if (targetAddress == address(0)) revert InvalidAddress();
         _validateCircuitParams(threshold, timeout);
         if (addressCircuits[targetAddress].isActive) {
@@ -177,7 +204,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param threshold Failure threshold
      * @param timeout Timeout period
      */
-    function _createAddressCircuit(address targetAddress, uint256 threshold, uint256 timeout) internal {
+    function _createAddressCircuit(
+        address targetAddress,
+        uint256 threshold,
+        uint256 timeout
+    ) internal {
         string memory circuitName = _addressToString(targetAddress);
         addressCircuits[targetAddress] = Circuit({
             state: CircuitState.CLOSED,
@@ -196,7 +227,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param addr Address to convert
      * @return String representation of address
      */
-    function _addressToString(address addr) internal pure returns (string memory) {
+    function _addressToString(
+        address addr
+    ) internal pure returns (string memory) {
         return string(abi.encodePacked("ADDR_", toHexString(addr)));
     }
 
@@ -208,7 +241,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
     function toHexString(address addr) internal pure returns (string memory) {
         bytes memory buffer = new bytes(40);
         for (uint256 i = 0; i < 20; ++i) {
-            bytes1 b = bytes1(uint8(uint256(uint160(addr)) / (2 ** (8 * (19 - i)))));
+            bytes1 b = bytes1(
+                uint8(uint256(uint160(addr)) / (2 ** (8 * (19 - i))))
+            );
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
             buffer[2 * i] = char(hi);
@@ -233,10 +268,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param threshold Failure threshold
      * @param timeout Timeout period
      */
-    function createFunctionCircuit(string calldata functionName, uint256 threshold, uint256 timeout)
-        external
-        onlyOwner
-    {
+    function createFunctionCircuit(
+        string calldata functionName,
+        uint256 threshold,
+        uint256 timeout
+    ) external onlyOwner {
         if (bytes(functionName).length == 0) revert InvalidFunctionName();
         _validateCircuitParams(threshold, timeout);
         if (functionCircuits[functionName].isActive) {
@@ -251,7 +287,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param threshold Failure threshold
      * @param timeout Timeout period
      */
-    function _createFunctionCircuit(string calldata functionName, uint256 threshold, uint256 timeout) internal {
+    function _createFunctionCircuit(
+        string calldata functionName,
+        uint256 threshold,
+        uint256 timeout
+    ) internal {
         functionCircuits[functionName] = Circuit({
             state: CircuitState.CLOSED,
             failureCount: 0,
@@ -269,7 +309,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param circuitName Name of the circuit
      * @return Whether circuit is open
      */
-    function checkCircuit(string calldata circuitName) external view returns (bool) {
+    function checkCircuit(
+        string calldata circuitName
+    ) external view returns (bool) {
         if (!circuitBreakerEnabled) return false;
         Circuit storage circuit = circuits[circuitName];
         if (!circuit.isActive) return false;
@@ -281,7 +323,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param targetAddress Address to check
      * @return Whether address circuit is open
      */
-    function checkAddressCircuit(address targetAddress) external view returns (bool) {
+    function checkAddressCircuit(
+        address targetAddress
+    ) external view returns (bool) {
         if (!circuitBreakerEnabled) return false;
         Circuit storage circuit = addressCircuits[targetAddress];
         if (!circuit.isActive) return false;
@@ -293,7 +337,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param functionName Name of the function
      * @return Whether function circuit is open
      */
-    function checkFunctionCircuit(string calldata functionName) external view returns (bool) {
+    function checkFunctionCircuit(
+        string calldata functionName
+    ) external view returns (bool) {
         if (!circuitBreakerEnabled) return false;
         Circuit storage circuit = functionCircuits[functionName];
         if (!circuit.isActive) return false;
@@ -305,7 +351,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @param circuit Circuit to check
      * @return Whether circuit is open
      */
-    function _checkCircuitState(Circuit storage circuit) internal view returns (bool) {
+    function _checkCircuitState(
+        Circuit storage circuit
+    ) internal view returns (bool) {
         if (circuit.state == CircuitState.OPEN) {
             if (block.timestamp >= circuit.lastFailureTime + circuit.timeout) {
                 // solhint-disable-line not-rely-on-time
@@ -330,7 +378,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
 
         if (circuit.failureCount >= circuit.threshold) {
             circuit.state = CircuitState.OPEN;
-            emit CircuitOpened(circuitName, circuit.failureCount, block.timestamp); // solhint-disable-line not-rely-on-time
+            emit CircuitOpened(
+                circuitName,
+                circuit.failureCount,
+                block.timestamp
+            ); // solhint-disable-line not-rely-on-time
         }
     }
 
@@ -349,7 +401,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
         if (circuit.failureCount >= circuit.threshold) {
             circuit.state = CircuitState.OPEN;
             string memory circuitName = _addressToString(targetAddress);
-            emit CircuitOpened(circuitName, circuit.failureCount, block.timestamp); // solhint-disable-line not-rely-on-time
+            emit CircuitOpened(
+                circuitName,
+                circuit.failureCount,
+                block.timestamp
+            ); // solhint-disable-line not-rely-on-time
         }
     }
 
@@ -367,7 +423,11 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
 
         if (circuit.failureCount >= circuit.threshold) {
             circuit.state = CircuitState.OPEN;
-            emit CircuitOpened(functionName, circuit.failureCount, block.timestamp); // solhint-disable-line not-rely-on-time
+            emit CircuitOpened(
+                functionName,
+                circuit.failureCount,
+                block.timestamp
+            ); // solhint-disable-line not-rely-on-time
         }
     }
 
@@ -438,7 +498,9 @@ contract CircuitBreaker is Initializable, OwnableUpgradeable {
      * @return timeout Timeout period
      * @return isActive Whether circuit is active
      */
-    function getCircuitInfo(string calldata circuitName)
+    function getCircuitInfo(
+        string calldata circuitName
+    )
         external
         view
         returns (

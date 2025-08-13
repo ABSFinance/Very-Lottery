@@ -1,0 +1,1003 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "AlertAlreadyResolved"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "ContractAlreadyRegistered"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "ContractNotRegistered"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidAlertId"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidContractAddress"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidInitialization"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidSeverityLevel"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "NotInitializing"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "alertId",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "severity",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "AlertCreated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "alertId",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "AlertResolved",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "ContractRegistered",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "ContractUnregistered",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bool",
+            "name": "isHealthy",
+            "type": "bool",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "HealthCheckPerformed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint64",
+            "name": "version",
+            "type": "uint64",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Initialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeUsers",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "MetricsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "parameter",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "oldValue",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "newValue",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "MonitoringConfigUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "metric",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentValue",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "PerformanceThresholdExceeded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "eventType",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "details",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "SecurityEvent",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "alertType",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "severity",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "SystemAlert",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "alertCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "alerts",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "severity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isResolved",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "contractLastCheck",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "severity",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createAlert"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "currentMetrics",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHealthy",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getActiveAlerts",
+        "outputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "activeAlerts",
+            "type": "uint256[]"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "alertId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getAlert",
+        "outputs": [
+          {
+            "internalType": "struct MonitoringSystem.Alert",
+            "name": "",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "string",
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "severity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "isResolved",
+                "type": "bool"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getSystemStats",
+        "outputs": [
+          {
+            "internalType": "struct MonitoringSystem.SystemMetrics",
+            "name": "metrics",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "totalTransactions",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "activeUsers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastUpdate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "isHealthy",
+                "type": "bool"
+              }
+            ]
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalAlerts",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeAlerts",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "contractCount",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "healthCheckInterval",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "initialize"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "maxResponseTime",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "minTransactionThreshold",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "monitoredContracts",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "performHealthCheck",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "registerContract"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "alertId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "resolveAlert"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "contractAddress",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "unregisterContract"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "users",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateMetrics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newMinTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newMaxResponseTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newHealthCheckInterval",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateThresholds"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "createAlert(string,uint256)": {
+          "params": {
+            "message": "Alert message",
+            "severity": "Alert severity level (1-4)"
+          }
+        },
+        "getActiveAlerts()": {
+          "returns": {
+            "activeAlerts": "Array of active alert IDs"
+          }
+        },
+        "getAlert(uint256)": {
+          "params": {
+            "alertId": "The alert ID to retrieve"
+          },
+          "returns": {
+            "_0": "Alert The alert information"
+          }
+        },
+        "getSystemStats()": {
+          "returns": {
+            "activeAlerts": "Number of active alerts",
+            "contractCount": "Number of monitored contracts",
+            "metrics": "System metrics",
+            "totalAlerts": "Total number of alerts"
+          }
+        },
+        "initialize(address)": {
+          "params": {
+            "owner": "The owner of the monitoring system"
+          }
+        },
+        "owner()": {
+          "details": "Returns the address of the current owner."
+        },
+        "performHealthCheck()": {
+          "returns": {
+            "_0": "bool Whether the system is healthy"
+          }
+        },
+        "registerContract(address)": {
+          "params": {
+            "contractAddress": "The contract address to register"
+          }
+        },
+        "renounceOwnership()": {
+          "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+        },
+        "resolveAlert(uint256)": {
+          "params": {
+            "alertId": "The alert ID to resolve"
+          }
+        },
+        "transferOwnership(address)": {
+          "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        },
+        "unregisterContract(address)": {
+          "params": {
+            "contractAddress": "The contract address to unregister"
+          }
+        },
+        "updateMetrics(uint256,uint256,uint256)": {
+          "params": {
+            "transactions": "Number of transactions",
+            "users": "Number of active users",
+            "volume": "Total volume"
+          }
+        },
+        "updateThresholds(uint256,uint256,uint256)": {
+          "params": {
+            "newHealthCheckInterval": "New health check interval",
+            "newMaxResponseTime": "New maximum response time",
+            "newMinTransactions": "New minimum transaction threshold"
+          }
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "alertCount()": {
+          "notice": "Total number of alerts"
+        },
+        "alerts(uint256)": {
+          "notice": "Mapping of alert IDs to alert information"
+        },
+        "constructor": {
+          "notice": "Constructor for the MonitoringSystem contract"
+        },
+        "contractLastCheck(address)": {
+          "notice": "Mapping of contract addresses to last check time"
+        },
+        "createAlert(string,uint256)": {
+          "notice": "Create a new alert"
+        },
+        "currentMetrics()": {
+          "notice": "Current system metrics"
+        },
+        "getActiveAlerts()": {
+          "notice": "Get active alerts (gas optimized version)"
+        },
+        "getAlert(uint256)": {
+          "notice": "Get alert by ID"
+        },
+        "getSystemStats()": {
+          "notice": "Get system statistics (gas optimized version)"
+        },
+        "healthCheckInterval()": {
+          "notice": "Health check interval in seconds"
+        },
+        "initialize(address)": {
+          "notice": "Initialize the monitoring system"
+        },
+        "maxResponseTime()": {
+          "notice": "Maximum response time in seconds"
+        },
+        "minTransactionThreshold()": {
+          "notice": "Minimum transaction threshold for monitoring"
+        },
+        "monitoredContracts(address)": {
+          "notice": "Mapping of contract addresses to monitoring status"
+        },
+        "performHealthCheck()": {
+          "notice": "Perform a health check"
+        },
+        "registerContract(address)": {
+          "notice": "Register a contract for monitoring"
+        },
+        "resolveAlert(uint256)": {
+          "notice": "Resolve an alert"
+        },
+        "unregisterContract(address)": {
+          "notice": "Unregister a contract from monitoring"
+        },
+        "updateMetrics(uint256,uint256,uint256)": {
+          "notice": "Update system metrics"
+        },
+        "updateThresholds(uint256,uint256,uint256)": {
+          "notice": "Update monitoring thresholds"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/modules/analytics/MonitoringSystem.sol": "MonitoringSystem"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/modules/analytics/MonitoringSystem.sol": {
+      "keccak256": "0x56ffab924a66fea9f400388dcad17a70509ed500bedbc3060d3d0194fbe49dad",
+      "urls": [
+        "bzz-raw://fab9566ef991fc0b3bb176283ae93676c5cbc5ac44d876b7aaa4d8983aaac40b",
+        "dweb:/ipfs/QmZe1PkEyX8dP5ou2SshfdN1Qrm24rquQQpih572CXQgNb"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/GasOptimizer.sol": {
+      "keccak256": "0x1b6870383897803ddf57896964421ad4a582bdc62d25701d5d1c6d15f8627f13",
+      "urls": [
+        "bzz-raw://5addeff7a3df26ee300968fb4b1b19c0f127a8335095ea055264a70aa706795b",
+        "dweb:/ipfs/QmZXprNbgDiBkJxPgF3nZM3G7Ev2bHkzX2jfBtiWUjynBF"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+      "keccak256": "0xc163fcf9bb10138631a9ba5564df1fa25db9adff73bd9ee868a8ae1858fe093a",
+      "urls": [
+        "bzz-raw://9706d43a0124053d9880f6e31a59f31bc0a6a3dc1acd66ce0a16e1111658c5f6",
+        "dweb:/ipfs/QmUFmfowzkRwGtDu36cXV9SPTBHJ3n7dG9xQiK5B28jTf2"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "keccak256": "0xdb4d24ee2c087c391d587cd17adfe5b3f9d93b3110b1388c2ab6c7c0ad1dcd05",
+      "urls": [
+        "bzz-raw://ab7b6d5b9e2b88176312967fe0f0e78f3d9a1422fa5e4b64e2440c35869b5d08",
+        "dweb:/ipfs/QmXKYWWyzcLg1B2k7Sb1qkEXgLCYfXecR9wYW5obRzWP1Q"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "keccak256": "0xdbef5f0c787055227243a7318ef74c8a5a1108ca3a07f2b3a00ef67769e1e397",
+      "urls": [
+        "bzz-raw://08e39f23d5b4692f9a40803e53a8156b72b4c1f9902a88cd65ba964db103dab9",
+        "dweb:/ipfs/QmPKn6EYDgpga7KtpkA8wV2yJCYGMtc9K4LkJfhKX2RVSV"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

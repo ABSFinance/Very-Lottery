@@ -49,20 +49,19 @@ import { ethers } from 'ethers';
         const fetchGameInfo = async () => {
           setLoading(true);
           try {
-            const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
-              contract.game(),
-              contract.ticketPrice(),
-              contract.isActive(),
-              contract.getPlayedGamePlayers(),
-              contract.getPlayedGameJackpot()
+            const [game, playerCount, jackpot, gameConfig] = await Promise.all([
+              contract.getCurrentGameNumber(),
+              contract.getCurrentGamePlayerCount(),
+              contract.getCurrentGameJackpot(),
+              contract.getGameConfig()
             ]);
             
             if (isMounted) {
               setGameInfo({
                 game: game.toString(),
-                ticketPrice: ethers.utils.formatEther(ticketPrice),
-                isActive,
-                players: players.toString(),
+                ticketPrice: ethers.utils.formatEther(gameConfig[0]),
+                isActive: gameConfig[3],
+                players: playerCount.toString(),
                 jackpot: ethers.utils.formatEther(jackpot)
               });
             }

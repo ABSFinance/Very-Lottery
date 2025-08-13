@@ -1,0 +1,1270 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidInitialization"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "NotInitializing"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableInvalidOwner"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AnalyticsUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "CircuitBreakerTriggered",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "contractName",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "oldAddress",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "newAddress",
+            "type": "address",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "ContractAddressUpdated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint64",
+            "name": "version",
+            "type": "uint64",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Initialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address",
+            "indexed": true
+          }
+        ],
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "functionName",
+            "type": "string",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "RateLimitExceeded",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "SecurityAlertTriggered",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "SystemActivated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "bool",
+            "name": "isHealthy",
+            "type": "bool",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "SystemCheckPerformed",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "SystemDeactivated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "emergencyManager",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "configManager",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "securityUtils",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "monitoringSystem",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "eventLogger",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "analyticsEngine",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "rateLimiter",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "circuitBreaker",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "treasuryManager",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "SystemInitialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "activateSystem"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "analyticsEngine",
+        "outputs": [
+          {
+            "internalType": "contract IAnalyticsEngine",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "blacklistAddress"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "circuitBreaker",
+        "outputs": [
+          {
+            "internalType": "contract ICircuitBreaker",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "configManager",
+        "outputs": [
+          {
+            "internalType": "contract IConfigManager",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "severity",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createAlert"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "threshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeout",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "createCircuit"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "deactivateSystem"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "emergencyManager",
+        "outputs": [
+          {
+            "internalType": "contract IEmergencyManager",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "emergencyPause"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "emergencyResume"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "eventLogger",
+        "outputs": [
+          {
+            "internalType": "contract IEventLogger",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getSystemStats",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "isSystemActive",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isEmergencyPaused",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastCheck",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalContracts",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isSecurityHealthy",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isMonitoringHealthy",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isAnalyticsHealthy",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isRateLimiterHealthy",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isCircuitBreakerHealthy",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_emergencyManager",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_configManager",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_securityUtils",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_monitoringSystem",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_eventLogger",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_analyticsEngine",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_rateLimiter",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_circuitBreaker",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_treasuryManager",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "initialize"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "lastSystemCheck",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "eventType",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "indexedAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "logEvent"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "monitoringSystem",
+        "outputs": [
+          {
+            "internalType": "contract IMonitoringSystem",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "performSystemCheck",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "rateLimiter",
+        "outputs": [
+          {
+            "internalType": "contract IRateLimiter",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordCircuitFailure"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "circuitName",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "recordCircuitSuccess"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "renounceOwnership"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "alertId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "resolveAlert"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "securityUtils",
+        "outputs": [
+          {
+            "internalType": "contract ISecurityUtils",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "functionName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxRequests",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeWindow",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setFunctionRateLimit"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxRequests",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeWindow",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "setUserRateLimit"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "systemActive",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "toggleLogging"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferOwnership"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "treasuryManager",
+        "outputs": [
+          {
+            "internalType": "contract ITreasuryManager",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "triggerSecurityAlert"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "gameType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalPlayers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "averageTicketPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinnings",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateGameAnalytics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "gameType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ticketPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gameDuration",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "fee",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxTicketsPerPlayer",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateGameConfig"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newMinInterval",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newMaxInteractions",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateRateLimits"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalTransactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "activeGames",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalWinnings",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "systemFees",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateSystemAnalytics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "users",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateSystemMetrics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "transactions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gamesPlayed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "winnings",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "referralEarnings",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "updateUserAnalytics"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "whitelistAddress"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "activateSystem()": {
+          "details": "시스템 활성화"
+        },
+        "blacklistAddress(address)": {
+          "details": "보안 관련 함수들"
+        },
+        "constructor": {
+          "custom:oz-upgrades-unsafe-allow": "constructor"
+        },
+        "deactivateSystem()": {
+          "details": "시스템 비활성화"
+        },
+        "emergencyPause()": {
+          "details": "긴급 정지"
+        },
+        "emergencyResume()": {
+          "details": "긴급 정지 해제"
+        },
+        "getSystemStats()": {
+          "details": "시스템 통계 조회"
+        },
+        "logEvent(string,string,address,bytes)": {
+          "details": "로깅 관련 함수들"
+        },
+        "owner()": {
+          "details": "Returns the address of the current owner."
+        },
+        "performSystemCheck()": {
+          "details": "시스템 상태 확인"
+        },
+        "renounceOwnership()": {
+          "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+        },
+        "setUserRateLimit(address,uint256,uint256)": {
+          "details": "고급 보안 관련 함수들"
+        },
+        "transferOwnership(address)": {
+          "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        },
+        "triggerSecurityAlert(address,string)": {
+          "details": "보안 알림 트리거"
+        },
+        "updateGameConfig(uint8,uint256,uint256,uint8,uint256)": {
+          "details": "게임 설정 업데이트"
+        },
+        "updateSystemMetrics(uint256,uint256,uint256)": {
+          "details": "모니터링 관련 함수들"
+        },
+        "updateUserAnalytics(address,uint256,uint256,uint256,uint256,uint256)": {
+          "details": "분석 관련 함수들"
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/modules/treasury/SystemManager.sol": "SystemManager"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/modules/treasury/SystemManager.sol": {
+      "keccak256": "0xc5e08f4aa28841070b8d66545600461b369aca26242494120b4c59bd4d2928ad",
+      "urls": [
+        "bzz-raw://f3de6d6db8f06ceaa1e9048665d025899f814175e6a1b789caad11c3e69ac95c",
+        "dweb:/ipfs/QmVjUgTiW1T5NLqmNHYhzkJqRmYPj7ddE78WwSxtUKZVya"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IAnalyticsEngine.sol": {
+      "keccak256": "0x9f415e7d41f19eb209782ccba2337cf054235aa8c7a7b8a2a7d492ebcbf78db9",
+      "urls": [
+        "bzz-raw://5ee64be0be8a49c6195f6da719c94453deb158eaa7ec146636f352697d85f1d4",
+        "dweb:/ipfs/QmeGDw2uvYEzvXqfitofN8EuKSaDJ2qEBNKvyw4oUHZYsg"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ICircuitBreaker.sol": {
+      "keccak256": "0xf0a3f7426e7d55d767adc729a83815fc344aafee06ffb7c0c85093cefad4daf0",
+      "urls": [
+        "bzz-raw://78d62082135a85e164cbca98ed06aa3afceabd4fcff736c9b9a7e2d7ad073057",
+        "dweb:/ipfs/Qme7PstecChApjKU9AmPhuvsXMo3d79SfAyaQhYUEpffdH"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IConfigManager.sol": {
+      "keccak256": "0xb9717999e774f96a1c4b5994b3ba03c80a7220afef1c06050d6a3e284d29dd08",
+      "urls": [
+        "bzz-raw://3819abe077c50f17b4bf11c3558a099ad06f5a6dd99487afbbc2df6faeb7a2e3",
+        "dweb:/ipfs/QmdBw7ZEmLzYswzyRrZ76BzH3Afv8baepSS7Y4jqrxYiYW"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IEmergencyManager.sol": {
+      "keccak256": "0x6627cf17bc5ffc7594045cd1e1946e81de18a28185b650e05793bddaf75ba016",
+      "urls": [
+        "bzz-raw://3bb96bb3bdb70828e3de3d44f87d5cd65c9a046010bbf9dd68ea03f770617630",
+        "dweb:/ipfs/QmUuJZSUiHmjHsh3iPwzxEfTFjWP9voWnrU8aebZ7QENUX"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IEventLogger.sol": {
+      "keccak256": "0x7ebdce3dbe66bfd2ac55165c066349ae1a6dda667ddb6e05c8c3148901e864c7",
+      "urls": [
+        "bzz-raw://344d2bd245e7f2015c8e0f13370a0fa54255c8a38f678a1f5b6e14f41f255b5f",
+        "dweb:/ipfs/QmXeHTokEetAvoxVEU5rAL9e3Tvvr3mq1xP5dVLNMcPchK"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IMonitoringSystem.sol": {
+      "keccak256": "0xf4176b2ef0bc2c9655c4f597aea1b3816dfebaa15168a5aab111ca3853095bf9",
+      "urls": [
+        "bzz-raw://5b5573f32521508f2aa2cd5825156221437db747b4b212ed562091639e750e03",
+        "dweb:/ipfs/QmcHiCxo3FBgDEPMwZ7o23LziPp7tk3G2BBSHjqrciLb6U"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/IRateLimiter.sol": {
+      "keccak256": "0xc929936b7207f6bb8f93ca7c456bca7dabfabbd4edb8dab5cdca415e5c609187",
+      "urls": [
+        "bzz-raw://33754775577749cd957b8e890b7dbb479f0761b50b24ff36567ee533bc94be1c",
+        "dweb:/ipfs/QmXSywVC6bruazc5UsSsCJvQ2trVdkgyRRMs9pZQtmUzZu"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ISecurityUtils.sol": {
+      "keccak256": "0x46955a27c8c2918edf68e48e6b8f975df4a7a7fad5c1fa83b30c6e926742bdf1",
+      "urls": [
+        "bzz-raw://8ddb6a80413a8b045c481edd3e792057272b283039007f89e39ec90f73a15b94",
+        "dweb:/ipfs/QmTv5FuEgX1qHABiPmBsJ5gKTEttqUmgE2bU8unyUf56sc"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/interfaces/ITreasuryManager.sol": {
+      "keccak256": "0x47141f0107d03257ee00ef2153936c138f105e39190a98564e58f4a6b596f76c",
+      "urls": [
+        "bzz-raw://d91efe955872cb09e40ea6be79dbe560d29f0d4c92f41798f765dfc5881a67ec",
+        "dweb:/ipfs/QmWeqPSRdk3yY2CvMBMUjbv7pwK7RzSTB3rFV65QfE5TbM"
+      ],
+      "license": "MIT"
+    },
+    "contracts/shared/utils/GasOptimizer.sol": {
+      "keccak256": "0x1b6870383897803ddf57896964421ad4a582bdc62d25701d5d1c6d15f8627f13",
+      "urls": [
+        "bzz-raw://5addeff7a3df26ee300968fb4b1b19c0f127a8335095ea055264a70aa706795b",
+        "dweb:/ipfs/QmZXprNbgDiBkJxPgF3nZM3G7Ev2bHkzX2jfBtiWUjynBF"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+      "keccak256": "0xc163fcf9bb10138631a9ba5564df1fa25db9adff73bd9ee868a8ae1858fe093a",
+      "urls": [
+        "bzz-raw://9706d43a0124053d9880f6e31a59f31bc0a6a3dc1acd66ce0a16e1111658c5f6",
+        "dweb:/ipfs/QmUFmfowzkRwGtDu36cXV9SPTBHJ3n7dG9xQiK5B28jTf2"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "keccak256": "0xdb4d24ee2c087c391d587cd17adfe5b3f9d93b3110b1388c2ab6c7c0ad1dcd05",
+      "urls": [
+        "bzz-raw://ab7b6d5b9e2b88176312967fe0f0e78f3d9a1422fa5e4b64e2440c35869b5d08",
+        "dweb:/ipfs/QmXKYWWyzcLg1B2k7Sb1qkEXgLCYfXecR9wYW5obRzWP1Q"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol": {
+      "keccak256": "0x574a7451e42724f7de29e2855c392a8a5020acd695169466a18459467d719d63",
+      "urls": [
+        "bzz-raw://5bc189f63b639ee173dd7b6fecc39baf7113bf161776aea22b34c57fdd1872ec",
+        "dweb:/ipfs/QmZAf2VtjDLRULqjJkde6LNsxAg12tUqpPqgUQQZbAjgtZ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "keccak256": "0xdbef5f0c787055227243a7318ef74c8a5a1108ca3a07f2b3a00ef67769e1e397",
+      "urls": [
+        "bzz-raw://08e39f23d5b4692f9a40803e53a8156b72b4c1f9902a88cd65ba964db103dab9",
+        "dweb:/ipfs/QmPKn6EYDgpga7KtpkA8wV2yJCYGMtc9K4LkJfhKX2RVSV"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/IERC1967.sol": {
+      "keccak256": "0xbf2aefe54b76d7f7bcd4f6da1080b7b1662611937d870b880db584d09cea56b5",
+      "urls": [
+        "bzz-raw://f5e7e2f12e0feec75296e57f51f82fdaa8bd1551f4b8cc6560442c0bf60f818c",
+        "dweb:/ipfs/QmcW9wDMaQ8RbQibMarfp17a3bABzY5KraWe2YDwuUrUoz"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol": {
+      "keccak256": "0x82f757819bf2429a0d4db141b99a4bbe5039e4ef86dfb94e2e6d40577ed5b28b",
+      "urls": [
+        "bzz-raw://37c30ed931e19fb71fdb806bb504cfdb9913b7127545001b64d4487783374422",
+        "dweb:/ipfs/QmUBHpv4hm3ZmwJ4GH8BeVzK4mv41Q6vBbWXxn8HExPXza"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol": {
+      "keccak256": "0xa1ad192cd45317c788618bef5cb1fb3ca4ce8b230f6433ac68cc1d850fb81618",
+      "urls": [
+        "bzz-raw://b43447bb85a53679d269a403c693b9d88d6c74177dfb35eddca63abaf7cf110a",
+        "dweb:/ipfs/QmXSDmpd4bNZj1PDgegr6C4w1jDaWHXCconC3rYiw9TSkQ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol": {
+      "keccak256": "0x20462ddb2665e9521372c76b001d0ce196e59dbbd989de9af5576cad0bd5628b",
+      "urls": [
+        "bzz-raw://f417fd12aeec8fbfaceaa30e3a08a0724c0bc39de363e2acf6773c897abbaf6d",
+        "dweb:/ipfs/QmU4Hko6sApdweVM92CsiuLKkCk8HfyBeutF89PCTz5Tye"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Address.sol": {
+      "keccak256": "0x6d0ae6e206645341fd122d278c2cb643dea260c190531f2f3f6a0426e77b00c0",
+      "urls": [
+        "bzz-raw://032d1201d839435be2c85b72e33206b3ea980c569d6ebf7fa57d811ab580a82f",
+        "dweb:/ipfs/QmeqQjAtMvdZT2tG7zm39itcRJkuwu8AEReK6WRnLJ18DD"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Errors.sol": {
+      "keccak256": "0x6afa713bfd42cf0f7656efa91201007ac465e42049d7de1d50753a373648c123",
+      "urls": [
+        "bzz-raw://ba1d02f4847670a1b83dec9f7d37f0b0418d6043447b69f3a29a5f9efc547fcf",
+        "dweb:/ipfs/QmQ7iH2keLNUKgq2xSWcRmuBE5eZ3F5whYAkAGzCNNoEWB"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol": {
+      "keccak256": "0xcf74f855663ce2ae00ed8352666b7935f6cddea2932fdf2c3ecd30a9b1cd0e97",
+      "urls": [
+        "bzz-raw://9f660b1f351b757dfe01438e59888f31f33ded3afcf5cb5b0d9bf9aa6f320a8b",
+        "dweb:/ipfs/QmarDJ5hZEgBtCmmrVzEZWjub9769eD686jmzb2XpSU1cM"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

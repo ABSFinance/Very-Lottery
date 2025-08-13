@@ -1,0 +1,116 @@
+{
+  "compiler": {
+    "version": "0.8.22+commit.4fc1097e"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "isLoggingEnabled",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "eventType",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "indexedAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "logEvent"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "toggleLogging"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "isLoggingEnabled()": {
+          "details": "로깅 상태 확인"
+        },
+        "logEvent(string,string,address,bytes)": {
+          "details": "이벤트 로깅",
+          "params": {
+            "data": "추가 데이터",
+            "eventType": "이벤트 타입",
+            "indexedAddress": "인덱싱된 주소",
+            "message": "이벤트 메시지"
+          }
+        },
+        "toggleLogging()": {
+          "details": "로깅 활성화/비활성화 토글"
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/shared/interfaces/IEventLogger.sol": "IEventLogger"
+    },
+    "evmVersion": "shanghai",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/shared/interfaces/IEventLogger.sol": {
+      "keccak256": "0x7ebdce3dbe66bfd2ac55165c066349ae1a6dda667ddb6e05c8c3148901e864c7",
+      "urls": [
+        "bzz-raw://344d2bd245e7f2015c8e0f13370a0fa54255c8a38f678a1f5b6e14f41f255b5f",
+        "dweb:/ipfs/QmXeHTokEetAvoxVEU5rAL9e3Tvvr3mq1xP5dVLNMcPchK"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

@@ -36,10 +36,10 @@ contract Cryptolotto7Days is BaseGame {
 
     function initialize(
         address owner,
-        address, /* distributor */
-        address, /* statsA */
-        address, /* referralSystem */
-        address, /* _treasuryManager */
+        address /* distributor */,
+        address /* statsA */,
+        address /* referralSystem */,
+        address /* _treasuryManager */,
         string memory /* _treasuryName */
     ) public initializer {
         require(owner != address(0), "Invalid owner address");
@@ -71,11 +71,17 @@ contract Cryptolotto7Days is BaseGame {
      */
     function _pickWinner() internal view override returns (address) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
+        uint256 currentGameId = gameStorage.totalGames > 0
+            ? gameStorage.totalGames - 1
+            : 0;
         StorageLayout.Game storage game = gameStorage.games[currentGameId];
         require(game.players.length > 0, "No players in game");
 
-        uint256 randomIndex = enhancedRandomNumberSecure(0, game.players.length - 1, block.timestamp);
+        uint256 randomIndex = enhancedRandomNumberSecure(
+            0,
+            game.players.length - 1,
+            block.timestamp
+        );
         return game.players[randomIndex];
     }
 
@@ -83,12 +89,11 @@ contract Cryptolotto7Days is BaseGame {
      * @dev 향상된 랜덤 생성 함수 (보안 강화)
      * @notice 시간 기반 공격 방지를 위한 추가 엔트로피 소스 사용
      */
-    function enhancedRandomNumberSecure(uint256 min, uint256 max, uint256 seed)
-        internal
-        view
-        override
-        returns (uint256)
-    {
+    function enhancedRandomNumberSecure(
+        uint256 min,
+        uint256 max,
+        uint256 seed
+    ) internal view override returns (uint256) {
         require(max > min, "Invalid range");
         require(max - min <= type(uint256).max - 1, "Range too large");
 
@@ -115,13 +120,18 @@ contract Cryptolotto7Days is BaseGame {
     /**
      * @dev 승자 지급 처리
      */
-    function _processWinnerPayout(address winner, uint256 amount) internal override {
+    function _processWinnerPayout(
+        address winner,
+        uint256 amount
+    ) internal override {
         if (address(registry) == address(0)) {
             emit TreasuryOperationFailed("payout", block.timestamp);
             return;
         }
 
-        try registry.getContract("TreasuryManager") returns (address treasuryAddress) {
+        try registry.getContract("TreasuryManager") returns (
+            address treasuryAddress
+        ) {
             if (treasuryAddress == address(0)) {
                 emit TreasuryOperationFailed("payout", block.timestamp);
                 return;
@@ -129,16 +139,35 @@ contract Cryptolotto7Days is BaseGame {
 
             // Process winner payout
             if (winner != address(0) && amount > 0) {
-                try ITreasuryManager(treasuryAddress).withdrawFunds(treasuryName, winner, amount) {
+                try
+                    ITreasuryManager(treasuryAddress).withdrawFunds(
+                        treasuryName,
+                        winner,
+                        amount
+                    )
+                {
                     emit WinnerPayout(winner, amount, block.timestamp);
                 } catch {
-                    emit TreasuryTransferFailed(address(this), amount, "Withdrawal failed", block.timestamp);
+                    emit TreasuryTransferFailed(
+                        address(this),
+                        amount,
+                        "Withdrawal failed",
+                        block.timestamp
+                    );
                 }
             }
         } catch Error(string memory) /* reason */ {
-            emit RegistryError("getContract", "TreasuryManager", block.timestamp);
+            emit RegistryError(
+                "getContract",
+                "TreasuryManager",
+                block.timestamp
+            );
         } catch {
-            emit RegistryError("getContract", "TreasuryManager", block.timestamp);
+            emit RegistryError(
+                "getContract",
+                "TreasuryManager",
+                block.timestamp
+            );
         }
     }
 
@@ -147,27 +176,53 @@ contract Cryptolotto7Days is BaseGame {
      */
     function _processFounderDistribution(uint256 amount) internal override {
         if (address(registry) == address(0)) {
-            emit DistributorError("getContract", "Registry not initialized", block.timestamp);
+            emit DistributorError(
+                "getContract",
+                "Registry not initialized",
+                block.timestamp
+            );
             return;
         }
 
-        try registry.getContract("FundsDistributor") returns (address distributorAddress) {
+        try registry.getContract("FundsDistributor") returns (
+            address distributorAddress
+        ) {
             if (distributorAddress == address(0)) {
-                emit DistributorError("getContract", "Distributor contract not found", block.timestamp);
+                emit DistributorError(
+                    "getContract",
+                    "Distributor contract not found",
+                    block.timestamp
+                );
                 return;
             }
 
             try IFundsDistributor(distributorAddress).withdrawAmount(amount) {
                 // 성공적으로 처리됨
             } catch Error(string memory) /* reason */ {
-                emit DistributorError("withdrawAmount", "Unknown error", block.timestamp);
+                emit DistributorError(
+                    "withdrawAmount",
+                    "Unknown error",
+                    block.timestamp
+                );
             } catch {
-                emit DistributorError("withdrawAmount", "Unknown error", block.timestamp);
+                emit DistributorError(
+                    "withdrawAmount",
+                    "Unknown error",
+                    block.timestamp
+                );
             }
         } catch Error(string memory) /* reason */ {
-            emit DistributorError("getContract", "Unknown registry error", block.timestamp);
+            emit DistributorError(
+                "getContract",
+                "Unknown registry error",
+                block.timestamp
+            );
         } catch {
-            emit DistributorError("getContract", "Unknown registry error", block.timestamp);
+            emit DistributorError(
+                "getContract",
+                "Unknown registry error",
+                block.timestamp
+            );
         }
     }
 
@@ -182,13 +237,23 @@ contract Cryptolotto7Days is BaseGame {
         uint256 winnerIndex
     ) internal override {
         if (address(registry) == address(0)) {
-            emit StatsError("getContract", "Registry not initialized", block.timestamp);
+            emit StatsError(
+                "getContract",
+                "Registry not initialized",
+                block.timestamp
+            );
             return;
         }
 
-        try registry.getContract("StatsAggregator") returns (address statsAddress) {
+        try registry.getContract("StatsAggregator") returns (
+            address statsAddress
+        ) {
             if (statsAddress == address(0)) {
-                emit StatsError("getContract", "Stats contract not found", block.timestamp);
+                emit StatsError(
+                    "getContract",
+                    "Stats contract not found",
+                    block.timestamp
+                );
                 return;
             }
 
@@ -199,14 +264,16 @@ contract Cryptolotto7Days is BaseGame {
             uint256 gamePlayerCount = getCurrentGamePlayerCount();
             // StorageLayout.GameState state = getCurrentGameState();
 
-            try ICryptolottoStatsAggregator(statsAddress).newWinner(
-                winner,
-                gameNumber,
-                gamePlayerCount,
-                amount,
-                7, // 7일 게임 타입
-                winnerIndex
-            ) {
+            try
+                ICryptolottoStatsAggregator(statsAddress).newWinner(
+                    winner,
+                    gameNumber,
+                    gamePlayerCount,
+                    amount,
+                    7, // 7일 게임 타입
+                    winnerIndex
+                )
+            {
                 // 성공적으로 처리됨
             } catch Error(string memory) /* reason */ {
                 emit StatsError("newWinner", "Unknown error", block.timestamp);
@@ -214,9 +281,17 @@ contract Cryptolotto7Days is BaseGame {
                 emit StatsError("newWinner", "Unknown error", block.timestamp);
             }
         } catch Error(string memory) /* reason */ {
-            emit StatsError("getContract", "Unknown registry error", block.timestamp);
+            emit StatsError(
+                "getContract",
+                "Unknown registry error",
+                block.timestamp
+            );
         } catch {
-            emit StatsError("getContract", "Unknown registry error", block.timestamp);
+            emit StatsError(
+                "getContract",
+                "Unknown registry error",
+                block.timestamp
+            );
         }
     }
 
@@ -224,18 +299,29 @@ contract Cryptolotto7Days is BaseGame {
      * @dev 게임 성능 메트릭 기록
      * @notice 게임 성능을 추적하기 위한 메트릭 기록
      */
-    function _recordPerformanceMetrics(uint256 gameNumber, uint256 gasUsed, uint256 playerCount, uint256 jackpot)
-        internal
-        override
-    {
-        emit GamePerformanceMetrics(gameNumber, gasUsed, playerCount, jackpot, block.timestamp);
+    function _recordPerformanceMetrics(
+        uint256 gameNumber,
+        uint256 gasUsed,
+        uint256 playerCount,
+        uint256 jackpot
+    ) internal override {
+        emit GamePerformanceMetrics(
+            gameNumber,
+            gasUsed,
+            playerCount,
+            jackpot,
+            block.timestamp
+        );
     }
 
     /**
      * @dev 보안 이벤트 기록
      * @notice 보안 관련 이벤트를 기록합니다
      */
-    function _recordSecurityEvent(address player, string memory eventType) internal override {
+    function _recordSecurityEvent(
+        address player,
+        string memory eventType
+    ) internal override {
         emit GameSecurityEvent(player, eventType, block.timestamp);
     }
 

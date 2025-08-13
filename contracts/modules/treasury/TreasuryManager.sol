@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title TreasuryManager
@@ -52,7 +52,10 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     }
 
     modifier onlyValidTreasuryName(string memory treasuryName) {
-        require(bytes(treasuryName).length > 0, "Treasury name cannot be empty");
+        require(
+            bytes(treasuryName).length > 0,
+            "Treasury name cannot be empty"
+        );
         require(bytes(treasuryName).length <= 50, "Treasury name too long");
         _;
     }
@@ -74,38 +77,94 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     }
 
     // Events
-    event TreasuryCreated(string indexed treasuryName, uint256 initialBalance, uint256 timestamp);
-    event TreasuryUpdated(string indexed treasuryName, uint256 oldBalance, uint256 newBalance, uint256 timestamp);
-    event FundsDeposited(string indexed treasuryName, address indexed user, uint256 amount, uint256 timestamp);
-    event FundsWithdrawn(string indexed treasuryName, address indexed user, uint256 amount, uint256 timestamp);
-    event ReserveUpdated(string indexed treasuryName, uint256 oldReserve, uint256 newReserve, uint256 timestamp);
+    event TreasuryCreated(
+        string indexed treasuryName,
+        uint256 initialBalance,
+        uint256 timestamp
+    );
+    event TreasuryUpdated(
+        string indexed treasuryName,
+        uint256 oldBalance,
+        uint256 newBalance,
+        uint256 timestamp
+    );
+    event FundsDeposited(
+        string indexed treasuryName,
+        address indexed user,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event FundsWithdrawn(
+        string indexed treasuryName,
+        address indexed user,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event ReserveUpdated(
+        string indexed treasuryName,
+        uint256 oldReserve,
+        uint256 newReserve,
+        uint256 timestamp
+    );
     event TreasuryToggled(bool enabled, uint256 timestamp);
 
     // 추가된 이벤트들
-    event TreasuryBalanceLow(string indexed treasuryName, uint256 currentBalance, uint256 threshold, uint256 timestamp);
-    event TreasuryBalanceHigh(
-        string indexed treasuryName, uint256 currentBalance, uint256 threshold, uint256 timestamp
+    event TreasuryBalanceLow(
+        string indexed treasuryName,
+        uint256 currentBalance,
+        uint256 threshold,
+        uint256 timestamp
     );
-    event WithdrawalLimitExceeded(address indexed user, uint256 requestedAmount, uint256 maxAllowed, uint256 timestamp);
-    event ReserveRatioUpdated(uint256 oldRatio, uint256 newRatio, uint256 timestamp);
-    event TreasuryEmergencyWithdraw(address indexed by, uint256 amount, string reason, uint256 timestamp);
+    event TreasuryBalanceHigh(
+        string indexed treasuryName,
+        uint256 currentBalance,
+        uint256 threshold,
+        uint256 timestamp
+    );
+    event WithdrawalLimitExceeded(
+        address indexed user,
+        uint256 requestedAmount,
+        uint256 maxAllowed,
+        uint256 timestamp
+    );
+    event ReserveRatioUpdated(
+        uint256 oldRatio,
+        uint256 newRatio,
+        uint256 timestamp
+    );
+    event TreasuryEmergencyWithdraw(
+        address indexed by,
+        uint256 amount,
+        string reason,
+        uint256 timestamp
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() Ownable(msg.sender) {
+    constructor() Ownable() {
         treasuryEnabled = true;
     }
 
     /**
      * @dev Treasury 생성
      */
-    function createTreasury(string memory treasuryName, uint256 initialBalance) external onlyOwner {
-        require(bytes(treasuryName).length > 0, "Treasury name cannot be empty");
-        require(treasuries[treasuryName].totalBalance == 0, "Treasury already exists");
+    function createTreasury(
+        string memory treasuryName,
+        uint256 initialBalance
+    ) external onlyOwner {
+        require(
+            bytes(treasuryName).length > 0,
+            "Treasury name cannot be empty"
+        );
+        require(
+            treasuries[treasuryName].totalBalance == 0,
+            "Treasury already exists"
+        );
 
         treasuries[treasuryName] = Treasury({
             totalBalance: initialBalance,
             reservedBalance: (initialBalance * minReserveRatio) / 100,
-            availableBalance: initialBalance - ((initialBalance * minReserveRatio) / 100),
+            availableBalance: initialBalance -
+                ((initialBalance * minReserveRatio) / 100),
             lastUpdate: block.timestamp,
             isActive: true
         });
@@ -116,7 +175,11 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     /**
      * @dev 자금 예치
      */
-    function depositFunds(string memory treasuryName, address user, uint256 amount)
+    function depositFunds(
+        string memory treasuryName,
+        address user,
+        uint256 amount
+    )
         external
         payable
         onlyOwnerOrAuthorized
@@ -139,13 +202,22 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
         userTreasuryBalances[treasuryName][user] += amount;
 
         emit FundsDeposited(treasuryName, user, amount, timestamp);
-        emit TreasuryUpdated(treasuryName, oldBalance, treasury.totalBalance, timestamp);
+        emit TreasuryUpdated(
+            treasuryName,
+            oldBalance,
+            treasury.totalBalance,
+            timestamp
+        );
     }
 
     /**
      * @dev 자금 인출
      */
-    function withdrawFunds(string memory treasuryName, address user, uint256 amount)
+    function withdrawFunds(
+        string memory treasuryName,
+        address user,
+        uint256 amount
+    )
         external
         onlyOwnerOrAuthorized
         nonReentrant
@@ -155,11 +227,20 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
         onlyValidAmount(amount)
         onlyActiveTreasury(treasuryName)
     {
-        require(amount <= maxWithdrawalAmount, "Amount exceeds maximum withdrawal");
-        require(userTreasuryBalances[treasuryName][user] >= amount, "Insufficient balance");
+        require(
+            amount <= maxWithdrawalAmount,
+            "Amount exceeds maximum withdrawal"
+        );
+        require(
+            userTreasuryBalances[treasuryName][user] >= amount,
+            "Insufficient balance"
+        );
 
         Treasury storage treasury = treasuries[treasuryName];
-        require(treasury.availableBalance >= amount, "Insufficient available balance");
+        require(
+            treasury.availableBalance >= amount,
+            "Insufficient available balance"
+        );
 
         uint256 oldBalance = treasury.totalBalance;
         uint256 oldReserve = treasury.reservedBalance;
@@ -170,7 +251,8 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
         treasury.lastUpdate = timestamp;
 
         // Ensure minimum reserve is maintained
-        uint256 requiredReserve = (treasury.totalBalance * minReserveRatio) / 100;
+        uint256 requiredReserve = (treasury.totalBalance * minReserveRatio) /
+            100;
         if (treasury.reservedBalance > requiredReserve) {
             uint256 excessReserve = treasury.reservedBalance - requiredReserve;
             treasury.reservedBalance = requiredReserve;
@@ -181,18 +263,34 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
         userTreasuryBalances[treasuryName][user] -= amount;
 
         emit FundsWithdrawn(treasuryName, user, amount, timestamp);
-        emit TreasuryUpdated(treasuryName, oldBalance, treasury.totalBalance, timestamp);
+        emit TreasuryUpdated(
+            treasuryName,
+            oldBalance,
+            treasury.totalBalance,
+            timestamp
+        );
         if (oldReserve != treasury.reservedBalance) {
-            emit ReserveUpdated(treasuryName, oldReserve, treasury.reservedBalance, timestamp);
+            emit ReserveUpdated(
+                treasuryName,
+                oldReserve,
+                treasury.reservedBalance,
+                timestamp
+            );
         }
     }
 
     /**
      * @dev 예약 자금 설정
      */
-    function setReserve(string memory treasuryName, uint256 reserveAmount) external onlyOwner {
+    function setReserve(
+        string memory treasuryName,
+        uint256 reserveAmount
+    ) external onlyOwner {
         require(treasuries[treasuryName].isActive, "Treasury is not active");
-        require(reserveAmount <= treasuries[treasuryName].totalBalance, "Reserve cannot exceed total balance");
+        require(
+            reserveAmount <= treasuries[treasuryName].totalBalance,
+            "Reserve cannot exceed total balance"
+        );
 
         Treasury storage treasury = treasuries[treasuryName];
         uint256 oldReserve = treasury.reservedBalance;
@@ -201,7 +299,12 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
         treasury.availableBalance = treasury.totalBalance - reserveAmount;
         treasury.lastUpdate = block.timestamp;
 
-        emit ReserveUpdated(treasuryName, oldReserve, treasury.reservedBalance, block.timestamp);
+        emit ReserveUpdated(
+            treasuryName,
+            oldReserve,
+            treasury.reservedBalance,
+            block.timestamp
+        );
     }
 
     /**
@@ -220,21 +323,38 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     function updateMaxWithdrawalAmount(uint256 newAmount) external onlyOwner {
         uint256 oldAmount = maxWithdrawalAmount;
         maxWithdrawalAmount = newAmount;
-        emit TreasuryUpdated("MaxWithdrawalAmount", oldAmount, newAmount, block.timestamp);
+        emit TreasuryUpdated(
+            "MaxWithdrawalAmount",
+            oldAmount,
+            newAmount,
+            block.timestamp
+        );
     }
 
     /**
      * @dev 긴급 인출 (관리자만)
      */
-    function emergencyWithdraw(string memory treasuryName, uint256 amount, string memory reason) external onlyOwner {
+    function emergencyWithdraw(
+        string memory treasuryName,
+        uint256 amount,
+        string memory reason
+    ) external onlyOwner {
         require(treasuries[treasuryName].isActive, "Treasury is not active");
-        require(treasuries[treasuryName].availableBalance >= amount, "Insufficient available balance");
+        require(
+            treasuries[treasuryName].availableBalance >= amount,
+            "Insufficient available balance"
+        );
 
         treasuries[treasuryName].availableBalance -= amount;
         treasuries[treasuryName].totalBalance -= amount;
         treasuries[treasuryName].lastUpdate = block.timestamp;
 
-        emit TreasuryEmergencyWithdraw(msg.sender, amount, reason, block.timestamp);
+        emit TreasuryEmergencyWithdraw(
+            msg.sender,
+            amount,
+            reason,
+            block.timestamp
+        );
         emit TreasuryUpdated(
             treasuryName,
             treasuries[treasuryName].totalBalance + amount,
@@ -273,7 +393,9 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     /**
      * @dev Treasury 정보 조회
      */
-    function getTreasuryInfo(string memory treasuryName)
+    function getTreasuryInfo(
+        string memory treasuryName
+    )
         external
         view
         returns (
@@ -304,7 +426,10 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     /**
      * @dev 사용자 Treasury 잔액 조회
      */
-    function getUserTreasuryBalance(string memory treasuryName, address user) external view returns (uint256) {
+    function getUserTreasuryBalance(
+        string memory treasuryName,
+        address user
+    ) external view returns (uint256) {
         return userTreasuryBalances[treasuryName][user];
     }
 
@@ -319,7 +444,9 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
     /**
      * @dev Authorized contract 제거
      */
-    function removeAuthorizedContract(address contractAddress) external onlyOwner {
+    function removeAuthorizedContract(
+        address contractAddress
+    ) external onlyOwner {
         authorizedContracts[contractAddress] = false;
     }
 
@@ -327,7 +454,10 @@ contract TreasuryManager is Ownable, ReentrancyGuard {
      * @dev Owner 또는 authorized contract만 허용하는 modifier
      */
     modifier onlyOwnerOrAuthorized() {
-        require(msg.sender == owner() || authorizedContracts[msg.sender], "Not authorized");
+        require(
+            msg.sender == owner() || authorizedContracts[msg.sender],
+            "Not authorized"
+        );
         _;
     }
 
