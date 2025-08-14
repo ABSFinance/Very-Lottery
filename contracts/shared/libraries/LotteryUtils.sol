@@ -57,6 +57,8 @@ library LotteryUtils {
     ) internal pure returns (bool) {
         require(ticketPrice >= MIN_TICKET_PRICE, "Ticket price too low");
         require(ticketPrice <= MAX_TICKET_PRICE, "Ticket price too high");
+        // 매우 큰 값들 방지
+        require(ticketPrice < type(uint256).max / 2, "Ticket price too large");
         return true;
     }
 
@@ -73,12 +75,22 @@ library LotteryUtils {
         uint256 ticketPrice,
         uint256 playerCount
     ) internal pure returns (uint256) {
+        // Overflow 방지를 위한 검증
+        require(
+            ticketPrice <= type(uint256).max / playerCount,
+            "Overflow in jackpot calculation"
+        );
         return ticketPrice * playerCount;
     }
 
     function calculateTicketIndex(
         uint256 playerCount
     ) internal pure returns (uint256) {
+        // Overflow 방지를 위한 검증
+        require(
+            playerCount < type(uint256).max,
+            "Overflow in ticket index calculation"
+        );
         return playerCount + 1;
     }
 
