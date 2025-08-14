@@ -105,18 +105,9 @@ contract DeployScript is Script {
 
         // Create treasuries
         console.log("Creating treasuries...");
-        treasuryManager.createTreasury(
-            "unique_test_lottery_1day",
-            1000000000000000000000
-        );
-        treasuryManager.createTreasury(
-            "unique_test_lottery_7days",
-            1000000000000000000000
-        );
-        treasuryManager.createTreasury(
-            "unique_test_lottery_ad",
-            1000000000000000000000
-        );
+        treasuryManager.createTreasury("unique_test_lottery_1day", 1000000000000000000000);
+        treasuryManager.createTreasury("unique_test_lottery_7days", 1000000000000000000000);
+        treasuryManager.createTreasury("unique_test_lottery_ad", 1000000000000000000000);
         console.log("Treasuries created successfully");
 
         console.log("Core contracts deployment completed");
@@ -128,24 +119,15 @@ contract DeployScript is Script {
         // Deploy implementations
         console.log("Deploying Cryptolotto1Day implementation...");
         Cryptolotto1Day implementation1Day = new Cryptolotto1Day();
-        console.log(
-            "Cryptolotto1Day implementation deployed at:",
-            address(implementation1Day)
-        );
+        console.log("Cryptolotto1Day implementation deployed at:", address(implementation1Day));
 
         console.log("Deploying Cryptolotto7Days implementation...");
         Cryptolotto7Days implementation7Days = new Cryptolotto7Days();
-        console.log(
-            "Cryptolotto7Days implementation deployed at:",
-            address(implementation7Days)
-        );
+        console.log("Cryptolotto7Days implementation deployed at:", address(implementation7Days));
 
         console.log("Deploying CryptolottoAd implementation...");
         CryptolottoAd implementationAd = new CryptolottoAd();
-        console.log(
-            "CryptolottoAd implementation deployed at:",
-            address(implementationAd)
-        );
+        console.log("CryptolottoAd implementation deployed at:", address(implementationAd));
 
         // Get deployer address
         address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
@@ -192,24 +174,15 @@ contract DeployScript is Script {
 
         // Deploy proxy contracts
         console.log("Creating ERC1967Proxy for Cryptolotto1Day...");
-        ERC1967Proxy proxy1Day = new ERC1967Proxy(
-            address(implementation1Day),
-            initData1Day
-        );
+        ERC1967Proxy proxy1Day = new ERC1967Proxy(address(implementation1Day), initData1Day);
         console.log("Cryptolotto1Day proxy created at:", address(proxy1Day));
 
         console.log("Creating ERC1967Proxy for Cryptolotto7Days...");
-        ERC1967Proxy proxy7Days = new ERC1967Proxy(
-            address(implementation7Days),
-            initData7Days
-        );
+        ERC1967Proxy proxy7Days = new ERC1967Proxy(address(implementation7Days), initData7Days);
         console.log("Cryptolotto7Days proxy created at:", address(proxy7Days));
 
         console.log("Creating ERC1967Proxy for CryptolottoAd...");
-        ERC1967Proxy proxyAd = new ERC1967Proxy(
-            address(implementationAd),
-            initDataAd
-        );
+        ERC1967Proxy proxyAd = new ERC1967Proxy(address(implementationAd), initDataAd);
         console.log("CryptolottoAd proxy created at:", address(proxyAd));
 
         // Cast proxies to their respective types

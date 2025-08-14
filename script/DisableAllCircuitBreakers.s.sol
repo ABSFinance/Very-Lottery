@@ -21,9 +21,7 @@ contract DisableAllCircuitBreakers is Script {
 
         // Disable circuit breaker for Cryptolotto1Day
         console.log("Disabling circuit breaker for Cryptolotto1Day...");
-        (bool success1, ) = cryptolotto1Day.call(
-            abi.encodeWithSignature("toggleCircuitBreaker()")
-        );
+        (bool success1,) = cryptolotto1Day.call(abi.encodeWithSignature("toggleCircuitBreaker()"));
         if (success1) {
             console.log("SUCCESS: Cryptolotto1Day circuit breaker disabled");
         } else {
@@ -32,9 +30,7 @@ contract DisableAllCircuitBreakers is Script {
 
         // Disable circuit breaker for Cryptolotto7Days
         console.log("Disabling circuit breaker for Cryptolotto7Days...");
-        (bool success2, ) = cryptolotto7Days.call(
-            abi.encodeWithSignature("toggleCircuitBreaker()")
-        );
+        (bool success2,) = cryptolotto7Days.call(abi.encodeWithSignature("toggleCircuitBreaker()"));
         if (success2) {
             console.log("SUCCESS: Cryptolotto7Days circuit breaker disabled");
         } else {
@@ -43,9 +39,7 @@ contract DisableAllCircuitBreakers is Script {
 
         // Disable circuit breaker for CryptolottoAd
         console.log("Disabling circuit breaker for CryptolottoAd...");
-        (bool success3, ) = cryptolottoAd.call(
-            abi.encodeWithSignature("toggleCircuitBreaker()")
-        );
+        (bool success3,) = cryptolottoAd.call(abi.encodeWithSignature("toggleCircuitBreaker()"));
         if (success3) {
             console.log("SUCCESS: CryptolottoAd circuit breaker disabled");
         } else {
