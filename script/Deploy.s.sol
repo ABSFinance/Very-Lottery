@@ -30,59 +30,134 @@ contract DeployScript is Script {
     function setUp() public {}
 
     function run() public {
+        console.log("=== STARTING DEPLOYMENT ===");
+
         // 환경변수에서 private key 가져오기
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
+        console.log("Deployer address:", deployer);
 
         vm.startBroadcast(deployerPrivateKey);
 
         // Deploy core contracts
+        console.log("Deploying core contracts...");
         _deployCoreContracts();
+        console.log("Core contracts deployed successfully");
 
         // Deploy lottery contracts
+        console.log("Deploying lottery contracts...");
         _deployLotteryContracts();
+        console.log("Lottery contracts deployed successfully");
 
         // Setup and configure
+        console.log("Setting up contracts...");
         _setupContracts();
+        console.log("Contract setup completed");
 
         // Register contracts
+        console.log("Registering contracts...");
         _registerContracts();
+        console.log("Contracts registered successfully");
 
         vm.stopBroadcast();
 
         // Log deployment summary
+        console.log("Generating deployment summary...");
         _logDeploymentSummary();
+
+        console.log("=== DEPLOYMENT COMPLETED SUCCESSFULLY ===");
     }
 
     function _deployCoreContracts() internal {
+        console.log("Starting core contracts deployment...");
+
         // Get deployer address
         address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
 
         // Deploy core contracts
+        console.log("Deploying SimpleOwnable...");
         ownable = new SimpleOwnable();
+        console.log("SimpleOwnable deployed at:", address(ownable));
+
+        console.log("Deploying StatsAggregator...");
         stats = new StatsAggregator();
+        console.log("StatsAggregator deployed at:", address(stats));
+
+        console.log("Deploying FundsDistributor...");
         fundsDistributor = new FundsDistributor();
+        console.log("FundsDistributor deployed at:", address(fundsDistributor));
+
+        console.log("Deploying CryptolottoReferral...");
         referral = new CryptolottoReferral();
+        console.log("CryptolottoReferral deployed at:", address(referral));
+
+        console.log("Deploying AdToken...");
         adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
+        console.log("AdToken deployed at:", address(adToken));
+
+        console.log("Deploying ContractRegistry...");
         registry = new ContractRegistry(deployer); // Set deployer as owner
+        console.log("ContractRegistry deployed at:", address(registry));
+
+        console.log("Deploying TreasuryManager...");
         treasuryManager = new TreasuryManager();
+        console.log("TreasuryManager deployed at:", address(treasuryManager));
 
         // Create treasuries
-        treasuryManager.createTreasury("unique_test_lottery_1day", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_7days", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_ad", 1000000000000000000000);
+        console.log("Creating treasuries...");
+        treasuryManager.createTreasury(
+            "unique_test_lottery_1day",
+            1000000000000000000000
+        );
+        treasuryManager.createTreasury(
+            "unique_test_lottery_7days",
+            1000000000000000000000
+        );
+        treasuryManager.createTreasury(
+            "unique_test_lottery_ad",
+            1000000000000000000000
+        );
+        console.log("Treasuries created successfully");
+
+        console.log("Core contracts deployment completed");
     }
 
     function _deployLotteryContracts() internal {
+        console.log("Starting lottery contracts deployment...");
+
         // Deploy implementations
+        console.log("Deploying Cryptolotto1Day implementation...");
         Cryptolotto1Day implementation1Day = new Cryptolotto1Day();
+        console.log(
+            "Cryptolotto1Day implementation deployed at:",
+            address(implementation1Day)
+        );
+
+        console.log("Deploying Cryptolotto7Days implementation...");
         Cryptolotto7Days implementation7Days = new Cryptolotto7Days();
+        console.log(
+            "Cryptolotto7Days implementation deployed at:",
+            address(implementation7Days)
+        );
+
+        console.log("Deploying CryptolottoAd implementation...");
         CryptolottoAd implementationAd = new CryptolottoAd();
+        console.log(
+            "CryptolottoAd implementation deployed at:",
+            address(implementationAd)
+        );
 
         // Get deployer address
         address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
 
         // Prepare initialization data with proper parameters
+        console.log("Preparing initialization data for Cryptolotto1Day...");
+        console.log("- Owner:", deployer);
+        console.log("- FundsDistributor:", address(fundsDistributor));
+        console.log("- Stats:", address(stats));
+        console.log("- Referral:", address(referral));
+        console.log("- TreasuryManager:", address(treasuryManager));
+
         bytes memory initData1Day = abi.encodeWithSelector(
             Cryptolotto1Day.initialize.selector,
             deployer, // owner
@@ -113,43 +188,76 @@ contract DeployScript is Script {
             "unique_test_lottery_ad" // _treasuryName
         );
 
+        console.log("Initialization data prepared successfully");
+
         // Deploy proxy contracts
-        ERC1967Proxy proxy1Day = new ERC1967Proxy(address(implementation1Day), initData1Day);
+        console.log("Creating ERC1967Proxy for Cryptolotto1Day...");
+        ERC1967Proxy proxy1Day = new ERC1967Proxy(
+            address(implementation1Day),
+            initData1Day
+        );
+        console.log("Cryptolotto1Day proxy created at:", address(proxy1Day));
 
-        ERC1967Proxy proxy7Days = new ERC1967Proxy(address(implementation7Days), initData7Days);
+        console.log("Creating ERC1967Proxy for Cryptolotto7Days...");
+        ERC1967Proxy proxy7Days = new ERC1967Proxy(
+            address(implementation7Days),
+            initData7Days
+        );
+        console.log("Cryptolotto7Days proxy created at:", address(proxy7Days));
 
-        ERC1967Proxy proxyAd = new ERC1967Proxy(address(implementationAd), initDataAd);
+        console.log("Creating ERC1967Proxy for CryptolottoAd...");
+        ERC1967Proxy proxyAd = new ERC1967Proxy(
+            address(implementationAd),
+            initDataAd
+        );
+        console.log("CryptolottoAd proxy created at:", address(proxyAd));
 
         // Cast proxies to their respective types
+        console.log("Casting proxies to contract types...");
         lottery1Day = Cryptolotto1Day(payable(address(proxy1Day)));
         lottery7Days = Cryptolotto7Days(payable(address(proxy7Days)));
         lotteryAd = CryptolottoAd(payable(address(proxyAd)));
+        console.log("Proxy casting completed successfully");
+
+        console.log("Lottery contracts deployment completed");
     }
 
     function _setupContracts() internal {
+        console.log("Setting up contracts...");
+
         // Set registry for lottery contracts (needed after initialization)
+        console.log("Setting registry for lottery contracts...");
         lottery1Day.setRegistry(address(registry));
         lottery7Days.setRegistry(address(registry));
         lotteryAd.setRegistry(address(registry));
+        console.log("Registry set for all lottery contracts");
 
         // Set treasury names for lottery contracts (registry is already set in initialize)
+        console.log("Setting treasury names...");
         lottery1Day.setTreasuryName("unique_test_lottery_1day");
         lottery7Days.setTreasuryName("unique_test_lottery_7days");
         lotteryAd.setTreasuryName("unique_test_lottery_ad");
+        console.log("Treasury names set");
 
         // Set AdToken for Ad Lottery
+        console.log("Setting AdToken for Ad Lottery...");
         lotteryAd.setAdToken(address(adToken));
+        console.log("AdToken set");
 
         // Set test mode for easier testing
+        console.log("Setting test mode...");
         lottery1Day.setTestMode(true);
         lottery7Days.setTestMode(true);
         lotteryAd.setTestMode(true);
+        console.log("Test mode enabled for all contracts");
+
+        console.log("Contract setup completed successfully");
     }
 
     function _registerContracts() internal {
         // Register contracts in registry
-        string[] memory names = new string[](8);
-        address[] memory contracts = new address[](8);
+        string[] memory names = new string[](9);
+        address[] memory contracts = new address[](9);
 
         names[0] = "TreasuryManager";
         names[1] = "CryptolottoReferral";
@@ -159,6 +267,7 @@ contract DeployScript is Script {
         names[5] = "AdToken";
         names[6] = "Cryptolotto1Day";
         names[7] = "Cryptolotto7Days";
+        names[8] = "CryptolottoAd";
 
         contracts[0] = address(treasuryManager);
         contracts[1] = address(referral);
@@ -167,13 +276,14 @@ contract DeployScript is Script {
         contracts[4] = address(ownable);
         contracts[5] = address(adToken);
         contracts[6] = address(lottery1Day);
-        contracts[7] = address(lotteryAd);
+        contracts[7] = address(lottery7Days);
+        contracts[8] = address(lotteryAd);
 
         registry.registerBatchContracts(names, contracts);
     }
 
     function _logDeploymentSummary() internal {
-        address deployer = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+        address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
 
         // Log deployed addresses
         console.log("=== DEPLOYMENT SUMMARY ===");
