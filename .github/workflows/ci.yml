@@ -298,7 +298,7 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
-          forge script script/Deploy.s.sol --broadcast --verify
+          forge script script/Deploy.s.sol --broadcast
 
       - name: Read deployment addresses
         id: addresses
