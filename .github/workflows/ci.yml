@@ -305,7 +305,20 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
-          forge script script/Deploy.s.sol --broadcast
+          echo "Starting deployment to Verychain..."
+          echo "Network: Verychain (Chain ID: 4613)"
+          echo "RPC URL: https://rpc.verylabs.io"
+          echo "Explorer: https://veryscan.io"
+          
+          # Deploy with error handling
+          if forge script script/Deploy.s.sol --broadcast; then
+            echo "✅ Deployment successful"
+            echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
+          else
+            echo "❌ Deployment failed"
+            echo "DEPLOYMENT_STATUS=failed" >> $GITHUB_ENV
+            exit 1
+          fi
 
       - name: Read deployment addresses
         id: addresses
