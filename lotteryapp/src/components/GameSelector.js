@@ -79,6 +79,11 @@ const GameSelector = ({ onGameSelect }) => {
     const loadGameInfos = async () => {
       for (const game of games) {
         if (game.address) {
+          console.log(`Loading game info for ${game.title}:`);
+          console.log(`- Game Type: ${game.gameType}`);
+          console.log(`- Contract Address: ${game.address}`);
+          console.log(`- Environment Variable: ${process.env[`REACT_APP_${game.gameType}`]}`);
+          
           setLoading(prev => ({ ...prev, [game.id]: true }));
           try {
             // Create contract instance manually instead of using hook in loop
@@ -94,6 +99,7 @@ const GameSelector = ({ onGameSelect }) => {
             ];
             
             const contract = new ethers.Contract(game.address, contractInterface, provider);
+            console.log(`- Contract instance created for address: ${contract.address}`);
             
             // Get game info using actual functions
             const [gameNumber, playerCount, jackpot, gameConfig] = await Promise.all([

@@ -102,7 +102,7 @@ const LotteryDashBoard = ({ selectedGame }) => {
       <LotteryStats selectedGame={selectedGame} gameInfo={gameInfo} />
 
       {/* Lottery Listing */}
-      <LotteryListing selectedGame={selectedGame} gameInfo={gameInfo} />
+              <LotteryListing selectedGame={selectedGame} />
     </VStack>
   );
 };

@@ -1,5 +1,7 @@
 // Contract Addresses Management
 const getContractAddress = (contractName) => {
+  console.log(`getContractAddress called with: ${contractName}`);
+  
   const addresses = {
     CRYPTOLOTTO_1DAY: process.env.REACT_APP_CRYPTOLOTTO_1DAY,
     CRYPTOLOTTO_7DAYS: process.env.REACT_APP_CRYPTOLOTTO_7DAYS,
@@ -13,11 +15,15 @@ const getContractAddress = (contractName) => {
     OWNABLE: process.env.REACT_APP_OWNABLE,
   };
 
+  console.log(`Environment variables:`, addresses);
+  
   const address = addresses[contractName];
   if (!address) {
     console.warn(`Contract address not found for: ${contractName}`);
     return null;
   }
+  
+  console.log(`Returning address for ${contractName}: ${address}`);
   return address;
 };
 

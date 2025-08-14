@@ -1,22 +1,28 @@
 import { useCallback, useMemo } from 'react';
-import * as wagmi from 'wagmi';
-import { useProvider, useSigner } from 'wagmi';
-import { useDispatch } from 'react-redux';
 import { ethers } from 'ethers';
-import { getContractAddress, GAME_TYPES } from '../utils/contractAddresses';
-import { startAction, stopAction, errorAction } from '../redux/reducers/uiActions';
+import { useMetaMaskAccount } from '../context/AccountContext';
+import { getContractAddress } from '../utils/contractAddresses';
 
 const useGameContract = (gameType) => {
-  const dispatch = useDispatch();
-  const [signer] = useSigner();
-  const provider = useProvider();
+  const { connected, connectedAddr } = useMetaMaskAccount();
+  
+  const contractAddress = getContractAddress(gameType);
+  
+  // Create provider and signer
+  const provider = useMemo(() => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      return new ethers.providers.Web3Provider(window.ethereum);
+    }
+    return new ethers.providers.JsonRpcProvider(process.env.REACT_APP_PROVIDER_URL || 'https://rpc.verylabs.io');
+  }, []);
 
-  // Get contract address based on game type
-  const contractAddress = useMemo(() => {
-    return getContractAddress(gameType);
-  }, [gameType]);
+  const signer = useMemo(() => {
+    if (provider && typeof window !== 'undefined' && window.ethereum) {
+      return provider.getSigner();
+    }
+    return null;
+  }, [provider]);
 
-  // Contract interface for actual contract functions
   const contractInterface = [
     // Game functions
     "function buyTicket(address referrer, uint256 ticketCount) payable",
@@ -31,16 +37,25 @@ const useGameContract = (gameType) => {
     "event WinnerSelected(address indexed winner, uint256 indexed gameNumber, uint256 jackpot, uint256 playerCount, uint256 timestamp)"
   ];
 
-  const contractConfig = useMemo(() => ({
-    addressOrName: contractAddress,
-    contractInterface: contractInterface,
-    signerOrProvider: signer.data || provider
-  }), [contractAddress, signer.data, provider]);
-
-  const contract = wagmi.useContract(contractConfig);
+  const contract = useMemo(() => {
+    if (!contractAddress) return null;
+    
+    try {
+      if (signer) {
+        return new ethers.Contract(contractAddress, contractInterface, signer);
+      } else {
+        return new ethers.Contract(contractAddress, contractInterface, provider);
+      }
+    } catch (error) {
+      console.error('Error creating contract instance:', error);
+      return null;
+    }
+  }, [contractAddress, contractInterface, signer, provider]);
 
   // Get current game info using actual functions
   const getCurrentGameInfo = useCallback(async () => {
+    if (!contract) return null;
+    
     try {
       const [gameNumber, playerCount, jackpot, gameConfig] = await Promise.all([
         contract.getCurrentGameNumber(),
@@ -64,6 +79,8 @@ const useGameContract = (gameType) => {
 
   // Get game configuration using actual functions
   const getGameConfiguration = useCallback(async () => {
+    if (!contract) return null;
+    
     try {
       const gameConfig = await contract.getGameConfig();
       
@@ -81,6 +98,8 @@ const useGameContract = (gameType) => {
 
   // Get player info
   const getPlayerInfo = useCallback(async (playerAddress) => {
+    if (!contract) return null;
+    
     try {
       const playerInfo = await contract.getPlayerInfo(playerAddress);
       return {
@@ -96,6 +115,8 @@ const useGameContract = (gameType) => {
 
   // Buy ticket
   const buyTicket = useCallback(async (referrer, ticketCount, value) => {
+    if (!contract) throw new Error('Contract not initialized');
+    
     try {
       const tx = await contract.buyTicket(referrer, ticketCount, { value });
       return tx;

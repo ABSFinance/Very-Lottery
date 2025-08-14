@@ -15,10 +15,27 @@ const provider = providers.getDefaultProvider(process.env.REACT_APP_PROVIDER_URL
   alchemy: process.env.REACT_APP_ALCHEMY_KEY
 } */);
 
+// Define Verychain network configuration
+const verychainNetwork = {
+  id: 4613,
+  name: 'Verychain',
+  network: 'verychain',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'VERY',
+    symbol: 'VERY',
+  },
+  rpcUrls: {
+    default: process.env.REACT_APP_PROVIDER_URL || 'https://rpc.verylabs.io',
+  },
+  blockExplorers: {
+    default: { name: 'VeryScan', url: 'https://veryscan.io' },
+  },
+};
 
 const connector = [
   new InjectedConnector({
-    chains: defaultChains.filter(c => c.id === 4613),
+    chains: [verychainNetwork],
     //options: { shimDisconnect: true }
   })
 ]
