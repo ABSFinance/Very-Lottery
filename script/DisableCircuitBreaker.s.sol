@@ -13,17 +13,11 @@ contract DisableCircuitBreaker is Script {
         console.log("Deployer address:", deployer);
 
         // Circuit Breaker 계약 주소 (배포 후 수동으로 설정 필요)
-        address circuitBreakerAddress = vm.envAddress(
-            "CIRCUIT_BREAKER_ADDRESS"
-        );
+        address circuitBreakerAddress = vm.envAddress("CIRCUIT_BREAKER_ADDRESS");
 
         if (circuitBreakerAddress == address(0)) {
-            console.log(
-                "ERROR: CIRCUIT_BREAKER_ADDRESS not set in environment"
-            );
-            console.log(
-                "Please set the deployed CircuitBreaker contract address"
-            );
+            console.log("ERROR: CIRCUIT_BREAKER_ADDRESS not set in environment");
+            console.log("Please set the deployed CircuitBreaker contract address");
             return;
         }
 
@@ -46,9 +40,7 @@ contract DisableCircuitBreaker is Script {
                 console.log("Transactions should now work normally");
             } else {
                 console.log("WARNING: Circuit Breaker is still ENABLED");
-                console.log(
-                    "You may need to call toggleCircuitBreaker() again"
-                );
+                console.log("You may need to call toggleCircuitBreaker() again");
             }
         } catch Error(string memory reason) {
             console.log("Failed to toggle Circuit Breaker:");

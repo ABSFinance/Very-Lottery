@@ -32,9 +32,7 @@ contract DeployCircuitBreaker is Script {
 
         if (isEnabled) {
             console.log("WARNING: Circuit Breaker is ENABLED by default");
-            console.log(
-                "You can now disable it using the DisableCircuitBreaker script"
-            );
+            console.log("You can now disable it using the DisableCircuitBreaker script");
         }
 
         console.log("=== DEPLOYMENT COMPLETE ===");
