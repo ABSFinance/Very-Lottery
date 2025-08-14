@@ -19,81 +19,37 @@ import "../contracts/shared/storage/StorageLayout.sol";
 
 contract CryptolottoTest is Test {
     // Event definitions for testing
-    event TicketPurchased(
-        address indexed _address,
-        uint256 indexed _game,
-        uint256 _number,
-        uint256 _time
-    );
+    event TicketPurchased(address indexed _address, uint256 indexed _game, uint256 _number, uint256 _time);
 
-    event TicketPriceChanged(
-        uint256 _oldPrice,
-        uint256 _newPrice,
-        uint256 _time
-    );
+    event TicketPriceChanged(uint256 _oldPrice, uint256 _newPrice, uint256 _time);
 
     event GameStatusChanged(bool _isActive, uint256 _time);
 
     // 새로운 이벤트 정의들
     event WinnerSelected(
-        address indexed winner,
-        uint256 indexed gameNumber,
-        uint256 jackpot,
-        uint256 playerCount,
-        uint256 timestamp
+        address indexed winner, uint256 indexed gameNumber, uint256 jackpot, uint256 playerCount, uint256 timestamp
     );
 
-    event GameEnded(
-        uint256 indexed gameNumber,
-        uint256 totalPlayers,
-        uint256 totalJackpot,
-        uint256 timestamp
-    );
+    event GameEnded(uint256 indexed gameNumber, uint256 totalPlayers, uint256 totalJackpot, uint256 timestamp);
 
-    event JackpotDistributed(
-        address indexed winner,
-        uint256 amount,
-        uint256 indexed gameNumber,
-        uint256 timestamp
-    );
+    event JackpotDistributed(address indexed winner, uint256 amount, uint256 indexed gameNumber, uint256 timestamp);
 
     event EmergencyPaused(address indexed by, string reason, uint256 timestamp);
 
     event EmergencyResumed(address indexed by, uint256 timestamp);
 
-    event MaxTicketsPerPlayerUpdated(
-        uint256 oldValue,
-        uint256 newValue,
-        uint256 timestamp
-    );
+    event MaxTicketsPerPlayerUpdated(uint256 oldValue, uint256 newValue, uint256 timestamp);
 
-    event GameDurationUpdated(
-        uint256 oldValue,
-        uint256 newValue,
-        uint256 timestamp
-    );
+    event GameDurationUpdated(uint256 oldValue, uint256 newValue, uint256 timestamp);
 
     // Ad Lottery 이벤트들
     event AdTicketPurchased(
-        address indexed player,
-        uint256 ticketCount,
-        uint256 adTokensUsed,
-        uint256 gameNumber,
-        uint256 timestamp
+        address indexed player, uint256 ticketCount, uint256 adTokensUsed, uint256 gameNumber, uint256 timestamp
     );
 
-    event AdLotteryWinnerSelected(
-        address indexed winner,
-        uint256 prizeAmount,
-        uint256 gameNumber,
-        uint256 timestamp
-    );
+    event AdLotteryWinnerSelected(address indexed winner, uint256 prizeAmount, uint256 gameNumber, uint256 timestamp);
 
-    event AdLotteryFeeUpdated(
-        uint256 oldFee,
-        uint256 newFee,
-        uint256 timestamp
-    );
+    event AdLotteryFeeUpdated(uint256 oldFee, uint256 newFee, uint256 timestamp);
 
     // 이더 수신을 위한 fallback/receive
     receive() external payable {}
@@ -124,55 +80,29 @@ contract CryptolottoTest is Test {
 
     // ===== HELPER FUNCTIONS =====
 
-    function _buyTicketAndFundTreasury(
-        Cryptolotto1Day lottery,
-        address player,
-        uint256 ticketCount
-    ) internal {
+    function _buyTicketAndFundTreasury(Cryptolotto1Day lottery, address player, uint256 ticketCount) internal {
         vm.deal(player, 10 ether);
         vm.prank(player);
-        (uint256 ticketPrice, , , ) = lottery.getGameConfig();
-        lottery.buyTicket{value: ticketPrice * ticketCount}(
-            address(0),
-            ticketCount
-        );
+        (uint256 ticketPrice,,,) = lottery.getGameConfig();
+        lottery.buyTicket{value: ticketPrice * ticketCount}(address(0), ticketCount);
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
-    function _buyTicketAndFundTreasury7Days(
-        Cryptolotto7Days lottery,
-        address player,
-        uint256 ticketCount
-    ) internal {
+    function _buyTicketAndFundTreasury7Days(Cryptolotto7Days lottery, address player, uint256 ticketCount) internal {
         vm.deal(player, 10 ether);
         vm.prank(player);
-        (uint256 ticketPrice, , , ) = lottery.getGameConfig();
-        lottery.buyTicket{value: ticketPrice * ticketCount}(
-            address(0),
-            ticketCount
-        );
+        (uint256 ticketPrice,,,) = lottery.getGameConfig();
+        lottery.buyTicket{value: ticketPrice * ticketCount}(address(0), ticketCount);
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
-    function _buyAdTicketAndFundTreasury(
-        CryptolottoAd lottery,
-        address player,
-        uint256 ticketCount
-    ) internal {
+    function _buyAdTicketAndFundTreasury(CryptolottoAd lottery, address player, uint256 ticketCount) internal {
         // Fund player with Ad Tokens
         uint256 adTokensNeeded = ticketCount * 1 ether; // 1 AD Token per ticket
         adToken.transfer(player, adTokensNeeded);
@@ -183,54 +113,41 @@ contract CryptolottoTest is Test {
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function _endGameAndStartNew(Cryptolotto1Day lottery) internal {
-        (, , uint256 gameDuration, ) = lottery.getGameConfig();
+        (,, uint256 gameDuration,) = lottery.getGameConfig();
         vm.warp(block.timestamp + gameDuration + 1);
         // checkAndEndGame 함수가 없으므로 시간만 변경
     }
 
     function _endGameAndStartNew7Days(Cryptolotto7Days lottery) internal {
-        (, , uint256 gameDuration, ) = lottery.getGameConfig();
+        (,, uint256 gameDuration,) = lottery.getGameConfig();
         vm.warp(block.timestamp + gameDuration + 1);
         // checkAndEndGame 함수가 없으므로 시간만 변경
     }
 
-    function _endAdGameAndStartNew(CryptolottoAd /* lottery */) internal {
+    function _endAdGameAndStartNew(CryptolottoAd /* lottery */ ) internal {
         // Ad 게임 종료 및 새 게임 시작 로직
         vm.warp(block.timestamp + 1 days);
     }
 
-    function _setupGameWithPlayers(
-        Cryptolotto1Day lottery,
-        uint256 playerCount
-    ) internal {
+    function _setupGameWithPlayers(Cryptolotto1Day lottery, uint256 playerCount) internal {
         for (uint256 i = 0; i < playerCount; i++) {
             address player = address(uint160(0x1000 + i));
             _buyTicketAndFundTreasury(lottery, player, 1);
         }
     }
 
-    function _setupGameWithPlayers7Days(
-        Cryptolotto7Days lottery,
-        uint256 playerCount
-    ) internal {
+    function _setupGameWithPlayers7Days(Cryptolotto7Days lottery, uint256 playerCount) internal {
         for (uint256 i = 0; i < playerCount; i++) {
             address player = address(uint160(0x2000 + i));
             _buyTicketAndFundTreasury7Days(lottery, player, 1);
         }
     }
 
-    function _setupAdGameWithPlayers(
-        CryptolottoAd lottery,
-        uint256 playerCount
-    ) internal {
+    function _setupAdGameWithPlayers(CryptolottoAd lottery, uint256 playerCount) internal {
         for (uint256 i = 0; i < playerCount; i++) {
             address player = address(uint160(0x3000 + i));
             uint256 adTokensNeeded = 2 ether; // 2 tickets per player
@@ -249,11 +166,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury for jackpot distribution
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function setUp() public {
@@ -288,10 +201,7 @@ contract CryptolottoTest is Test {
         contractAddresses[4] = address(ownable);
         contractAddresses[5] = address(adToken);
 
-        contractRegistry.registerBatchContracts(
-            contractNames,
-            contractAddresses
-        );
+        contractRegistry.registerBatchContracts(contractNames, contractAddresses);
 
         // Debug: Print registered contracts
         emit log_string("Registered contracts:");
@@ -326,10 +236,7 @@ contract CryptolottoTest is Test {
 
         // Create additional treasury for specific tests
         vm.prank(treasuryOwner);
-        treasuryManager.createTreasury(
-            "unique_test_lottery_1day",
-            100000 ether
-        );
+        treasuryManager.createTreasury("unique_test_lottery_1day", 100000 ether);
 
         emit log_string("Unique test treasury created");
 
@@ -377,24 +284,15 @@ contract CryptolottoTest is Test {
         emit log_string("Init data prepared");
 
         // Deploy proxies
-        ERC1967Proxy proxy1Day = new ERC1967Proxy(
-            address(implementation1Day),
-            initData1Day
-        );
+        ERC1967Proxy proxy1Day = new ERC1967Proxy(address(implementation1Day), initData1Day);
 
         emit log_string("Proxy 1Day deployed");
 
-        ERC1967Proxy proxy7Days = new ERC1967Proxy(
-            address(implementation7Days),
-            initData7Days
-        );
+        ERC1967Proxy proxy7Days = new ERC1967Proxy(address(implementation7Days), initData7Days);
 
         emit log_string("Proxy 7Days deployed");
 
-        ERC1967Proxy proxyAd = new ERC1967Proxy(
-            address(implementationAd),
-            initDataAd
-        );
+        ERC1967Proxy proxyAd = new ERC1967Proxy(address(implementationAd), initDataAd);
 
         emit log_string("Proxy Ad deployed");
 
@@ -458,11 +356,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Approve Ad Tokens and buy tickets
         vm.prank(player1);
@@ -478,11 +372,7 @@ contract CryptolottoTest is Test {
         uint256 jackpot = lotteryAd.getCurrentGameJackpot();
         // uint256 gamePlayerCount = lotteryAd.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lotteryAd.getCurrentGameState();
-        assertEq(
-            jackpot,
-            expectedJackpot,
-            "Jackpot should equal fixed fee only"
-        );
+        assertEq(jackpot, expectedJackpot, "Jackpot should equal fixed fee only");
         // Ad Lottery에서는 Ad Token은 소각되고, 오직 고정 수수료만 잭팟에 추가됨
     }
 
@@ -508,11 +398,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Player approves and buys tickets (Ad Tokens will be burned)
         vm.prank(player1);
@@ -523,11 +409,7 @@ contract CryptolottoTest is Test {
 
         // Check lottery contract has no Ad Tokens (they were burned)
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
 
         // Check player has no Ad Tokens left
         uint256 playerBalance = adToken.balanceOf(player1);
@@ -570,11 +452,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.prank(player1);
         adToken.approve(address(lotteryAd), adTokensNeeded);
@@ -593,11 +471,7 @@ contract CryptolottoTest is Test {
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
     }
 
     function testAdLotteryWinnerSelection() public {
@@ -611,11 +485,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Fund each player with Ad Tokens and buy tickets
         for (uint256 i = 0; i < playerCount; i++) {
@@ -661,18 +531,11 @@ contract CryptolottoTest is Test {
 
         // Verify winner was selected (should be one of the players)
         address winner = _getWinnerFromEvent();
-        assertTrue(
-            winner == player1 || winner == player2 || winner == player3,
-            "Winner should be one of the players"
-        );
+        assertTrue(winner == player1 || winner == player2 || winner == player3, "Winner should be one of the players");
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
     }
 
     function testAdLotteryFeeProcessing() public {
@@ -686,11 +549,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -706,19 +565,11 @@ contract CryptolottoTest is Test {
         uint256 jackpot = lotteryAd.getCurrentGameJackpot();
         // uint256 gamePlayerCount = lotteryAd.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lotteryAd.getCurrentGameState();
-        assertEq(
-            jackpot,
-            expectedJackpot,
-            "Jackpot should equal fixed fee only"
-        );
+        assertEq(jackpot, expectedJackpot, "Jackpot should equal fixed fee only");
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
     }
 
     function testAdLotteryPrizeDistribution() public {
@@ -730,11 +581,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket
         vm.prank(player1);
@@ -755,11 +602,7 @@ contract CryptolottoTest is Test {
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
     }
 
     function testAdLotteryGameState() public {
@@ -771,11 +614,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket
         vm.prank(player1);
@@ -796,11 +635,7 @@ contract CryptolottoTest is Test {
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
     }
 
     function testAdLotteryEmergencyFunctions() public {
@@ -812,11 +647,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Emergency pause
         vm.prank(owner);
@@ -850,11 +681,7 @@ contract CryptolottoTest is Test {
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
     }
 
     function testAdLotteryInfoQueries() public view {
@@ -897,11 +724,7 @@ contract CryptolottoTest is Test {
         lotteryAd.withdrawAdTokens(withdrawalAmount);
         uint256 ownerBalanceAfter = adToken.balanceOf(owner);
 
-        assertEq(
-            ownerBalanceAfter - ownerBalanceBefore,
-            withdrawalAmount,
-            "Owner should receive withdrawn tokens"
-        );
+        assertEq(ownerBalanceAfter - ownerBalanceBefore, withdrawalAmount, "Owner should receive withdrawn tokens");
     }
 
     function testAdLotteryFeeUpdate() public {
@@ -918,8 +741,7 @@ contract CryptolottoTest is Test {
         lotteryAd.setAdLotteryFee(newFee);
 
         // Verify fee was updated
-        (, , , , uint256 adLotteryFeePercent, , ) = lotteryAd
-            .getAdLotteryInfo();
+        (,,,, uint256 adLotteryFeePercent,,) = lotteryAd.getAdLotteryInfo();
         assertEq(adLotteryFeePercent, newFee, "Fee should be updated");
     }
 
@@ -930,11 +752,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Fund players and buy tickets
         for (uint256 i = 0; i < playerCount; i++) {
@@ -968,11 +786,7 @@ contract CryptolottoTest is Test {
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
 
         // Fast forward time to end the game
         vm.warp(block.timestamp + 1 days + 1);
@@ -989,10 +803,7 @@ contract CryptolottoTest is Test {
 
         // Verify winner was selected
         address winner = _getWinnerFromEvent();
-        assertTrue(
-            winner == player1 || winner == player2,
-            "Winner should be one of the players"
-        );
+        assertTrue(winner == player1 || winner == player2, "Winner should be one of the players");
     }
 
     function testAdLotteryBatchPurchase() public {
@@ -1010,11 +821,7 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Approve and buy batch
         vm.prank(player1);
@@ -1035,11 +842,7 @@ contract CryptolottoTest is Test {
 
         // Verify Ad Tokens were burned
         uint256 lotteryBalance = lotteryAd.getAdTokenBalance();
-        assertEq(
-            lotteryBalance,
-            0,
-            "Ad Tokens should be burned after purchase"
-        );
+        assertEq(lotteryBalance, 0, "Ad Tokens should be burned after purchase");
     }
 
     // ===== EXISTING TESTS (KEEP ALL EXISTING TESTS) =====
@@ -1049,15 +852,11 @@ contract CryptolottoTest is Test {
         vm.deal(player1, 1 ether);
         vm.prank(player1);
 
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
 
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 티켓 구매 시도 - 이벤트를 확인하기 위해
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
@@ -1077,12 +876,8 @@ contract CryptolottoTest is Test {
         // emit log_named_uint("Initial game state", uint256(initialState));
 
         // 게임 시작 전 상태
-        (
-            uint256 ticketPrice,
-            uint256 gameDuration,
-            uint256 maxTicketsPerPlayer,
-            bool isActive
-        ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive) =
+            lottery1Day.getGameConfig();
         emit log_named_uint("Ticket price", ticketPrice);
         emit log_named_uint("Game duration", gameDuration);
         emit log_named_uint("Max tickets per player", maxTicketsPerPlayer);
@@ -1090,11 +885,7 @@ contract CryptolottoTest is Test {
 
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 게임을 시작하기 위해 티켓을 구매
         uint256 requiredValue = ticketPrice * 1; // 1 티켓
@@ -1134,7 +925,7 @@ contract CryptolottoTest is Test {
         vm.deal(player1, 1 ether);
         vm.prank(player1);
 
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
         emit log_named_uint("Ticket price", ticketPrice);
 
         // 초기 게임 상태 확인
@@ -1143,17 +934,12 @@ contract CryptolottoTest is Test {
         // uint256 initialEndTime = lottery1Day.getCurrentGameEndTime();
         // uint256 initialJackpot = lottery1Day.getCurrentGameJackpot();
         // uint256 initialPlayerCount = lottery1Day.getCurrentGamePlayerCount();
-        StorageLayout.GameState initialState = lottery1Day
-            .getCurrentGameState();
+        StorageLayout.GameState initialState = lottery1Day.getCurrentGameState();
         emit log_named_uint("Initial game state", uint256(initialState));
 
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 티켓 구매 시도
         vm.prank(player1);
@@ -1179,21 +965,13 @@ contract CryptolottoTest is Test {
 
     function testStorageAccess() public {
         // 스토리지 접근이 제대로 작동하는지 테스트
-        (
-            uint256 ticketPrice,
-            uint256 gameDuration,
-            uint256 maxTicketsPerPlayer,
-            bool isActive
-        ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive) =
+            lottery1Day.getGameConfig();
 
         // 기본값 확인
         assertEq(ticketPrice, 0.01 ether, "Ticket price should be 0.01 ether");
         assertEq(gameDuration, 1 days, "Game duration should be 1 day");
-        assertEq(
-            maxTicketsPerPlayer,
-            100,
-            "Max tickets per player should be 100"
-        );
+        assertEq(maxTicketsPerPlayer, 100, "Max tickets per player should be 100");
         assertTrue(isActive, "Game should be active");
 
         // 게임 정보 확인
@@ -1210,12 +988,8 @@ contract CryptolottoTest is Test {
 
     function testInitialState() public view {
         // Test initial state using new getGameConfig() function
-        (
-            uint256 ticketPrice,
-            uint256 gameDuration,
-            uint256 maxTicketsPerPlayer,
-            bool isActive
-        ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive) =
+            lottery1Day.getGameConfig();
         assertEq(ticketPrice, 0.01 ether);
         assertEq(maxTicketsPerPlayer, 100); // 실제 초기화 값으로 수정
         assertTrue(isActive);
@@ -1226,16 +1000,12 @@ contract CryptolottoTest is Test {
     function testBuyTicket() public {
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.prank(address(this)); // Use test contract as owner
 
         // Buy a ticket using new getGameConfig()
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
 
         // Check state - 새로운 스토리지 구조에 맞게 수정 필요
@@ -1253,17 +1023,13 @@ contract CryptolottoTest is Test {
     function testBuyMultipleTickets() public {
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.deal(player1, 1 ether);
 
         // Buy 5 tickets
         vm.prank(player1);
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
         lottery1Day.buyTicket{value: ticketPrice * 5}(address(0), 5); // 5 * 0.01 ether = 0.05 ether
 
         // Check state using new storage structure
@@ -1293,7 +1059,7 @@ contract CryptolottoTest is Test {
 
     function testBuyMultipleTickets7Days() public {
         vm.prank(address(this)); // Use test contract as owner
-        (uint256 ticketPrice, , , ) = lottery7Days.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery7Days.getGameConfig();
         lottery7Days.buyTicket{value: ticketPrice * 3}(address(0), 3); // 3 * 0.01 ether = 0.03 ether
 
         // When same player buys multiple tickets, player count should be 1 (unique players)
@@ -1310,14 +1076,10 @@ contract CryptolottoTest is Test {
     function testBuyMultipleTicketsSamePlayer() public {
         // Fund treasury first
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy 1 ticket first
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
 
         // Buy 3 more tickets (this will trigger auto game end and start new game)
@@ -1345,7 +1107,7 @@ contract CryptolottoTest is Test {
 
         // Buy 5 tickets with referral
         vm.prank(player2);
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
         lottery1Day.buyTicket{value: ticketPrice * 5}(address(0x1), 5); // 5 * 0.01 ether = 0.05 ether
 
         // Check game state using new storage structure
@@ -1362,8 +1124,8 @@ contract CryptolottoTest is Test {
         vm.prank(address(this)); // Use test contract as owner
 
         // Send ETH directly to contract (fallback) - should only buy 1 ticket
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
-        (bool success, ) = address(lottery1Day).call{value: ticketPrice}("");
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
+        (bool success,) = address(lottery1Day).call{value: ticketPrice}("");
         assertTrue(success);
 
         // Check ticket was bought (fallback only buys 1 ticket)
@@ -1386,18 +1148,14 @@ contract CryptolottoTest is Test {
 
     function testBuyTicketGameInactive() public {
         vm.prank(address(this));
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         // Treasury 잔액 보강
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 게임을 강제로 종료시켜 새 게임을 시작
-        (, , uint256 gameDuration, ) = lottery1Day.getGameConfig();
+        (,, uint256 gameDuration,) = lottery1Day.getGameConfig();
         vm.warp(block.timestamp + gameDuration + 100000); // Add much more time to ensure expiration
 
         // Check remaining time is 0
@@ -1408,39 +1166,29 @@ contract CryptolottoTest is Test {
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery1Day.getCurrentGameState();
         uint256 endTime = lottery1Day.getCurrentGameEndTime();
-        uint256 remainingTime = endTime > block.timestamp
-            ? endTime - block.timestamp
-            : 0;
+        uint256 remainingTime = endTime > block.timestamp ? endTime - block.timestamp : 0;
         assertEq(remainingTime, 0);
     }
 
     function testChangeTicketPrice() public view {
         // setTicketPrice 함수가 제거되었으므로 다른 방법으로 테스트
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
-        assertEq(
-            ticketPrice,
-            0.01 ether,
-            "Initial ticket price should be 0.01 ether"
-        );
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
+        assertEq(ticketPrice, 0.01 ether, "Initial ticket price should be 0.01 ether");
     }
 
     function testGameToggle() public view {
-        (, , , bool isActive) = lottery1Day.getGameConfig();
+        (,,, bool isActive) = lottery1Day.getGameConfig();
         assertTrue(isActive, "Game should be active by default");
     }
 
     function testGameDurationUpdatedEvent() public view {
-        (, , uint256 gameDuration, ) = lottery1Day.getGameConfig();
+        (,, uint256 gameDuration,) = lottery1Day.getGameConfig();
         assertEq(gameDuration, 100, "Game duration should be 100 seconds");
     }
 
     function testMaxTicketsPerPlayerUpdatedEvent() public view {
-        (, , uint256 maxTicketsPerPlayer, ) = lottery1Day.getGameConfig();
-        assertEq(
-            maxTicketsPerPlayer,
-            100,
-            "Max tickets per player should be 100"
-        );
+        (,, uint256 maxTicketsPerPlayer,) = lottery1Day.getGameConfig();
+        assertEq(maxTicketsPerPlayer, 100, "Max tickets per player should be 100");
     }
 
     function testWinnerSelectedEvent() public {
@@ -1449,15 +1197,11 @@ contract CryptolottoTest is Test {
         vm.deal(player2, 10 ether);
         vm.deal(player3, 10 ether);
 
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -1467,9 +1211,7 @@ contract CryptolottoTest is Test {
             emit log_string("Player 1 ticket purchase failed");
             emit log_string(reason);
         } catch {
-            emit log_string(
-                "Player 1 ticket purchase failed with unknown error"
-            );
+            emit log_string("Player 1 ticket purchase failed with unknown error");
         }
 
         vm.prank(player2);
@@ -1479,9 +1221,7 @@ contract CryptolottoTest is Test {
             emit log_string("Player 2 ticket purchase failed");
             emit log_string(reason);
         } catch {
-            emit log_string(
-                "Player 2 ticket purchase failed with unknown error"
-            );
+            emit log_string("Player 2 ticket purchase failed with unknown error");
         }
 
         vm.prank(player3);
@@ -1491,9 +1231,7 @@ contract CryptolottoTest is Test {
             emit log_string("Player 3 ticket purchase failed");
             emit log_string(reason);
         } catch {
-            emit log_string(
-                "Player 3 ticket purchase failed with unknown error"
-            );
+            emit log_string("Player 3 ticket purchase failed with unknown error");
         }
 
         // Check initial game state
@@ -1503,11 +1241,7 @@ contract CryptolottoTest is Test {
         uint256 jackpot = lottery1Day.getCurrentGameJackpot();
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         StorageLayout.GameState state = lottery1Day.getCurrentGameState();
-        assertEq(
-            jackpot,
-            ticketPrice * 3,
-            "Jackpot should be 3 * ticket price"
-        );
+        assertEq(jackpot, ticketPrice * 3, "Jackpot should be 3 * ticket price");
         assertEq(uint256(state), 1, "Game should be ACTIVE");
 
         // Fast forward time to end the game (86401 + 1 = 86402)
@@ -1534,25 +1268,18 @@ contract CryptolottoTest is Test {
 
         // Verify winner was selected (should be one of the players)
         address winner = _getWinnerFromEvent();
-        assertTrue(
-            winner == player1 || winner == player2 || winner == player3,
-            "Winner should be one of the players"
-        );
+        assertTrue(winner == player1 || winner == player2 || winner == player3, "Winner should be one of the players");
     }
 
     function testGameEndedEvent() public {
         // Setup game
         vm.deal(player1, 10 ether);
         vm.deal(player2, 10 ether);
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -1572,7 +1299,7 @@ contract CryptolottoTest is Test {
         // assertEq(gamePlayerCount, 2, "Should have 2 players");
 
         // Fast forward time to end the game
-        (, , uint256 gameDuration, ) = lottery1Day.getGameConfig();
+        (,, uint256 gameDuration,) = lottery1Day.getGameConfig();
         vm.warp(block.timestamp + gameDuration + 1);
 
         // Auto end the game (this should trigger game ending and start new game)
@@ -1601,15 +1328,11 @@ contract CryptolottoTest is Test {
 
         // Start a game first
         vm.deal(player1, 10 ether);
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.prank(player1);
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
@@ -1628,15 +1351,11 @@ contract CryptolottoTest is Test {
         // Test jackpot distribution
         vm.deal(player1, 10 ether);
         vm.deal(player2, 10 ether);
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -1652,14 +1371,10 @@ contract CryptolottoTest is Test {
         uint256 jackpot = lottery1Day.getCurrentGameJackpot();
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery1Day.getCurrentGameState();
-        assertEq(
-            jackpot,
-            ticketPrice * 2,
-            "Jackpot should be 2 * ticket price"
-        );
+        assertEq(jackpot, ticketPrice * 2, "Jackpot should be 2 * ticket price");
 
         // Fast forward time to end the game
-        (, , uint256 gameDuration, ) = lottery1Day.getGameConfig();
+        (,, uint256 gameDuration,) = lottery1Day.getGameConfig();
         vm.warp(block.timestamp + gameDuration + 1);
 
         // Auto end the game (this should trigger jackpot distribution and start new game)
@@ -1681,15 +1396,11 @@ contract CryptolottoTest is Test {
     function testEventConsistencyWithNewEvents() public {
         // Test that all new events are properly defined and can be emitted
         vm.deal(player1, 10 ether);
-        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds(
-            "Cryptolotto1Day",
-            address(this),
-            1000 ether
-        );
+        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket and verify game state
         vm.prank(player1);
@@ -1733,11 +1444,7 @@ contract CryptolottoTest is Test {
         // This test verifies that analytics integration is working
 
         // Test stats aggregator
-        assertEq(
-            stats.owner(),
-            address(this),
-            "Stats aggregator owner should be test contract"
-        );
+        assertEq(stats.owner(), address(this), "Stats aggregator owner should be test contract");
 
         // Test that analytics can be updated
         assertTrue(true, "Analytics integration is working");

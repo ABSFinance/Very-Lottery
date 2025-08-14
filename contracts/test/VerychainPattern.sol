@@ -8,10 +8,7 @@ contract VerychainPattern {
 
     // Events
     event ValueSet(address indexed setter, uint256 newValue, uint256 timestamp);
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     // Modifiers
     modifier onlyOwner() {

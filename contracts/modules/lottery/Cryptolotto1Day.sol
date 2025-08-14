@@ -83,10 +83,10 @@ contract Cryptolotto1Day is BaseGame {
 
     function initialize(
         address owner,
-        address /* distributor */,
-        address /* statsA */,
-        address /* referralSystem */,
-        address /* _treasuryManager */,
+        address, /* distributor */
+        address, /* statsA */
+        address, /* referralSystem */
+        address, /* _treasuryManager */
         string memory _treasuryName
     ) public initializer {
         require(owner != address(0), "Invalid owner address");
@@ -121,35 +121,24 @@ contract Cryptolotto1Day is BaseGame {
      */
     function _pickWinner() internal view override returns (address) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = gameStorage.totalGames > 0 ? gameStorage.totalGames - 1 : 0;
         StorageLayout.Game storage game = gameStorage.games[currentGameId];
         require(game.players.length > 0, "No players in game");
 
-        uint256 randomIndex = enhancedRandomNumberSecure(
-            0,
-            game.players.length - 1,
-            block.timestamp
-        );
+        uint256 randomIndex = enhancedRandomNumberSecure(0, game.players.length - 1, block.timestamp);
         return game.players[randomIndex];
     }
 
     /**
      * @dev Process winner payout
      */
-    function _processWinnerPayout(
-        address winner,
-        uint256 amount
-    ) internal override {
+    function _processWinnerPayout(address winner, uint256 amount) internal override {
         if (address(registry) == address(0)) {
             emit TreasuryOperationFailed("payout", block.timestamp);
             return;
         }
 
-        try registry.getContract(treasuryName) returns (
-            address treasuryAddress
-        ) {
+        try registry.getContract(treasuryName) returns (address treasuryAddress) {
             if (treasuryAddress != address(0)) {
                 ITreasuryManager treasury = ITreasuryManager(treasuryAddress);
                 treasury.withdrawFunds(treasuryName, winner, amount);
@@ -169,49 +158,27 @@ contract Cryptolotto1Day is BaseGame {
      */
     function _processFounderDistribution(uint256 amount) internal override {
         if (address(registry) == address(0)) {
-            emit DistributorError(
-                "getContract",
-                "Registry not initialized",
-                block.timestamp
-            );
+            emit DistributorError("getContract", "Registry not initialized", block.timestamp);
             return;
         }
 
-        try registry.getContract("FundsDistributor") returns (
-            address distributorAddress
-        ) {
+        try registry.getContract("FundsDistributor") returns (address distributorAddress) {
             if (distributorAddress == address(0)) {
-                emit DistributorError(
-                    "getContract",
-                    "Distributor contract not found",
-                    block.timestamp
-                );
+                emit DistributorError("getContract", "Distributor contract not found", block.timestamp);
                 return;
             }
 
             try IFundsDistributor(distributorAddress).withdrawAmount(amount) {
                 // Successfully processed
             } catch Error(string memory reason) {
-                emit DistributorError(
-                    "withdrawAmount",
-                    reason,
-                    block.timestamp
-                );
+                emit DistributorError("withdrawAmount", reason, block.timestamp);
             } catch {
-                emit DistributorError(
-                    "withdrawAmount",
-                    "Unknown error",
-                    block.timestamp
-                );
+                emit DistributorError("withdrawAmount", "Unknown error", block.timestamp);
             }
         } catch Error(string memory reason) {
             emit DistributorError("getContract", reason, block.timestamp);
         } catch {
-            emit DistributorError(
-                "getContract",
-                "Unknown registry error",
-                block.timestamp
-            );
+            emit DistributorError("getContract", "Unknown registry error", block.timestamp);
         }
     }
 
@@ -226,23 +193,13 @@ contract Cryptolotto1Day is BaseGame {
         uint256 winnerIndex
     ) internal override {
         if (address(registry) == address(0)) {
-            emit StatsError(
-                "getContract",
-                "Registry not initialized",
-                block.timestamp
-            );
+            emit StatsError("getContract", "Registry not initialized", block.timestamp);
             return;
         }
 
-        try registry.getContract("StatsAggregator") returns (
-            address statsAddress
-        ) {
+        try registry.getContract("StatsAggregator") returns (address statsAddress) {
             if (statsAddress == address(0)) {
-                emit StatsError(
-                    "getContract",
-                    "Stats contract not found",
-                    block.timestamp
-                );
+                emit StatsError("getContract", "Stats contract not found", block.timestamp);
                 return;
             }
 
@@ -253,16 +210,14 @@ contract Cryptolotto1Day is BaseGame {
             uint256 gamePlayerCount = getCurrentGamePlayerCount();
             // StorageLayout.GameState state = getCurrentGameState();
 
-            try
-                ICryptolottoStatsAggregator(statsAddress).newWinner(
-                    winner,
-                    gameNumber,
-                    gamePlayerCount,
-                    amount,
-                    1, // 1 day game type
-                    winnerIndex
-                )
-            {
+            try ICryptolottoStatsAggregator(statsAddress).newWinner(
+                winner,
+                gameNumber,
+                gamePlayerCount,
+                amount,
+                1, // 1 day game type
+                winnerIndex
+            ) {
                 // Successfully processed
             } catch Error(string memory reason) {
                 emit StatsError("newWinner", reason, block.timestamp);
@@ -272,11 +227,7 @@ contract Cryptolotto1Day is BaseGame {
         } catch Error(string memory reason) {
             emit StatsError("getContract", reason, block.timestamp);
         } catch {
-            emit StatsError(
-                "getContract",
-                "Unknown registry error",
-                block.timestamp
-            );
+            emit StatsError("getContract", "Unknown registry error", block.timestamp);
         }
     }
 
@@ -291,13 +242,7 @@ contract Cryptolotto1Day is BaseGame {
         /* playerCount */
         uint256 jackpot
     ) internal override {
-        emit GamePerformanceMetrics(
-            gameNumber,
-            gasUsed,
-            jackpot,
-            jackpot,
-            block.timestamp
-        );
+        emit GamePerformanceMetrics(gameNumber, gasUsed, jackpot, jackpot, block.timestamp);
     }
 
     /**
@@ -305,10 +250,7 @@ contract Cryptolotto1Day is BaseGame {
      * @param player The player address
      * @param eventType The event type
      */
-    function _recordSecurityEvent(
-        address player,
-        string memory eventType
-    ) internal override {
+    function _recordSecurityEvent(address player, string memory eventType) internal override {
         emit GameSecurityEvent(player, eventType, block.timestamp);
     }
 

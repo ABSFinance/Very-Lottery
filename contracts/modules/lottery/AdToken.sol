@@ -96,11 +96,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param reward Amount of utility tokens rewarded
      * @param timestamp Timestamp when ad was watched
      */
-    event AdWatched(
-        address indexed viewer,
-        uint256 indexed reward,
-        uint256 indexed timestamp
-    );
+    event AdWatched(address indexed viewer, uint256 indexed reward, uint256 indexed timestamp);
     /**
      * @notice Emitted when reward amount is updated
      * @param newReward New reward amount in utility tokens
@@ -125,11 +121,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param newMax New max daily reward in utility tokens
      * @param timestamp Timestamp when max daily reward was updated
      */
-    event MaxDailyRewardUpdated(
-        uint256 indexed oldMax,
-        uint256 indexed newMax,
-        uint256 indexed timestamp
-    );
+    event MaxDailyRewardUpdated(uint256 indexed oldMax, uint256 indexed newMax, uint256 indexed timestamp);
 
     /**
      * @notice Constructor for the AdToken utility token contract
@@ -243,9 +235,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @return lastReset Last reset timestamp
      * @return canWatchNow Whether user can watch now
      */
-    function getUserStats(
-        address user
-    )
+    function getUserStats(address user)
         external
         view
         returns (
@@ -353,11 +343,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param from Sender address
      * @param to Recipient address
      */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 /* amount */
-    ) internal virtual override {
+    function _beforeTokenTransfer(address from, address to, uint256 /* amount */ ) internal virtual override {
         // 긴급 정지 확인
         if (emergencyPaused) revert TransferNotAllowed();
         if (from == address(0) && to == address(0)) revert TransferNotAllowed();
@@ -369,10 +355,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param amount Amount of utility tokens to transfer
      * @return bool Success status
      */
-    function transfer(
-        address to,
-        uint256 amount
-    ) public virtual override returns (bool) {
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
         if (emergencyPaused) revert TransferNotAllowed();
 
         // Holder 수 업데이트
@@ -395,11 +378,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param amount Amount of utility tokens to transfer
      * @return bool Success status
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public virtual override returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
         if (emergencyPaused) revert TransferNotAllowed();
 
         // Holder 수 업데이트
@@ -420,10 +399,7 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param burner Address authorized to burn utility tokens
      * @param amount Amount of utility tokens to burn
      */
-    function burnFromAuthorized(
-        address burner,
-        uint256 amount
-    ) external onlyOwner {
+    function burnFromAuthorized(address burner, uint256 amount) external onlyOwner {
         if (burner == address(0)) revert InvalidBurnerAddress();
         if (amount == 0) revert InvalidBurnAmount();
         if (balanceOf(burner) < amount) revert InsufficientBalanceForBurn();

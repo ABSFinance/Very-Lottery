@@ -54,21 +54,14 @@ contract GameFactory is Initializable, OwnableUpgradeable {
      * @param gameType The type of game created
      * @param timestamp The timestamp when the game was created
      */
-    event GameCreated(
-        address indexed gameAddress,
-        GameType indexed gameType,
-        uint256 timestamp
-    );
+    event GameCreated(address indexed gameAddress, GameType indexed gameType, uint256 timestamp);
 
     /**
      * @notice Emitted when a game is deactivated
      * @param gameAddress The address of the deactivated game
      * @param timestamp The timestamp when the game was deactivated
      */
-    event GameDeactivated(
-        address indexed gameAddress,
-        uint256 indexed timestamp
-    );
+    event GameDeactivated(address indexed gameAddress, uint256 indexed timestamp);
 
     // State variables
     /**
@@ -171,9 +164,7 @@ contract GameFactory is Initializable, OwnableUpgradeable {
      * @param gameType The type of game to create
      * @return The address of the created game contract
      */
-    function createGame(
-        GameType gameType
-    ) external onlyOwner returns (address) {
+    function createGame(GameType gameType) external onlyOwner returns (address) {
         address gameAddress;
 
         if (gameType == GameType.ONE_DAY) {
@@ -236,10 +227,7 @@ contract GameFactory is Initializable, OwnableUpgradeable {
             address(registry) // registry address
         );
 
-        ERC1967Proxy proxy = new ERC1967Proxy(
-            sevenDaysImplementation,
-            initData
-        );
+        ERC1967Proxy proxy = new ERC1967Proxy(sevenDaysImplementation, initData);
 
         return address(proxy);
     }
@@ -285,9 +273,7 @@ contract GameFactory is Initializable, OwnableUpgradeable {
      * @param gameAddress The address of the game
      * @return GameInfo structure containing game details
      */
-    function getGameInfo(
-        address gameAddress
-    ) external view returns (GameInfo memory) {
+    function getGameInfo(address gameAddress) external view returns (GameInfo memory) {
         return games[gameAddress];
     }
 
@@ -296,10 +282,7 @@ contract GameFactory is Initializable, OwnableUpgradeable {
      * @param _oneDayImplementation The 1-day game implementation address
      * @param _sevenDaysImplementation The 7-days game implementation address
      */
-    function setImplementations(
-        address _oneDayImplementation,
-        address _sevenDaysImplementation
-    ) external onlyOwner {
+    function setImplementations(address _oneDayImplementation, address _sevenDaysImplementation) external onlyOwner {
         oneDayImplementation = _oneDayImplementation;
         sevenDaysImplementation = _sevenDaysImplementation;
     }
@@ -325,9 +308,7 @@ contract GameFactory is Initializable, OwnableUpgradeable {
      * @param gameType The type of games to retrieve
      * @return Array of game addresses of the specified type
      */
-    function getGamesByType(
-        GameType gameType
-    ) external view returns (address[] memory) {
+    function getGamesByType(GameType gameType) external view returns (address[] memory) {
         uint256 count = 0;
         for (uint256 i = 0; i < allGames.length; ++i) {
             if (games[allGames[i]].gameType == gameType) {

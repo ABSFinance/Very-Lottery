@@ -16,4 +16,4 @@ contract SimpleDeploy is Script {
 
         vm.stopBroadcast();
     }
-} 
+}

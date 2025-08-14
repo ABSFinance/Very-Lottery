@@ -56,10 +56,7 @@ contract CryptolottoPerformance is Test {
 
         uint256 endTime = block.timestamp;
         uint256 duration = endTime - startTime;
-        assertTrue(
-            duration < 10,
-            "Bulk transaction should complete within 10 seconds"
-        );
+        assertTrue(duration < 10, "Bulk transaction should complete within 10 seconds");
     }
 
     /// @dev 메모리 사용량 테스트
@@ -97,15 +94,9 @@ contract CryptolottoPerformance is Test {
         vm.prank(player1);
         try adLottery.buyAdTicket(1) {
             uint256 gasUsed = gasBefore - gasleft();
-            assertTrue(
-                gasUsed < 150000,
-                "AdToken burn should be gas optimized"
-            );
+            assertTrue(gasUsed < 150000, "AdToken burn should be gas optimized");
         } catch {
-            assertTrue(
-                true,
-                "AdToken burn test completed with expected failure"
-            );
+            assertTrue(true, "AdToken burn test completed with expected failure");
         }
     }
 
