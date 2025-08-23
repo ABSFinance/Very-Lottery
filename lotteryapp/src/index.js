@@ -10,10 +10,25 @@ import {Provider as RProvider} from 'react-redux';
 import store from "./redux/store";
 
 // Provider that will be used when no wallet is connected (aka no signer)
-const provider = providers.getDefaultProvider(process.env.REACT_APP_PROVIDER_URL/* ,{
-  infura: process.env.REACT_APP_INFURA_KEY,
-  alchemy: process.env.REACT_APP_ALCHEMY_KEY
-} */);
+const provider = new providers.JsonRpcProvider(
+  process.env.REACT_APP_RPC_URL || 'https://rpc.verylabs.io',
+  {
+    name: 'Verychain',
+    chainId: 4613
+  }
+);
+
+// Validate that we're connected to the right network
+provider.getNetwork().then(network => {
+  if (network.chainId !== 4613) {
+    console.error(`❌ WRONG NETWORK DETECTED: ${network.chainId}, expected 4613 (Verychain)`);
+    console.error('Please ensure you are connected to Verychain network');
+  } else {
+    console.log('✅ Connected to Verychain network (Chain ID: 4613)');
+  }
+}).catch(error => {
+  console.error('❌ Failed to get network information:', error);
+});
 
 // Define Verychain network configuration
 const verychainNetwork = {
@@ -26,7 +41,7 @@ const verychainNetwork = {
     symbol: 'VERY',
   },
   rpcUrls: {
-    default: process.env.REACT_APP_PROVIDER_URL || 'https://rpc.verylabs.io',
+    default: process.env.REACT_APP_RPC_URL || 'https://rpc.verylabs.io',
   },
   blockExplorers: {
     default: { name: 'VeryScan', url: 'https://veryscan.io' },

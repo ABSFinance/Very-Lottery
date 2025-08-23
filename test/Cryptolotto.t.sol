@@ -85,10 +85,6 @@ contract CryptolottoTest is Test {
         vm.prank(player);
         (uint256 ticketPrice,,,) = lottery.getGameConfig();
         lottery.buyTicket{value: ticketPrice * ticketCount}(address(0), ticketCount);
-
-        // Fund treasury for jackpot distribution
-        vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function _buyTicketAndFundTreasury7Days(Cryptolotto7Days lottery, address player, uint256 ticketCount) internal {
@@ -96,10 +92,6 @@ contract CryptolottoTest is Test {
         vm.prank(player);
         (uint256 ticketPrice,,,) = lottery.getGameConfig();
         lottery.buyTicket{value: ticketPrice * ticketCount}(address(0), ticketCount);
-
-        // Fund treasury for jackpot distribution
-        vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function _buyAdTicketAndFundTreasury(CryptolottoAd lottery, address player, uint256 ticketCount) internal {
@@ -110,10 +102,6 @@ contract CryptolottoTest is Test {
         vm.prank(player);
         adToken.approve(address(lottery), adTokensNeeded);
         lottery.buyAdTicket(ticketCount);
-
-        // Fund treasury for jackpot distribution
-        vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function _endGameAndStartNew(Cryptolotto1Day lottery) internal {
@@ -163,10 +151,6 @@ contract CryptolottoTest is Test {
             vm.prank(player);
             lottery.buyAdTicket(2);
         }
-
-        // Fund treasury for jackpot distribution
-        vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
     }
 
     function setUp() public {
@@ -356,7 +340,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Approve Ad Tokens and buy tickets
         vm.prank(player1);
@@ -398,7 +381,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Player approves and buys tickets (Ad Tokens will be burned)
         vm.prank(player1);
@@ -452,7 +434,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.prank(player1);
         adToken.approve(address(lotteryAd), adTokensNeeded);
@@ -485,7 +466,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Fund each player with Ad Tokens and buy tickets
         for (uint256 i = 0; i < playerCount; i++) {
@@ -549,7 +529,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -581,7 +560,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket
         vm.prank(player1);
@@ -614,7 +592,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket
         vm.prank(player1);
@@ -647,7 +624,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Emergency pause
         vm.prank(owner);
@@ -752,7 +728,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Fund players and buy tickets
         for (uint256 i = 0; i < playerCount; i++) {
@@ -821,7 +796,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Approve and buy batch
         vm.prank(player1);
@@ -856,7 +830,6 @@ contract CryptolottoTest is Test {
 
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 티켓 구매 시도 - 이벤트를 확인하기 위해
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
@@ -885,7 +858,6 @@ contract CryptolottoTest is Test {
 
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 게임을 시작하기 위해 티켓을 구매
         uint256 requiredValue = ticketPrice * 1; // 1 티켓
@@ -939,7 +911,6 @@ contract CryptolottoTest is Test {
 
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 티켓 구매 시도
         vm.prank(player1);
@@ -1000,7 +971,6 @@ contract CryptolottoTest is Test {
     function testBuyTicket() public {
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.prank(address(this)); // Use test contract as owner
 
@@ -1023,7 +993,6 @@ contract CryptolottoTest is Test {
     function testBuyMultipleTickets() public {
         // Treasury에 자금 추가
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.deal(player1, 1 ether);
 
@@ -1076,7 +1045,6 @@ contract CryptolottoTest is Test {
     function testBuyMultipleTicketsSamePlayer() public {
         // Fund treasury first
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy 1 ticket first
         (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
@@ -1152,7 +1120,6 @@ contract CryptolottoTest is Test {
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
         // Treasury 잔액 보강
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // 게임을 강제로 종료시켜 새 게임을 시작
         (,, uint256 gameDuration,) = lottery1Day.getGameConfig();
@@ -1201,7 +1168,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -1279,7 +1245,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -1332,7 +1297,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         vm.prank(player1);
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
@@ -1355,7 +1319,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy tickets
         vm.prank(player1);
@@ -1400,7 +1363,6 @@ contract CryptolottoTest is Test {
 
         // Fund treasury
         vm.prank(address(this));
-        treasuryManager.depositFunds("Cryptolotto1Day", address(this), 1000 ether);
 
         // Buy ticket and verify game state
         vm.prank(player1);
@@ -1428,7 +1390,6 @@ contract CryptolottoTest is Test {
 
         // Test deposit
         vm.prank(address(this));
-        treasuryManager.depositFunds(treasuryName, address(this), 100 ether);
 
         // Test withdrawal
         vm.prank(address(this));
@@ -1473,5 +1434,225 @@ contract CryptolottoTest is Test {
         // This is a simplified implementation
         // In a real test, you would capture the event and extract the winner
         return player1; // Placeholder
+    }
+
+    // ===== PLAYER INFO TESTS =====
+
+    function testGetPlayerInfoInitialState() public {
+        // Test getPlayerInfo function for a player who hasn't bought any tickets
+        (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent) = lottery1Day.getPlayerInfo(player1);
+
+        assertEq(ticketCount, 0, "Initial ticket count should be 0");
+        assertEq(lastPurchaseTime, 0, "Initial last purchase time should be 0");
+        assertEq(totalSpent, 0, "Initial total spent should be 0");
+    }
+
+    function testGetPlayerInfoAfterSingleTicketPurchase() public {
+        // Fund treasury first
+        vm.prank(address(this));
+
+        // Get ticket price
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
+
+        // Buy 1 ticket
+        vm.deal(player1, ticketPrice);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
+
+        // Check player info after purchase
+        (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent) = lottery1Day.getPlayerInfo(player1);
+
+        assertEq(ticketCount, 1, "Ticket count should be 1 after buying 1 ticket");
+        assertGt(lastPurchaseTime, 0, "Last purchase time should be greater than 0");
+        assertEq(totalSpent, ticketPrice, "Total spent should equal ticket price");
+    }
+
+    function testGetPlayerInfoAfterMultipleTicketPurchases() public {
+        // Fund treasury first
+        vm.prank(address(this));
+
+        // Get ticket price
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
+
+        // Buy 3 tickets in one transaction
+        uint256 totalTickets = 3;
+        uint256 totalCost = ticketPrice * totalTickets;
+
+        vm.deal(player1, totalCost);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: totalCost}(address(0), totalTickets);
+
+        // Check player info after purchase
+        (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent) = lottery1Day.getPlayerInfo(player1);
+
+        assertEq(ticketCount, totalTickets, "Ticket count should be 3 after buying 3 tickets");
+        assertGt(lastPurchaseTime, 0, "Last purchase time should be greater than 0");
+        assertEq(totalSpent, totalCost, "Total spent should equal 3 * ticket price");
+    }
+
+    function testGetPlayerInfoAfterMultipleTransactions() public {
+        // Fund treasury first
+        vm.prank(address(this));
+
+        // Get ticket price
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
+
+        // First transaction: Buy 2 tickets
+        uint256 firstPurchase = 2;
+        uint256 firstCost = ticketPrice * firstPurchase;
+
+        vm.deal(player1, firstCost);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: firstCost}(address(0), firstPurchase);
+
+        // Check player info after first purchase
+        (uint256 ticketCount1, uint256 lastPurchaseTime1, uint256 totalSpent1) = lottery1Day.getPlayerInfo(player1);
+
+        assertEq(ticketCount1, firstPurchase, "Ticket count should be 2 after first purchase");
+        assertGt(lastPurchaseTime1, 0, "Last purchase time should be greater than 0");
+        assertEq(totalSpent1, firstCost, "Total spent should equal 2 * ticket price");
+
+        // Second transaction: Buy 3 more tickets
+        uint256 secondPurchase = 3;
+        uint256 secondCost = ticketPrice * secondPurchase;
+
+        // Warp time to ensure different timestamps
+        vm.warp(block.timestamp + 1);
+
+        vm.deal(player1, secondCost);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: secondCost}(address(0), secondPurchase);
+
+        // Check player info after second purchase
+        (uint256 ticketCount2, uint256 lastPurchaseTime2, uint256 totalSpent2) = lottery1Day.getPlayerInfo(player1);
+
+        assertEq(ticketCount2, firstPurchase + secondPurchase, "Ticket count should be 5 after second purchase");
+        assertGt(lastPurchaseTime2, lastPurchaseTime1, "Last purchase time should be updated");
+        assertEq(totalSpent2, firstCost + secondCost, "Total spent should equal sum of both purchases");
+    }
+
+    function testGetPlayerInfoForMultiplePlayers() public {
+        // Fund treasury first
+        vm.prank(address(this));
+
+        // Get ticket price
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
+
+        // Player 1 buys 2 tickets
+        uint256 player1Tickets = 2;
+        uint256 player1Cost = ticketPrice * player1Tickets;
+
+        vm.deal(player1, player1Cost);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: player1Cost}(address(0), player1Tickets);
+
+        // Player 2 buys 3 tickets
+        uint256 player2Tickets = 3;
+        uint256 player2Cost = ticketPrice * player2Tickets;
+
+        vm.deal(player2, player2Cost);
+        vm.prank(player2);
+        lottery1Day.buyTicket{value: player2Cost}(address(0), player2Tickets);
+
+        // Check player 1 info
+        (uint256 ticketCount1, uint256 lastPurchaseTime1, uint256 totalSpent1) = lottery1Day.getPlayerInfo(player1);
+        assertEq(ticketCount1, player1Tickets, "Player 1 ticket count should be 2");
+        assertGt(lastPurchaseTime1, 0, "Player 1 last purchase time should be greater than 0");
+        assertEq(totalSpent1, player1Cost, "Player 1 total spent should equal 2 * ticket price");
+
+        // Check player 2 info
+        (uint256 ticketCount2, uint256 lastPurchaseTime2, uint256 totalSpent2) = lottery1Day.getPlayerInfo(player2);
+        assertEq(ticketCount2, player2Tickets, "Player 2 ticket count should be 3");
+        assertGt(lastPurchaseTime2, 0, "Player 2 last purchase time should be greater than 0");
+        assertEq(totalSpent2, player2Cost, "Player 2 total spent should equal 3 * ticket price");
+
+        // Verify that players have different info
+        assertTrue(ticketCount1 != ticketCount2, "Players should have different ticket counts");
+        assertTrue(totalSpent1 != totalSpent2, "Players should have different total spent amounts");
+    }
+
+    function testGetPlayerInfoForNonExistentPlayer() public {
+        // Test getPlayerInfo for a player who has never interacted with the contract
+        address nonExistentPlayer = address(0x999);
+
+        (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent) =
+            lottery1Day.getPlayerInfo(nonExistentPlayer);
+
+        assertEq(ticketCount, 0, "Non-existent player ticket count should be 0");
+        assertEq(lastPurchaseTime, 0, "Non-existent player last purchase time should be 0");
+        assertEq(totalSpent, 0, "Non-existent player total spent should be 0");
+    }
+
+    function testGetPlayerInfoAfterGameEnd() public {
+        // Fund treasury first
+        vm.prank(address(this));
+
+        // Get ticket price and game duration
+        (uint256 ticketPrice,, uint256 gameDuration,) = lottery1Day.getGameConfig();
+
+        // Buy 1 ticket
+        vm.deal(player1, ticketPrice);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
+
+        // Check player info before game end
+        (uint256 ticketCountBefore, uint256 lastPurchaseTimeBefore, uint256 totalSpentBefore) =
+            lottery1Day.getPlayerInfo(player1);
+        assertEq(ticketCountBefore, 1, "Ticket count should be 1 before game end");
+        assertGt(lastPurchaseTimeBefore, 0, "Last purchase time should be greater than 0");
+        assertEq(totalSpentBefore, ticketPrice, "Total spent should equal ticket price");
+
+        // Fast forward time to end the game
+        vm.warp(block.timestamp + gameDuration + 1);
+
+        // Auto end the game
+        lottery1Day.autoEndGame();
+
+        // Check player info after game end (should remain the same as it's cumulative)
+        (uint256 ticketCountAfter, uint256 lastPurchaseTimeAfter, uint256 totalSpentAfter) =
+            lottery1Day.getPlayerInfo(player1);
+        assertEq(ticketCountAfter, ticketCountBefore, "Ticket count should remain the same after game end");
+        assertEq(
+            lastPurchaseTimeAfter, lastPurchaseTimeBefore, "Last purchase time should remain the same after game end"
+        );
+        assertEq(totalSpentAfter, totalSpentBefore, "Total spent should remain the same after game end");
+    }
+
+    function testGetPlayerInfoWithReferral() public {
+        // Fund treasury first
+        vm.prank(address(this));
+
+        // Get ticket price
+        (uint256 ticketPrice,,,) = lottery1Day.getGameConfig();
+
+        // Buy ticket with referral
+        vm.deal(player1, ticketPrice);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: ticketPrice}(player2, 1); // player2 as referrer
+
+        // Check player info (should be the same regardless of referral)
+        (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent) = lottery1Day.getPlayerInfo(player1);
+
+        assertEq(ticketCount, 1, "Ticket count should be 1 with referral");
+        assertGt(lastPurchaseTime, 0, "Last purchase time should be greater than 0");
+        assertEq(totalSpent, ticketPrice, "Total spent should equal ticket price with referral");
+    }
+
+    function testGetPlayerInfoEdgeCases() public {
+        // Test edge cases for getPlayerInfo function
+
+        // Test with zero address
+        (uint256 ticketCount, uint256 lastPurchaseTime, uint256 totalSpent) = lottery1Day.getPlayerInfo(address(0));
+        assertEq(ticketCount, 0, "Zero address ticket count should be 0");
+        assertEq(lastPurchaseTime, 0, "Zero address last purchase time should be 0");
+        assertEq(totalSpent, 0, "Zero address total spent should be 0");
+
+        // Test with contract address
+        address contractAddress = address(lottery1Day);
+        (uint256 ticketCount2, uint256 lastPurchaseTime2, uint256 totalSpent2) =
+            lottery1Day.getPlayerInfo(contractAddress);
+        assertEq(ticketCount2, 0, "Contract address ticket count should be 0");
+        assertEq(lastPurchaseTime2, 0, "Contract address last purchase time should be 0");
+        assertEq(totalSpent2, 0, "Contract address total spent should be 0");
     }
 }

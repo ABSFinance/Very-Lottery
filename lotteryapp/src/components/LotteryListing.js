@@ -85,16 +85,21 @@ function Lottery(props) {
               {localGameInfo ?
                 <>
                   <Text fontSize={"sm"} color={"gray.500"} pt={4}>
-                    Active Players: {localGameInfo.players}
+                    Active Players: {localGameInfo.players || "0"}
                   </Text>
                   <Text fontSize={"sm"} color={"gray.500"}>
-                    Ticket Price: {localGameInfo.ticketPrice} VERY
+                    Ticket Price: {localGameInfo.ticketPrice || "0.01"} VERY
                   </Text>
                   <Text fontSize={"sm"} color={"gray.500"}>
-                    Jackpot: {localGameInfo.jackpot} VERY
+                    Jackpot: {localGameInfo.jackpot || "0"} VERY
                   </Text>
                 </>
-                : ''
+                : 
+                <Text fontSize={"sm"} color={"gray.500"} pt={4}>
+                  <Badge variant="outline" colorScheme="blue">
+                    🎯 No games started yet - Buy the first ticket to begin the lottery!
+                  </Badge>
+                </Text>
               }
             </>
         }
@@ -210,6 +215,8 @@ export default function LotteryListing({ selectedGame }) {
           ticketPrice = ethers.utils.formatEther(gameConfig[0]);
         } catch (error) {
           console.error('Error getting ticket price from contract:', error);
+          // Use default ticket price if contract call fails
+          ticketPrice = "0.01";
         }
       }
       
@@ -257,18 +264,25 @@ export default function LotteryListing({ selectedGame }) {
     }
   }, [connected, selectedGame, localGameInfo, gameContract, toast]);
 
+  //enter lottery action
+
   // Check for referral information
   useEffect(() => {
+    // Flag to track if component is still mounted
+    let isMounted = true;
+    
     const loadReferralInfo = async () => {
       if (connected && connectedAddr && gameContract.contract) {
         try {
           // Get referral info from contract if available
           const referralAddress = getReferralAddress();
           if (referralAddress !== '0x0000000000000000000000000000000000000000') {
-            setReferralInfo({
-              address: referralAddress,
-              code: referralAddress.slice(2, 8).toUpperCase()
-            });
+            if (isMounted) {
+              setReferralInfo({
+                address: referralAddress,
+                code: referralAddress.slice(2, 8).toUpperCase()
+              });
+            }
           }
         } catch (error) {
           console.error('Error loading referral info:', error);
@@ -277,9 +291,15 @@ export default function LotteryListing({ selectedGame }) {
     };
 
     loadReferralInfo();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, [connected, connectedAddr, gameContract.contract]);
 
-  // Handle transaction events
+  // Handle transaction events - TEMPORARILY DISABLED TO PREVENT ERRORS
+  /*
   useEffect(() => {
     if (gameContract.contract) {
       const handleTicketPurchased = (player, gameNumber, ticketIndex, timestamp) => {
@@ -292,40 +312,70 @@ export default function LotteryListing({ selectedGame }) {
         });
       };
 
-      const handleWinnerSelected = (winner, gameNumber, jackpot, playerCount, timestamp) => {
-        console.log('Winner selected:', { winner, gameNumber, jackpot, playerCount, timestamp });
+      const handleWinnerSelected = (winner, gameNumber, amount, timestamp) => {
+        console.log('Winner selected:', { winner, gameNumber, amount, timestamp });
         toast({
           title: 'Winner Selected!',
-          description: `Game #${gameNumber} winner: ${winner}`,
+          description: `Game #${gameNumber} - Winner: ${winner.slice(0, 6)}...${winner.slice(-4)}`,
+          status: 'success',
+          isClosable: true,
+        });
+      };
+
+      const handleGameEnded = (gameNumber, totalPlayers, totalJackpot, timestamp) => {
+        console.log('Game ended:', { gameNumber, totalPlayers, totalJackpot, timestamp });
+        toast({
+          title: 'Game Ended!',
+          description: `Game #${gameNumber} - Total Players: ${totalPlayers}, Jackpot: ${ethers.utils.formatEther(totalJackpot)} VERY`,
           status: 'info',
           isClosable: true,
         });
       };
 
+      // Listen for events using correct event names
       gameContract.contract.on('TicketPurchased', handleTicketPurchased);
       gameContract.contract.on('WinnerSelected', handleWinnerSelected);
+      gameContract.contract.on('GameEnded', handleGameEnded);
 
+      // Cleanup
       return () => {
         gameContract.contract.off('TicketPurchased', handleTicketPurchased);
         gameContract.contract.off('WinnerSelected', handleWinnerSelected);
+        gameContract.contract.off('GameEnded', handleGameEnded);
       };
     }
   }, [gameContract.contract, toast]);
+  */
+  
+  console.log('Event listening temporarily disabled to prevent errors');
 
-  // Load initial game info
+  // Load initial game data when component mounts
   useEffect(() => {
-    const loadInitialGameInfo = async () => {
-      if (selectedGame?.address && gameContract.contract) {
+    // Flag to track if component is still mounted
+    let isMounted = true;
+    
+    const loadInitialGameData = async () => {
+      if (!selectedGame?.address || !gameContract.contract) {
+        console.log('No game selected or contract not available');
+        return;
+      }
+
+      console.log('🔄 Loading initial game data for:', selectedGame.title);
+      if (isMounted) {
         setLoading(true);
-        try {
-          // Use actual contract functions that exist
-          const [gameNumber, playerCount, jackpot, gameConfig] = await Promise.all([
-            gameContract.contract.getCurrentGameNumber(),
-            gameContract.contract.getCurrentGamePlayerCount(),
-            gameContract.contract.getCurrentGameJackpot(),
-            gameContract.contract.getGameConfig()
-          ]);
-          
+      }
+      
+      try {
+        const [gameNumber, playerCount, jackpot, gameConfig] = await Promise.all([
+          gameContract.contract.getCurrentGameNumber(),
+          gameContract.contract.getCurrentGamePlayerCount(),
+          gameContract.contract.getCurrentGameJackpot(),
+          gameContract.contract.getGameConfig()
+        ]);
+        
+        console.log('✅ Game data loaded:', { gameNumber, playerCount, jackpot, gameConfig });
+        
+        if (isMounted) {
           setLocalGameInfo({
             game: gameNumber.toString(),
             ticketPrice: ethers.utils.formatEther(gameConfig[0]),
@@ -333,241 +383,33 @@ export default function LotteryListing({ selectedGame }) {
             playerCount: playerCount.toString(),
             currentJackpot: ethers.utils.formatEther(jackpot)
           });
-        } catch (error) {
-          console.error('Error loading initial game info:', error);
-        } finally {
-          setLoading(false);
         }
-      }
-    };
-
-    loadInitialGameInfo();
-  }, [selectedGame, gameContract.contract]);
-
-  // Handle transaction errors
-  useEffect(() => {
-    // This will be handled by the buyTicket function
-  }, []);
-
-  // Check for referral information
-  useEffect(() => {
-    const loadReferralInfo = async () => {
-      if (connected && connectedAddr && gameContract.contract) {
-        try {
-          // Get referral info from contract if available
-          const referralAddress = getReferralAddress();
-          if (referralAddress !== '0x0000000000000000000000000000000000000000') {
-            setReferralInfo({
-              address: referralAddress,
-              code: referralAddress.slice(2, 8).toUpperCase()
-            });
-          }
-        } catch (error) {
-          console.error('Error loading referral info:', error);
-        }
-      }
-    };
-
-    loadReferralInfo();
-  }, [connected, connectedAddr, gameContract.contract]);
-
-
-  // Transaction event handling is now done in the buyTicket function
-
-
-
-
-  //event handler
-  const handleEvents = async (eventData, eventType) => {
-    console.log('handleEvents called with:', { eventData, eventType });
-    
-    if(eventData.events){
-      console.log('Events found:', eventData.events);
-      console.log('Looking for event type:', eventType);
-      
-      // Log all event names to see what's available
-      eventData.events.forEach((evt, index) => {
-        console.log(`Event ${index}:`, evt);
-      });
-      
-      const e = eventData.events.find(eve => eve.event === eventType);
-      console.log('Found event:', e);
-      
-      if(typeof e !== "undefined"){
-        // Get transaction hash for scan link
-        let txHash = eventData.transactionHash || eventData.hash;
-        console.log('Event data for txHash:', eventData);
-        console.log('Extracted txHash from event:', txHash);
-        
-        if (!txHash) {
-          console.error('Could not find transaction hash in event data');
-          return;
-        }
-        
-        // Check if this transaction has already been processed
-        if (processedTransactions.has(txHash)) {
-          console.log('Transaction already processed in event handler, skipping');
-          return;
-        }
-        
-        console.log('Processing Ticket event for transaction:', txHash);
-        
-        // Mark transaction as processed
-        setProcessedTransactions(prev => new Set([...prev, txHash]));
-        
-        const scanUrl = `https://veryscan.io/tx/${txHash}`;
-        
-        console.log('Showing toast from event handler for transaction:', txHash);
-        // Temporarily disable toast from event handler to prevent duplicates
-        // toast({
-        //   title: eventMessage(e.event),
-        //   description: (
-        //     <VStack spacing={2} align="start">
-        //       <Text fontSize="sm">Transaction completed successfully!</Text>
-        //       <Link href={scanUrl} isExternal color="blue.500" fontWeight="bold">
-        //         🔍 View on Very Scan →
-        //       </Link>
-        //     </VStack>
-        //   ),
-        //   status: 'success',
-        //   isClosable: true,
-        //   duration: 15000,
-        // });
-  
-        if(e.event === 'Ticket'){
-          // Reset button loader for this specific lottery
-          setEntryBtnLoaders(prevS => {
-            return {
-              ...prevS,
-              [e.args[1].toString()]: false  // e.args[1] is the game number
-            }
+      } catch (error) {
+        console.error('❌ Error loading initial game data:', error);
+        // Set default values when contract call fails
+        if (isMounted) {
+          setLocalGameInfo({
+            game: "0",
+            ticketPrice: "0.01",
+            isActive: false,
+            playerCount: "0",
+            currentJackpot: "0"
           });
-          
-          // Store transaction hash for this lottery
-          setTransactionHashes(prev => ({
-            ...prev,
-            [e.args[1].toString()]: txHash  // e.args[1] is the game number
-          }));
-          
-          // Refresh game info after successful transaction
-          if(gameContract.contract && selectedGame) {
-            const fetchGameInfo = async () => {
-              try {
-                const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
-                  gameContract.contract.game(),
-                  gameContract.contract.ticketPrice(),
-                  gameContract.contract.isActive(),
-                  gameContract.contract.getPlayedGamePlayers(),
-                  gameContract.contract.getPlayedGameJackpot()
-                ]);
-                
-                setLocalGameInfo({
-                  game: game.toString(),
-                  ticketPrice: ethers.utils.formatEther(ticketPrice),
-                  isActive,
-                  players: players.toString(),
-                  jackpot: ethers.utils.formatEther(jackpot)
-                });
-              } catch (error) {
-                console.error('Error fetching game info after transaction:', error);
-              }
-            };
-            
-            fetchGameInfo();
-          }
         }
-
-        if(e.event === 'LotteryCreated') {
-          // Refresh game info
-          if(gameContract.contract && selectedGame) {
-            const fetchGameInfo = async () => {
-              setLoading(true);
-              try {
-                const [game, ticketPrice, isActive, players, jackpot] = await Promise.all([
-                  gameContract.contract.game(),
-                  gameContract.contract.ticketPrice(),
-                  gameContract.contract.isActive(),
-                  gameContract.contract.getPlayedGamePlayers(),
-                  gameContract.contract.getPlayedGameJackpot()
-                ]);
-                
-                setLocalGameInfo({
-                  game: game.toString(),
-                  ticketPrice: ethers.utils.formatEther(ticketPrice),
-                  isActive,
-                  players: players.toString(),
-                  jackpot: ethers.utils.formatEther(jackpot)
-                });
-              } catch (error) {
-                console.error('Error fetching game info:', error);
-              }
-              setLoading(false);
-            };
-            
-            fetchGameInfo();
-          }
-        }
-  
-
-      }
-
-    }
-  }
-
-  useEffect(() => {
-      if (gameContract.contract && selectedGame) {
-        // Check contract initialization first
-        // checkContractInitialization();
-        // initializeContract();
-        
-        const fetchGameInfo = async () => {
-          setLoading(true);
-          try {
-            // Use the correct contract functions that actually exist
-            const [gameNumber, playerCount, jackpot, gameConfig] = await Promise.all([
-              gameContract.contract.getCurrentGameNumber(),
-              gameContract.contract.getCurrentGamePlayerCount(),
-              gameContract.contract.getCurrentGameJackpot(),
-              gameContract.contract.getGameConfig()
-            ]);
-            
-            // Handle the case when no games exist yet
-            if (gameNumber.toString() === "0" && playerCount.toString() === "0") {
-              // No games created yet, show default values
-              setLocalGameInfo({
-                game: "0",
-                ticketPrice: ethers.utils.formatEther(gameConfig[0]),
-                isActive: gameConfig[3],
-                players: "0",
-                jackpot: "0.0"
-              });
-            } else {
-              // Games exist, use actual values
-              setLocalGameInfo({
-                game: gameNumber.toString(),
-                ticketPrice: ethers.utils.formatEther(gameConfig[0]),
-                isActive: gameConfig[3],
-                players: playerCount.toString(),
-                jackpot: ethers.utils.formatEther(jackpot)
-              });
-            }
-          } catch (error) {
-            console.error('Error fetching game info:', error);
-            // Set default values on error
-            setLocalGameInfo({
-              game: "0",
-              ticketPrice: "0.0",
-              isActive: false,
-              players: "0",
-              jackpot: "0.0"
-            });
-          }
+      } finally {
+        if (isMounted) {
           setLoading(false);
-        };
-        
-        fetchGameInfo();
+        }
       }
-  },[gameContract.contract, selectedGame])
+    };
+
+    loadInitialGameData();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedGame?.address, gameContract.contract]); // Only run when game or contract changes
 
   //enter lottery action
 
@@ -603,31 +445,31 @@ export default function LotteryListing({ selectedGame }) {
           <Spinner loading size={40} applyPadding/>
         ) : (
           <>
-            {localGameInfo ? (
-              <SimpleGrid
-                p={4}
-                columns={{ base: 1, xl: 3 }}
-                spacing={"8"}
-                mt={8}
-                ml={4}
-              >
-                <Lottery 
-                  index={0} 
-                  key={0} 
-                  lotteryId={localGameInfo.game} 
-                  enterLotteryHandler={buyTicket} 
-                  entryBtnLoaders={entryBtnLoaders} 
-                  selectedGame={selectedGame}
-                  localGameInfo={localGameInfo}
-                  loading={loading}
-                  transactionHashes={transactionHashes}
-                />
-              </SimpleGrid>
-            ) : (
-              <Stack direction="row" alignItems="center" justifyContent={'center'} pt="8">
-                <Text p="10">No Game Selected</Text>
-              </Stack>
-            )}
+            <SimpleGrid
+              p={4}
+              columns={{ base: 1, xl: 3 }}
+              spacing={"8"}
+              mt={8}
+              ml={4}
+            >
+              <Lottery 
+                index={0} 
+                key={0} 
+                lotteryId={localGameInfo?.game || "0"} 
+                enterLotteryHandler={buyTicket} 
+                entryBtnLoaders={entryBtnLoaders} 
+                selectedGame={selectedGame}
+                localGameInfo={localGameInfo || {
+                  game: "0",
+                  ticketPrice: "0.01",
+                  isActive: false,
+                  players: "0",
+                  jackpot: "0.0"
+                }}
+                loading={loading}
+                transactionHashes={transactionHashes}
+              />
+            </SimpleGrid>
           </>
         )}
     </Flex>

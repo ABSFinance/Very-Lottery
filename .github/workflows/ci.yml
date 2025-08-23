@@ -302,6 +302,7 @@ jobs:
         run: forge install
 
       - name: Deploy to Verychain
+        id: deploy
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
@@ -310,21 +311,25 @@ jobs:
           echo "RPC URL: https://rpc.verylabs.io"
           echo "Explorer: https://veryscan.io"
           
-          # Deploy with error handling
-          if forge script script/Deploy.s.sol --broadcast; then
+          # Deploy with error handling and capture addresses
+          if forge script script/Deploy.s.sol --broadcast 2>&1 | tee deployment.log; then
             echo "✅ Deployment successful"
             echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
-          else
-            echo "❌ Deployment failed"
-            echo "DEPLOYMENT_STATUS=failed" >> $GITHUB_ENV
-            exit 1
-          fi
-
-      - name: Read deployment addresses
-        id: addresses
-        run: |
-          if [ -f deployment_addresses.txt ]; then
-            source deployment_addresses.txt
+            
+            # Extract contract addresses from deployment log
+            echo "Extracting contract addresses..."
+            CRYPTOLOTTO_1DAY=$(grep "CRYPTOLOTTO_1DAY=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            CRYPTOLOTTO_7DAYS=$(grep "CRYPTOLOTTO_7DAYS=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            CRYPTOLOTTO_AD=$(grep "CRYPTOLOTTO_AD=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            TREASURY_MANAGER=$(grep "TREASURY_MANAGER=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            CONTRACT_REGISTRY=$(grep "CONTRACT_REGISTRY=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            STATS_AGGREGATOR=$(grep "STATS_AGGREGATOR=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            FUNDS_DISTRIBUTOR=$(grep "FUNDS_DISTRIBUTOR=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            CRYPTOLOTTO_REFERRAL=$(grep "CRYPTOLOTTO_REFERRAL=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            AD_TOKEN=$(grep "AD_TOKEN=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            OWNABLE=$(grep "OWNABLE=" deployment.log | cut -d'=' -f2 | tr -d ' ')
+            
+            # Store addresses in GitHub output
             echo "cryptolotto_1day=$CRYPTOLOTTO_1DAY" >> $GITHUB_OUTPUT
             echo "cryptolotto_7days=$CRYPTOLOTTO_7DAYS" >> $GITHUB_OUTPUT
             echo "cryptolotto_ad=$CRYPTOLOTTO_AD" >> $GITHUB_OUTPUT
@@ -335,19 +340,42 @@ jobs:
             echo "cryptolotto_referral=$CRYPTOLOTTO_REFERRAL" >> $GITHUB_OUTPUT
             echo "ad_token=$AD_TOKEN" >> $GITHUB_OUTPUT
             echo "ownable=$OWNABLE" >> $GITHUB_OUTPUT
+            
+            echo "Contract addresses extracted and stored"
+            
+            # Debug: Show extracted addresses
+            echo "=== EXTRACTED ADDRESSES ==="
+            echo "CRYPTOLOTTO_1DAY: $CRYPTOLOTTO_1DAY"
+            echo "CRYPTOLOTTO_7DAYS: $CRYPTOLOTTO_7DAYS"
+            echo "CRYPTOLOTTO_AD: $CRYPTOLOTTO_AD"
+            echo "TREASURY_MANAGER: $TREASURY_MANAGER"
+            echo "CONTRACT_REGISTRY: $CONTRACT_REGISTRY"
+            echo "STATS_AGGREGATOR: $STATS_AGGREGATOR"
+            echo "FUNDS_DISTRIBUTOR: $FUNDS_DISTRIBUTOR"
+            echo "CRYPTOLOTTO_REFERRAL: $CRYPTOLOTTO_REFERRAL"
+            echo "AD_TOKEN: $AD_TOKEN"
+            echo "OWNABLE: $OWNABLE"
+            echo "=== END EXTRACTED ADDRESSES ==="
           else
-            echo "deployment_addresses.txt not found"
-            echo "cryptolotto_1day=0x..." >> $GITHUB_OUTPUT
-            echo "cryptolotto_7days=0x..." >> $GITHUB_OUTPUT
-            echo "cryptolotto_ad=0x..." >> $GITHUB_OUTPUT
-            echo "treasury_manager=0x..." >> $GITHUB_OUTPUT
-            echo "contract_registry=0x..." >> $GITHUB_OUTPUT
-            echo "stats_aggregator=0x..." >> $GITHUB_OUTPUT
-            echo "funds_distributor=0x..." >> $GITHUB_OUTPUT
-            echo "cryptolotto_referral=0x..." >> $GITHUB_OUTPUT
-            echo "ad_token=0x..." >> $GITHUB_OUTPUT
-            echo "ownable=0x..." >> $GITHUB_OUTPUT
+            echo "❌ Deployment failed"
+            echo "DEPLOYMENT_STATUS=failed" >> $GITHUB_ENV
+            exit 1
           fi
+
+      - name: Show extracted addresses
+        run: |
+          echo "=== GITHUB OUTPUTS ==="
+          echo "cryptolotto_1day: ${{ steps.deploy.outputs.cryptolotto_1day }}"
+          echo "cryptolotto_7days: ${{ steps.deploy.outputs.cryptolotto_7days }}"
+          echo "cryptolotto_ad: ${{ steps.deploy.outputs.cryptolotto_ad }}"
+          echo "treasury_manager: ${{ steps.deploy.outputs.treasury_manager }}"
+          echo "contract_registry: ${{ steps.deploy.outputs.contract_registry }}"
+          echo "stats_aggregator: ${{ steps.deploy.outputs.stats_aggregator }}"
+          echo "funds_distributor: ${{ steps.deploy.outputs.funds_distributor }}"
+          echo "cryptolotto_referral: ${{ steps.deploy.outputs.cryptolotto_referral }}"
+          echo "ad_token: ${{ steps.deploy.outputs.ad_token }}"
+          echo "ownable: ${{ steps.deploy.outputs.ownable }}"
+          echo "=== END GITHUB OUTPUTS ==="
 
       - name: Create deployment summary
         run: |
@@ -388,16 +416,16 @@ jobs:
             - Performance optimizations
             
             ### Contract Addresses
-            - **Cryptolotto1Day**: `${{ steps.addresses.outputs.cryptolotto_1day }}`
-            - **Cryptolotto7Days**: `${{ steps.addresses.outputs.cryptolotto_7days }}`
-            - **CryptolottoAd**: `${{ steps.addresses.outputs.cryptolotto_ad }}`
-            - **TreasuryManager**: `${{ steps.addresses.outputs.treasury_manager }}`
-            - **ContractRegistry**: `${{ steps.addresses.outputs.contract_registry }}`
-            - **StatsAggregator**: `${{ steps.addresses.outputs.stats_aggregator }}`
-            - **FundsDistributor**: `${{ steps.addresses.outputs.funds_distributor }}`
-            - **CryptolottoReferral**: `${{ steps.addresses.outputs.cryptolotto_referral }}`
-            - **AdToken**: `${{ steps.addresses.outputs.ad_token }}`
-            - **Ownable**: `${{ steps.addresses.outputs.ownable }}`
+            - **Cryptolotto1Day**: `${{ steps.deploy.outputs.cryptolotto_1day }}`
+            - **Cryptolotto7Days**: `${{ steps.deploy.outputs.cryptolotto_7days }}`
+            - **CryptolottoAd**: `${{ steps.deploy.outputs.cryptolotto_ad }}`
+            - **TreasuryManager**: `${{ steps.deploy.outputs.treasury_manager }}`
+            - **ContractRegistry**: `${{ steps.deploy.outputs.contract_registry }}`
+            - **StatsAggregator**: `${{ steps.deploy.outputs.stats_aggregator }}`
+            - **FundsDistributor**: `${{ steps.deploy.outputs.funds_distributor }}`
+            - **CryptolottoReferral**: `${{ steps.deploy.outputs.cryptolotto_referral }}`
+            - **AdToken**: `${{ steps.deploy.outputs.ad_token }}`
+            - **Ownable**: `${{ steps.deploy.outputs.ownable }}`
             
             ### Verification
             - All contracts verified on Veryscan

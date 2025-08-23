@@ -66,7 +66,17 @@ import { ethers } from 'ethers';
               });
             }
           } catch (error) {
-            console.error('Error fetching game info:', error);
+            console.error('Error fetching game info, using defaults:', error);
+            if (isMounted) {
+              setGameInfo({
+                game: '0',
+                ticketPrice: '0.01',
+                isActive: false,
+                players: '0',
+                jackpot: '0',
+                status: 'No games started yet - Buy first ticket to begin!'
+              });
+            }
           }
           if (isMounted) {
             setLoading(false);
@@ -88,23 +98,23 @@ import { ethers } from 'ethers';
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 5, lg: 8 }}>
             <StatsCard
               title={'Current Game'}
-              stat={loading ? 'Loading...' : (gameInfo?.game || 'N/A')}
+              stat={loading ? 'Loading...' : (gameInfo?.game || '0 (Default)')}
             />
             <StatsCard
               title={'Ticket Price'}
-              stat={loading ? 'Loading...' : (gameInfo?.ticketPrice ? `${gameInfo.ticketPrice} VERY` : 'N/A')}
+              stat={loading ? 'Loading...' : (gameInfo?.ticketPrice ? `${gameInfo.ticketPrice} VERY` : '0.01 VERY (Default)')}
             />
             <StatsCard
               title={'Active Players'}
-              stat={loading ? 'Loading...' : (gameInfo?.players || 'N/A')}
+              stat={loading ? 'Loading...' : (gameInfo?.players || '0 (Default)')}
             />
             <StatsCard
               title={'Current Jackpot'}
-              stat={loading ? 'Loading...' : (gameInfo?.jackpot ? `${gameInfo.jackpot} VERY` : 'N/A')}
+              stat={loading ? 'Loading...' : (gameInfo?.jackpot ? `${gameInfo.jackpot} VERY` : '0 VERY (Default)')}
             />
             <StatsCard
               title={'Game Status'}
-              stat={loading ? 'Loading...' : (gameInfo?.isActive ? 'Active' : 'Inactive')}
+              stat={loading ? 'Loading...' : (gameInfo?.isActive ? 'Active' : 'Inactive (Default)')}
             />
             <StatsCard
               title={'Contract Address'}

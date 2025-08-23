@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 import { getContractAddress, GAME_TYPES } from '../utils/contractAddresses';
 import './GameSelector.css';
 
@@ -74,34 +75,86 @@ const GameSelector = ({ onGameSelect }) => {
     }
   ];
 
-  // Load game information for each game
+  // Load game information
   useEffect(() => {
+    // Prevent infinite reloading by checking if we already have data
+    if (Object.keys(gameInfos).length > 0 && Object.values(loading).every(l => !l)) {
+      console.log('🛑 Already have game infos, skipping reload');
+      return;
+    }
+    
     const loadGameInfos = async () => {
+      console.log('🔄 Loading game infos...');
+      
       for (const game of games) {
-        if (game.address) {
-          console.log(`Loading game info for ${game.title}:`);
-          console.log(`- Game Type: ${game.gameType}`);
-          console.log(`- Contract Address: ${game.address}`);
-          console.log(`- Environment Variable: ${process.env[`REACT_APP_${game.gameType}`]}`);
+        console.log(`Loading game info for ${game.title}:`);
+        console.log(`- Game Type: ${game.gameType}`);
+        console.log(`- Contract Address: ${game.address}`);
+        console.log(`- Environment Variable: ${game.address}`);
+        
+        // Set loading state for this game
+        setLoading(prev => ({ ...prev, [game.id]: true }));
+        
+        // Add timeout for this specific game
+        const timeoutId = setTimeout(() => {
+          console.warn(`Timeout reached for ${game.title}, setting loading to false`);
+          setLoading(prev => ({ ...prev, [game.id]: false }));
+        }, 10000); // 10 second timeout per game
+        
+        try {
+          // Force use of Verychain RPC provider to ensure correct network connection
+          const provider = new ethers.providers.JsonRpcProvider(
+            process.env.REACT_APP_RPC_URL || 'https://rpc.verylabs.io',
+            {
+              name: 'Verychain',
+              chainId: 4613
+            }
+          );
           
-          setLoading(prev => ({ ...prev, [game.id]: true }));
+          console.log(`- Using Verychain RPC provider: ${process.env.REACT_APP_RPC_URL || 'https://rpc.verylabs.io'}`);
+          
+          // Test provider connection
           try {
-            // Create contract instance manually instead of using hook in loop
-            const { ethers } = require('ethers');
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const network = await provider.getNetwork();
+            console.log(`- Provider network: ${network.name} (Chain ID: ${network.chainId})`);
             
-            // Use actual contract functions that exist
-            const contractInterface = [
-              "function getCurrentGameNumber() view returns (uint256)",
-              "function getCurrentGamePlayerCount() view returns (uint256)",
-              "function getCurrentGameJackpot() view returns (uint256)",
-              "function getGameConfig() view returns (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive)"
-            ];
+            const blockNumber = await provider.getBlockNumber();
+            console.log(`- Current block number: ${blockNumber}`);
             
-            const contract = new ethers.Contract(game.address, contractInterface, provider);
-            console.log(`- Contract instance created for address: ${contract.address}`);
+            // Test RPC connection by getting a recent block
+            const block = await provider.getBlock(blockNumber);
+            console.log(`- Latest block hash: ${block.hash}`);
+            console.log(`- Latest block timestamp: ${new Date(block.timestamp * 1000).toISOString()}`);
             
-            // Get game info using actual functions
+          } catch (error) {
+            console.error(`- Error testing provider:`, error);
+          }
+          
+          // Use actual contract functions that exist
+          const contractInterface = [
+            "function getCurrentGameNumber() view returns (uint256)",
+            "function getCurrentGamePlayerCount() view returns (uint256)",
+            "function getCurrentGameJackpot() view returns (uint256)",
+            "function getGameConfig() view returns (uint256 ticketPrice, uint256 gameDuration, uint256 maxTicketsPerPlayer, bool isActive)"
+          ];
+          
+          const contract = new ethers.Contract(game.address, contractInterface, provider);
+          console.log(`- Contract instance created for address: ${contract.address}`);
+          console.log(`- Game: ${game.title}, Address: ${game.address}`);
+          
+          // Test if contract is accessible
+          try {
+            const code = await provider.getCode(game.address);
+            console.log(`- Contract code exists: ${code !== '0x'}`);
+            if (code === '0x') {
+              console.warn(`- WARNING: No contract code at address ${game.address}`);
+            }
+          } catch (error) {
+            console.error(`- Error checking contract code:`, error);
+          }
+          
+          // Get game info using actual functions
+          try {
             const [gameNumber, playerCount, jackpot, gameConfig] = await Promise.all([
               contract.getCurrentGameNumber(),
               contract.getCurrentGamePlayerCount(),
@@ -121,15 +174,50 @@ const GameSelector = ({ onGameSelect }) => {
             }));
           } catch (error) {
             console.error(`Error loading game info for ${game.title}:`, error);
+            // Set default values when contract call fails (likely no games started)
+            setGameInfos(prev => ({
+              ...prev,
+              [game.id]: {
+                currentGameNumber: "0",
+                ticketPrice: "0.01",
+                isActive: false,
+                playerCount: "0",
+                currentJackpot: "0",
+                status: "No games started yet - Buy first ticket to begin!"
+              }
+            }));
           } finally {
             setLoading(prev => ({ ...prev, [game.id]: false }));
+            clearTimeout(timeoutId); // Clear timeout on successful load
           }
+        } catch (error) {
+          console.error(`Error loading game info for ${game.title}:`, error);
+          // Set default values and reset loading even on outer error
+          setGameInfos(prev => ({
+            ...prev,
+            [game.id]: {
+              currentGameNumber: "0",
+              ticketPrice: "0.01",
+              isActive: false,
+              playerCount: "0",
+              currentJackpot: "0",
+              status: "No games started yet - Buy first ticket to begin!"
+            }
+          }));
+          setLoading(prev => ({ ...prev, [game.id]: false }));
+          clearTimeout(timeoutId); // Clear timeout on error
         }
       }
     };
 
     loadGameInfos();
-  }, []);
+    
+    // Cleanup function to reset loading states
+    return () => {
+      setLoading({});
+      setGameInfos({});
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   return (
     <div className="game-selector">

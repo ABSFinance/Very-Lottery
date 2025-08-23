@@ -605,8 +605,21 @@ abstract contract BaseGame is
         StorageLayout.Game storage currentGame = gameStorage.games[currentGameId];
 
         _updateTicketCount(gameStorage, player, ticketCount);
+        _updatePlayerInfo(player, ticketCount, msg.value);
         _updatePlayerList(currentGame, gameStorage, player);
         currentGame.jackpot = _updateJackpot(currentGame.jackpot, ticketCount, gameStorage.ticketPrice);
+    }
+
+    /**
+     * @dev 플레이어 정보 업데이트
+     */
+    function _updatePlayerInfo(address player, uint256 ticketCount, uint256 amount) internal {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.PlayerInfo storage playerInfo = gameStorage.playerInfo[player];
+
+        playerInfo.ticketCount += ticketCount;
+        playerInfo.lastPurchaseTime = block.timestamp;
+        playerInfo.totalSpent += amount;
     }
 
     /**

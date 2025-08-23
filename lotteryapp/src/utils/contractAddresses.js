@@ -32,7 +32,7 @@ const NETWORK_CONFIG = {
   id: process.env.REACT_APP_NETWORK_ID || 4613,
   name: process.env.REACT_APP_NETWORK_NAME || 'Verychain',
   explorer: process.env.REACT_APP_EXPLORER_URL || 'https://veryscan.io',
-  rpcUrl: process.env.REACT_APP_PROVIDER_URL || 'https://rpc.verylabs.io',
+  rpcUrl: process.env.REACT_APP_RPC_URL || 'https://rpc.verylabs.io',
 };
 
 // Game Types

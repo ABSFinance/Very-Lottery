@@ -224,6 +224,13 @@ contract DeployScript is Script {
         lotteryAd.setTestMode(true);
         console.log("Test mode enabled for all contracts");
 
+        // Add lottery contracts as authorized contracts in TreasuryManager
+        console.log("Adding lottery contracts as authorized contracts...");
+        treasuryManager.addAuthorizedContract(address(lottery1Day));
+        treasuryManager.addAuthorizedContract(address(lottery7Days));
+        treasuryManager.addAuthorizedContract(address(lotteryAd));
+        console.log("Lottery contracts authorized in TreasuryManager");
+
         console.log("Contract setup completed successfully");
     }
 
@@ -287,5 +294,17 @@ contract DeployScript is Script {
         console.log("AD_TOKEN=", address(adToken));
         console.log("OWNABLE=", address(ownable));
         console.log("=== END ADDRESSES ===");
+
+        // Output addresses in GitHub Actions friendly format
+        console.log("::set-output name=CRYPTOLOTTO_1DAY::", address(lottery1Day));
+        console.log("::set-output name=CRYPTOLOTTO_7DAYS::", address(lottery7Days));
+        console.log("::set-output name=CRYPTOLOTTO_AD::", address(lotteryAd));
+        console.log("::set-output name=TREASURY_MANAGER::", address(treasuryManager));
+        console.log("::set-output name=CONTRACT_REGISTRY::", address(registry));
+        console.log("::set-output name=STATS_AGGREGATOR::", address(stats));
+        console.log("::set-output name=FUNDS_DISTRIBUTOR::", address(fundsDistributor));
+        console.log("::set-output name=CRYPTOLOTTO_REFERRAL::", address(referral));
+        console.log("::set-output name=AD_TOKEN::", address(adToken));
+        console.log("::set-output name=OWNABLE::", address(ownable));
     }
 }
