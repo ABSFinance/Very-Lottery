@@ -49,17 +49,17 @@ contract DeployScript is Script {
         _deployLotteryContracts();
         console.log("Lottery contracts deployed successfully");
 
-        // Setup and configure
+        vm.stopBroadcast();
+
+        // IMPORTANT: Setup contracts AFTER broadcast to ensure they are actual transactions
         console.log("Setting up contracts...");
         _setupContracts();
         console.log("Contract setup completed");
 
-        // Register contracts
+        // IMPORTANT: Register contracts AFTER broadcast to ensure they are actual transactions
         console.log("Registering contracts...");
         _registerContracts();
         console.log("Contracts registered successfully");
-
-        vm.stopBroadcast();
 
         // Log deployment summary
         console.log("Generating deployment summary...");
@@ -198,156 +198,217 @@ contract DeployScript is Script {
     function _setupContracts() internal {
         console.log("Setting up contracts...");
 
+        // IMPORTANT: Proxy contracts are already initialized during deployment
+        // We just need to set additional configuration
+
         // Set registry for lottery contracts (needed after initialization)
         console.log("Setting registry for lottery contracts...");
 
-        // Force transaction execution by using low-level calls
+        // Force transaction execution by using low-level calls with explicit gas
+        // These calls will be broadcast as actual transactions
         (bool success1, bytes memory data1) =
-            address(lottery1Day).call(abi.encodeWithSignature("setRegistry(address)", address(registry)));
+            address(lottery1Day).call{gas: 200000}(abi.encodeWithSignature("setRegistry(address)", address(registry)));
         if (success1) {
-            console.log("Registry set for Cryptolotto1Day");
+            console.log("[SUCCESS] Registry set for Cryptolotto1Day");
         } else {
-            console.log("Failed to set registry for Cryptolotto1Day");
+            console.log("[FAILED] Registry set for Cryptolotto1Day");
+            if (data1.length > 0) {
+                console.log("Error data:", vm.toString(data1));
+            }
         }
 
         (bool success2, bytes memory data2) =
-            address(lottery7Days).call(abi.encodeWithSignature("setRegistry(address)", address(registry)));
+            address(lottery7Days).call{gas: 200000}(abi.encodeWithSignature("setRegistry(address)", address(registry)));
         if (success2) {
-            console.log("Registry set for Cryptolotto7Days");
+            console.log("[SUCCESS] Registry set for Cryptolotto7Days");
         } else {
-            console.log("Failed to set registry for Cryptolotto7Days");
+            console.log("[FAILED] Registry set for Cryptolotto7Days");
+            if (data2.length > 0) {
+                console.log("Error data:", vm.toString(data2));
+            }
         }
 
         (bool success3, bytes memory data3) =
-            address(lotteryAd).call(abi.encodeWithSignature("setRegistry(address)", address(registry)));
+            address(lotteryAd).call{gas: 200000}(abi.encodeWithSignature("setRegistry(address)", address(registry)));
         if (success3) {
-            console.log("Registry set for CryptolottoAd");
+            console.log("[SUCCESS] Registry set for CryptolottoAd");
         } else {
-            console.log("Failed to set registry for CryptolottoAd");
+            console.log("[FAILED] Registry set for CryptolottoAd");
+            if (data3.length > 0) {
+                console.log("Error data:", vm.toString(data3));
+            }
         }
         console.log("Registry setup completed");
 
         // Set treasury names for lottery contracts
         console.log("Setting treasury names...");
 
-        (bool success4, bytes memory data4) =
-            address(lottery1Day).call(abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_1day"));
+        (bool success4, bytes memory data4) = address(lottery1Day).call{gas: 200000}(
+            abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_1day")
+        );
         if (success4) {
-            console.log("Treasury name set for Cryptolotto1Day");
+            console.log("[SUCCESS] Treasury name set for Cryptolotto1Day");
         } else {
-            console.log("Failed to set treasury name for Cryptolotto1Day");
+            console.log("[FAILED] Treasury name set for Cryptolotto1Day");
+            if (data4.length > 0) {
+                console.log("Error data:", vm.toString(data4));
+            }
         }
 
-        (bool success5, bytes memory data5) =
-            address(lottery7Days).call(abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_7days"));
+        (bool success5, bytes memory data5) = address(lottery7Days).call{gas: 200000}(
+            abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_7days")
+        );
         if (success5) {
-            console.log("Treasury name set for Cryptolotto7Days");
+            console.log("[SUCCESS] Treasury name set for Cryptolotto7Days");
         } else {
-            console.log("Failed to set treasury name for Cryptolotto7Days");
+            console.log("[FAILED] Treasury name set for Cryptolotto7Days");
+            if (data5.length > 0) {
+                console.log("Error data:", vm.toString(data5));
+            }
         }
 
-        (bool success6, bytes memory data6) =
-            address(lotteryAd).call(abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_ad"));
+        (bool success6, bytes memory data6) = address(lotteryAd).call{gas: 200000}(
+            abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_ad")
+        );
         if (success6) {
-            console.log("Treasury name set for CryptolottoAd");
+            console.log("[SUCCESS] Treasury name set for CryptolottoAd");
         } else {
-            console.log("Failed to set treasury name for CryptolottoAd");
+            console.log("[FAILED] Treasury name set for CryptolottoAd");
+            if (data6.length > 0) {
+                console.log("Error data:", vm.toString(data6));
+            }
         }
         console.log("Treasury names setup completed");
 
         // Set AdToken for Ad Lottery
         console.log("Setting AdToken for Ad Lottery...");
         (bool success7, bytes memory data7) =
-            address(lotteryAd).call(abi.encodeWithSignature("setAdToken(address)", address(adToken)));
+            address(lotteryAd).call{gas: 200000}(abi.encodeWithSignature("setAdToken(address)", address(adToken)));
         if (success7) {
-            console.log("AdToken set for CryptolottoAd");
+            console.log("[SUCCESS] AdToken set for CryptolottoAd");
         } else {
-            console.log("Failed to set AdToken for CryptolottoAd");
+            console.log("[FAILED] AdToken set for CryptolottoAd");
+            if (data7.length > 0) {
+                console.log("Error data:", vm.toString(data7));
+            }
         }
         console.log("AdToken setup completed");
 
         // Set test mode for easier testing
         console.log("Setting test mode...");
         (bool success8, bytes memory data8) =
-            address(lottery1Day).call(abi.encodeWithSignature("setTestMode(bool)", true));
+            address(lottery1Day).call{gas: 200000}(abi.encodeWithSignature("setTestMode(bool)", true));
         if (success8) {
-            console.log("Test mode enabled for Cryptolotto1Day");
+            console.log("[SUCCESS] Test mode enabled for Cryptolotto1Day");
         } else {
-            console.log("Failed to enable test mode for Cryptolotto1Day");
+            console.log("[FAILED] Test mode failed for Cryptolotto1Day");
+            if (data8.length > 0) {
+                console.log("Error data:", vm.toString(data8));
+            }
         }
 
         (bool success9, bytes memory data9) =
-            address(lottery7Days).call(abi.encodeWithSignature("setTestMode(bool)", true));
+            address(lottery7Days).call{gas: 200000}(abi.encodeWithSignature("setTestMode(bool)", true));
         if (success9) {
-            console.log("Test mode enabled for Cryptolotto7Days");
+            console.log("[SUCCESS] Test mode enabled for Cryptolotto7Days");
         } else {
-            console.log("Failed to enable test mode for Cryptolotto7Days");
+            console.log("[FAILED] Test mode failed for Cryptolotto7Days");
+            if (data9.length > 0) {
+                console.log("Error data:", vm.toString(data9));
+            }
         }
 
         (bool success10, bytes memory data10) =
-            address(lotteryAd).call(abi.encodeWithSignature("setTestMode(bool)", true));
+            address(lotteryAd).call{gas: 200000}(abi.encodeWithSignature("setTestMode(bool)", true));
         if (success10) {
-            console.log("Test mode enabled for CryptolottoAd");
+            console.log("[SUCCESS] Test mode enabled for CryptolottoAd");
         } else {
-            console.log("Failed to enable test mode for CryptolottoAd");
+            console.log("[FAILED] Test mode failed for CryptolottoAd");
+            if (data10.length > 0) {
+                console.log("Error data:", vm.toString(data10));
+            }
         }
         console.log("Test mode setup completed");
 
         // Add lottery contracts as authorized contracts in TreasuryManager
         console.log("Adding lottery contracts as authorized contracts...");
-        (bool success11, bytes memory data11) = address(treasuryManager).call(
+        (bool success11, bytes memory data11) = address(treasuryManager).call{gas: 200000}(
             abi.encodeWithSignature("addAuthorizedContract(address)", address(lottery1Day))
         );
         if (success11) {
-            console.log("Cryptolotto1Day authorized in TreasuryManager");
+            console.log("[SUCCESS] Cryptolotto1Day authorized in TreasuryManager");
         } else {
-            console.log("Failed to authorize Cryptolotto1Day");
+            console.log("[FAILED] Cryptolotto1Day authorization failed");
+            if (data11.length > 0) {
+                console.log("Error data:", vm.toString(data11));
+            }
         }
 
-        (bool success12, bytes memory data12) = address(treasuryManager).call(
+        (bool success12, bytes memory data12) = address(treasuryManager).call{gas: 200000}(
             abi.encodeWithSignature("addAuthorizedContract(address)", address(lottery7Days))
         );
         if (success12) {
-            console.log("Cryptolotto7Days authorized in TreasuryManager");
+            console.log("[SUCCESS] Cryptolotto7Days authorized in TreasuryManager");
         } else {
-            console.log("Failed to authorize Cryptolotto7Days");
+            console.log("[FAILED] Cryptolotto7Days authorization failed");
+            if (data12.length > 0) {
+                console.log("Error data:", vm.toString(data12));
+            }
         }
 
-        (bool success13, bytes memory data13) =
-            address(treasuryManager).call(abi.encodeWithSignature("addAuthorizedContract(address)", address(lotteryAd)));
+        (bool success13, bytes memory data13) = address(treasuryManager).call{gas: 200000}(
+            abi.encodeWithSignature("addAuthorizedContract(address)", address(lotteryAd))
+        );
         if (success13) {
-            console.log("CryptolottoAd authorized in TreasuryManager");
+            console.log("[SUCCESS] CryptolottoAd authorized in TreasuryManager");
         } else {
-            console.log("Failed to authorize CryptolottoAd");
+            console.log("[FAILED] CryptolottoAd authorization failed");
+            if (data13.length > 0) {
+                console.log("Error data:", vm.toString(data13));
+            }
         }
         console.log("Authorization setup completed");
 
         console.log("Contract setup completed successfully");
 
+        // IMPORTANT: Wait a few blocks to ensure transactions are mined
+        console.log("Waiting for transactions to be mined...");
+        vm.roll(block.number + 2);
+
         // Verify setup by calling functions
         console.log("Verifying setup...");
 
         // Check if registry is set
-        (bool verify1, bytes memory verifyData1) = address(lottery1Day).call(abi.encodeWithSignature("registry()"));
+        (bool verify1, bytes memory verifyData1) =
+            address(lottery1Day).call{gas: 200000}(abi.encodeWithSignature("registry()"));
         if (verify1) {
             console.log("[SUCCESS] Registry verification successful for Cryptolotto1Day");
         } else {
             console.log("[FAILED] Registry verification failed for Cryptolotto1Day");
+            if (verifyData1.length > 0) {
+                console.log("Verification error data:", vm.toString(verifyData1));
+            }
         }
 
         // Test game config to ensure everything is working
-        (bool verify2, bytes memory verifyData2) = address(lottery1Day).call(abi.encodeWithSignature("getGameConfig()"));
+        (bool verify2, bytes memory verifyData2) =
+            address(lottery1Day).call{gas: 200000}(abi.encodeWithSignature("getGameConfig()"));
         if (verify2) {
             console.log("[SUCCESS] Game config accessible for Cryptolotto1Day");
         } else {
             console.log("[FAILED] Game config failed for Cryptolotto1Day");
+            if (verifyData2.length > 0) {
+                console.log("Verification error data:", vm.toString(verifyData2));
+            }
         }
 
         console.log("Setup verification completed");
     }
 
     function _registerContracts() internal {
-        // Register contracts in registry
+        // Register contracts in registry using low-level calls to ensure transaction broadcasting
+        console.log("Registering contracts in registry...");
+
         string[] memory names = new string[](9);
         address[] memory contracts = new address[](9);
 
@@ -371,7 +432,19 @@ contract DeployScript is Script {
         contracts[7] = address(lottery7Days);
         contracts[8] = address(lotteryAd);
 
-        registry.registerBatchContracts(names, contracts);
+        // Use low-level call to ensure transaction broadcasting
+        (bool success, bytes memory data) = address(registry).call{gas: 500000}(
+            abi.encodeWithSignature("registerBatchContracts(string[],address[])", names, contracts)
+        );
+
+        if (success) {
+            console.log("[SUCCESS] All contracts registered successfully");
+        } else {
+            console.log("[FAILED] Contract registration failed");
+            if (data.length > 0) {
+                console.log("Error data:", vm.toString(data));
+            }
+        }
     }
 
     function _logDeploymentSummary() internal {
