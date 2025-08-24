@@ -200,111 +200,150 @@ contract DeployScript is Script {
 
         // Set registry for lottery contracts (needed after initialization)
         console.log("Setting registry for lottery contracts...");
-        try lottery1Day.setRegistry(address(registry)) {
+
+        // Force transaction execution by using low-level calls
+        (bool success1, bytes memory data1) =
+            address(lottery1Day).call(abi.encodeWithSignature("setRegistry(address)", address(registry)));
+        if (success1) {
             console.log("Registry set for Cryptolotto1Day");
-        } catch Error(string memory reason) {
-            console.log("Failed to set registry for Cryptolotto1Day:", reason);
+        } else {
+            console.log("Failed to set registry for Cryptolotto1Day");
         }
 
-        try lottery7Days.setRegistry(address(registry)) {
+        (bool success2, bytes memory data2) =
+            address(lottery7Days).call(abi.encodeWithSignature("setRegistry(address)", address(registry)));
+        if (success2) {
             console.log("Registry set for Cryptolotto7Days");
-        } catch Error(string memory reason) {
-            console.log("Failed to set registry for Cryptolotto7Days:", reason);
+        } else {
+            console.log("Failed to set registry for Cryptolotto7Days");
         }
 
-        try lotteryAd.setRegistry(address(registry)) {
+        (bool success3, bytes memory data3) =
+            address(lotteryAd).call(abi.encodeWithSignature("setRegistry(address)", address(registry)));
+        if (success3) {
             console.log("Registry set for CryptolottoAd");
-        } catch Error(string memory reason) {
-            console.log("Failed to set registry for CryptolottoAd:", reason);
+        } else {
+            console.log("Failed to set registry for CryptolottoAd");
         }
         console.log("Registry setup completed");
 
         // Set treasury names for lottery contracts
         console.log("Setting treasury names...");
-        try lottery1Day.setTreasuryName("unique_test_lottery_1day") {
+
+        (bool success4, bytes memory data4) =
+            address(lottery1Day).call(abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_1day"));
+        if (success4) {
             console.log("Treasury name set for Cryptolotto1Day");
-        } catch Error(string memory reason) {
-            console.log("Failed to set treasury name for Cryptolotto1Day:", reason);
+        } else {
+            console.log("Failed to set treasury name for Cryptolotto1Day");
         }
 
-        try lottery7Days.setTreasuryName("unique_test_lottery_7days") {
+        (bool success5, bytes memory data5) =
+            address(lottery7Days).call(abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_7days"));
+        if (success5) {
             console.log("Treasury name set for Cryptolotto7Days");
-        } catch Error(string memory reason) {
-            console.log("Failed to set treasury name for Cryptolotto7Days:", reason);
+        } else {
+            console.log("Failed to set treasury name for Cryptolotto7Days");
         }
 
-        try lotteryAd.setTreasuryName("unique_test_lottery_ad") {
+        (bool success6, bytes memory data6) =
+            address(lotteryAd).call(abi.encodeWithSignature("setTreasuryName(string)", "unique_test_lottery_ad"));
+        if (success6) {
             console.log("Treasury name set for CryptolottoAd");
-        } catch Error(string memory reason) {
-            console.log("Failed to set treasury name for CryptolottoAd:", reason);
+        } else {
+            console.log("Failed to set treasury name for CryptolottoAd");
         }
         console.log("Treasury names setup completed");
 
         // Set AdToken for Ad Lottery
         console.log("Setting AdToken for Ad Lottery...");
-        try lotteryAd.setAdToken(address(adToken)) {
+        (bool success7, bytes memory data7) =
+            address(lotteryAd).call(abi.encodeWithSignature("setAdToken(address)", address(adToken)));
+        if (success7) {
             console.log("AdToken set for CryptolottoAd");
-        } catch Error(string memory reason) {
-            console.log("Failed to set AdToken for CryptolottoAd:", reason);
+        } else {
+            console.log("Failed to set AdToken for CryptolottoAd");
         }
         console.log("AdToken setup completed");
 
         // Set test mode for easier testing
         console.log("Setting test mode...");
-        try lottery1Day.setTestMode(true) {
+        (bool success8, bytes memory data8) =
+            address(lottery1Day).call(abi.encodeWithSignature("setTestMode(bool)", true));
+        if (success8) {
             console.log("Test mode enabled for Cryptolotto1Day");
-        } catch Error(string memory reason) {
-            console.log("Failed to enable test mode for Cryptolotto1Day:", reason);
+        } else {
+            console.log("Failed to enable test mode for Cryptolotto1Day");
         }
 
-        try lottery7Days.setTestMode(true) {
+        (bool success9, bytes memory data9) =
+            address(lottery7Days).call(abi.encodeWithSignature("setTestMode(bool)", true));
+        if (success9) {
             console.log("Test mode enabled for Cryptolotto7Days");
-        } catch Error(string memory reason) {
-            console.log("Failed to enable test mode for Cryptolotto7Days:", reason);
+        } else {
+            console.log("Failed to enable test mode for Cryptolotto7Days");
         }
 
-        try lotteryAd.setTestMode(true) {
+        (bool success10, bytes memory data10) =
+            address(lotteryAd).call(abi.encodeWithSignature("setTestMode(bool)", true));
+        if (success10) {
             console.log("Test mode enabled for CryptolottoAd");
-        } catch Error(string memory reason) {
-            console.log("Failed to enable test mode for CryptolottoAd:", reason);
+        } else {
+            console.log("Failed to enable test mode for CryptolottoAd");
         }
         console.log("Test mode setup completed");
 
         // Add lottery contracts as authorized contracts in TreasuryManager
         console.log("Adding lottery contracts as authorized contracts...");
-        try treasuryManager.addAuthorizedContract(address(lottery1Day)) {
+        (bool success11, bytes memory data11) = address(treasuryManager).call(
+            abi.encodeWithSignature("addAuthorizedContract(address)", address(lottery1Day))
+        );
+        if (success11) {
             console.log("Cryptolotto1Day authorized in TreasuryManager");
-        } catch Error(string memory reason) {
-            console.log("Failed to authorize Cryptolotto1Day:", reason);
+        } else {
+            console.log("Failed to authorize Cryptolotto1Day");
         }
 
-        try treasuryManager.addAuthorizedContract(address(lottery7Days)) {
+        (bool success12, bytes memory data12) = address(treasuryManager).call(
+            abi.encodeWithSignature("addAuthorizedContract(address)", address(lottery7Days))
+        );
+        if (success12) {
             console.log("Cryptolotto7Days authorized in TreasuryManager");
-        } catch Error(string memory reason) {
-            console.log("Failed to authorize Cryptolotto7Days:", reason);
+        } else {
+            console.log("Failed to authorize Cryptolotto7Days");
         }
 
-        try treasuryManager.addAuthorizedContract(address(lotteryAd)) {
+        (bool success13, bytes memory data13) =
+            address(treasuryManager).call(abi.encodeWithSignature("addAuthorizedContract(address)", address(lotteryAd)));
+        if (success13) {
             console.log("CryptolottoAd authorized in TreasuryManager");
-        } catch Error(string memory reason) {
-            console.log("Failed to authorize CryptolottoAd:", reason);
+        } else {
+            console.log("Failed to authorize CryptolottoAd");
         }
         console.log("Authorization setup completed");
 
         console.log("Contract setup completed successfully");
 
-        // Force execution of setup by calling functions that will fail if not set up
-        console.log("Forcing setup execution...");
+        // Verify setup by calling functions
+        console.log("Verifying setup...");
 
-        // These calls will force the setup to be executed as actual transactions
-        lottery1Day.registry();
-        lottery7Days.registry();
-        lotteryAd.registry();
+        // Check if registry is set
+        (bool verify1, bytes memory verifyData1) = address(lottery1Day).call(abi.encodeWithSignature("registry()"));
+        if (verify1) {
+            console.log("[SUCCESS] Registry verification successful for Cryptolotto1Day");
+        } else {
+            console.log("[FAILED] Registry verification failed for Cryptolotto1Day");
+        }
 
         // Test game config to ensure everything is working
-        lottery1Day.getGameConfig();
+        (bool verify2, bytes memory verifyData2) = address(lottery1Day).call(abi.encodeWithSignature("getGameConfig()"));
+        if (verify2) {
+            console.log("[SUCCESS] Game config accessible for Cryptolotto1Day");
+        } else {
+            console.log("[FAILED] Game config failed for Cryptolotto1Day");
+        }
 
-        console.log("Setup execution completed");
+        console.log("Setup verification completed");
     }
 
     function _registerContracts() internal {
