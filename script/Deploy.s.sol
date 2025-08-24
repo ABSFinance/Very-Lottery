@@ -293,36 +293,18 @@ contract DeployScript is Script {
 
         console.log("Contract setup completed successfully");
 
-        // Verify setup was successful
-        console.log("Verifying setup...");
+        // Force execution of setup by calling functions that will fail if not set up
+        console.log("Forcing setup execution...");
 
-        // Check if registry is set
-        try lottery1Day.registry() {
-            console.log("[SUCCESS] Registry verification successful for Cryptolotto1Day");
-        } catch {
-            console.log("[FAILED] Registry verification failed for Cryptolotto1Day");
-        }
+        // These calls will force the setup to be executed as actual transactions
+        lottery1Day.registry();
+        lottery7Days.registry();
+        lotteryAd.registry();
 
-        try lottery7Days.registry() {
-            console.log("[SUCCESS] Registry verification successful for Cryptolotto7Days");
-        } catch {
-            console.log("[FAILED] Registry verification failed for Cryptolotto7Days");
-        }
+        // Test game config to ensure everything is working
+        lottery1Day.getGameConfig();
 
-        try lotteryAd.registry() {
-            console.log("[SUCCESS] Registry verification successful for CryptolottoAd");
-        } catch {
-            console.log("[FAILED] Registry verification failed for CryptolottoAd");
-        }
-
-        // Check if game config is accessible
-        try lottery1Day.getGameConfig() {
-            console.log("[SUCCESS] Game config accessible for Cryptolotto1Day");
-        } catch Error(string memory reason) {
-            console.log("[FAILED] Game config failed for Cryptolotto1Day:", reason);
-        }
-
-        console.log("Setup verification completed");
+        console.log("Setup execution completed");
     }
 
     function _registerContracts() internal {
