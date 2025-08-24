@@ -119,24 +119,15 @@ contract DeployScript is Script {
         // Deploy implementations
         console.log("Deploying Cryptolotto1Day implementation...");
         Cryptolotto1Day implementation1Day = new Cryptolotto1Day();
-        console.log(
-            "Cryptolotto1Day implementation deployed at:",
-            address(implementation1Day)
-        );
+        console.log("Cryptolotto1Day implementation deployed at:", address(implementation1Day));
 
         console.log("Deploying Cryptolotto7Days implementation...");
         Cryptolotto7Days implementation7Days = new Cryptolotto7Days();
-        console.log(
-            "Cryptolotto7Days implementation deployed at:",
-            address(implementation7Days)
-        );
+        console.log("Cryptolotto7Days implementation deployed at:", address(implementation7Days));
 
         console.log("Deploying CryptolottoAd implementation...");
         CryptolottoAd implementationAd = new CryptolottoAd();
-        console.log(
-            "CryptolottoAd implementation deployed at:",
-            address(implementationAd)
-        );
+        console.log("CryptolottoAd implementation deployed at:", address(implementationAd));
 
         // Get deployer address
         address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
@@ -183,24 +174,15 @@ contract DeployScript is Script {
 
         // Deploy proxy contracts
         console.log("Creating ERC1967Proxy for Cryptolotto1Day...");
-        ERC1967Proxy proxy1Day = new ERC1967Proxy(
-            address(implementation1Day),
-            initData1Day
-        );
+        ERC1967Proxy proxy1Day = new ERC1967Proxy(address(implementation1Day), initData1Day);
         console.log("Cryptolotto1Day proxy created at:", address(proxy1Day));
 
         console.log("Creating ERC1967Proxy for Cryptolotto7Days...");
-        ERC1967Proxy proxy7Days = new ERC1967Proxy(
-            address(implementation7Days),
-            initData7Days
-        );
+        ERC1967Proxy proxy7Days = new ERC1967Proxy(address(implementation7Days), initData7Days);
         console.log("Cryptolotto7Days proxy created at:", address(proxy7Days));
 
         console.log("Creating ERC1967Proxy for CryptolottoAd...");
-        ERC1967Proxy proxyAd = new ERC1967Proxy(
-            address(implementationAd),
-            initDataAd
-        );
+        ERC1967Proxy proxyAd = new ERC1967Proxy(address(implementationAd), initDataAd);
         console.log("CryptolottoAd proxy created at:", address(proxyAd));
 
         // Cast proxies to their respective types
@@ -242,28 +224,19 @@ contract DeployScript is Script {
         try lottery1Day.setTreasuryName("unique_test_lottery_1day") {
             console.log("Treasury name set for Cryptolotto1Day");
         } catch Error(string memory reason) {
-            console.log(
-                "Failed to set treasury name for Cryptolotto1Day:",
-                reason
-            );
+            console.log("Failed to set treasury name for Cryptolotto1Day:", reason);
         }
 
         try lottery7Days.setTreasuryName("unique_test_lottery_7days") {
             console.log("Treasury name set for Cryptolotto7Days");
         } catch Error(string memory reason) {
-            console.log(
-                "Failed to set treasury name for Cryptolotto7Days:",
-                reason
-            );
+            console.log("Failed to set treasury name for Cryptolotto7Days:", reason);
         }
 
         try lotteryAd.setTreasuryName("unique_test_lottery_ad") {
             console.log("Treasury name set for CryptolottoAd");
         } catch Error(string memory reason) {
-            console.log(
-                "Failed to set treasury name for CryptolottoAd:",
-                reason
-            );
+            console.log("Failed to set treasury name for CryptolottoAd:", reason);
         }
         console.log("Treasury names setup completed");
 
@@ -281,28 +254,19 @@ contract DeployScript is Script {
         try lottery1Day.setTestMode(true) {
             console.log("Test mode enabled for Cryptolotto1Day");
         } catch Error(string memory reason) {
-            console.log(
-                "Failed to enable test mode for Cryptolotto1Day:",
-                reason
-            );
+            console.log("Failed to enable test mode for Cryptolotto1Day:", reason);
         }
 
         try lottery7Days.setTestMode(true) {
             console.log("Test mode enabled for Cryptolotto7Days");
         } catch Error(string memory reason) {
-            console.log(
-                "Failed to enable test mode for Cryptolotto7Days:",
-                reason
-            );
+            console.log("Failed to enable test mode for Cryptolotto7Days:", reason);
         }
 
         try lotteryAd.setTestMode(true) {
             console.log("Test mode enabled for CryptolottoAd");
         } catch Error(string memory reason) {
-            console.log(
-                "Failed to enable test mode for CryptolottoAd:",
-                reason
-            );
+            console.log("Failed to enable test mode for CryptolottoAd:", reason);
         }
         console.log("Test mode setup completed");
 
@@ -334,43 +298,28 @@ contract DeployScript is Script {
 
         // Check if registry is set
         try lottery1Day.registry() {
-            console.log(
-                "[SUCCESS] Registry verification successful for Cryptolotto1Day"
-            );
+            console.log("[SUCCESS] Registry verification successful for Cryptolotto1Day");
         } catch {
-            console.log(
-                "[FAILED] Registry verification failed for Cryptolotto1Day"
-            );
+            console.log("[FAILED] Registry verification failed for Cryptolotto1Day");
         }
 
         try lottery7Days.registry() {
-            console.log(
-                "[SUCCESS] Registry verification successful for Cryptolotto7Days"
-            );
+            console.log("[SUCCESS] Registry verification successful for Cryptolotto7Days");
         } catch {
-            console.log(
-                "[FAILED] Registry verification failed for Cryptolotto7Days"
-            );
+            console.log("[FAILED] Registry verification failed for Cryptolotto7Days");
         }
 
         try lotteryAd.registry() {
-            console.log(
-                "[SUCCESS] Registry verification successful for CryptolottoAd"
-            );
+            console.log("[SUCCESS] Registry verification successful for CryptolottoAd");
         } catch {
-            console.log(
-                "[FAILED] Registry verification failed for CryptolottoAd"
-            );
+            console.log("[FAILED] Registry verification failed for CryptolottoAd");
         }
 
         // Check if game config is accessible
         try lottery1Day.getGameConfig() {
             console.log("[SUCCESS] Game config accessible for Cryptolotto1Day");
         } catch Error(string memory reason) {
-            console.log(
-                "[FAILED] Game config failed for Cryptolotto1Day:",
-                reason
-            );
+            console.log("[FAILED] Game config failed for Cryptolotto1Day:", reason);
         }
 
         console.log("Setup verification completed");
@@ -438,29 +387,14 @@ contract DeployScript is Script {
         console.log("=== END ADDRESSES ===");
 
         // Output addresses in GitHub Actions friendly format
-        console.log(
-            "::set-output name=CRYPTOLOTTO_1DAY::",
-            address(lottery1Day)
-        );
-        console.log(
-            "::set-output name=CRYPTOLOTTO_7DAYS::",
-            address(lottery7Days)
-        );
+        console.log("::set-output name=CRYPTOLOTTO_1DAY::", address(lottery1Day));
+        console.log("::set-output name=CRYPTOLOTTO_7DAYS::", address(lottery7Days));
         console.log("::set-output name=CRYPTOLOTTO_AD::", address(lotteryAd));
-        console.log(
-            "::set-output name=TREASURY_MANAGER::",
-            address(treasuryManager)
-        );
+        console.log("::set-output name=TREASURY_MANAGER::", address(treasuryManager));
         console.log("::set-output name=CONTRACT_REGISTRY::", address(registry));
         console.log("::set-output name=STATS_AGGREGATOR::", address(stats));
-        console.log(
-            "::set-output name=FUNDS_DISTRIBUTOR::",
-            address(fundsDistributor)
-        );
-        console.log(
-            "::set-output name=CRYPTOLOTTO_REFERRAL::",
-            address(referral)
-        );
+        console.log("::set-output name=FUNDS_DISTRIBUTOR::", address(fundsDistributor));
+        console.log("::set-output name=CRYPTOLOTTO_REFERRAL::", address(referral));
         console.log("::set-output name=AD_TOKEN::", address(adToken));
         console.log("::set-output name=OWNABLE::", address(ownable));
     }
