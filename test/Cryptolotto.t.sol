@@ -204,23 +204,23 @@ contract CryptolottoTest is Test {
         emit log_string("About to create treasury 1day");
 
         vm.prank(treasuryOwner);
-        treasuryManager.createTreasury("Cryptolotto1Day", 100000 ether);
+        treasuryManager.createTreasury("Cryptolotto1Day", 0);
 
         emit log_string("Treasury 1day created");
 
         vm.prank(treasuryOwner);
-        treasuryManager.createTreasury("Cryptolotto7Days", 100000 ether);
+        treasuryManager.createTreasury("Cryptolotto7Days", 0);
 
         emit log_string("Treasury 7days created");
 
         vm.prank(treasuryOwner);
-        treasuryManager.createTreasury("CryptolottoAd", 100000 ether);
+        treasuryManager.createTreasury("CryptolottoAd", 0);
 
         emit log_string("Treasury Ad created");
 
         // Create additional treasury for specific tests
         vm.prank(treasuryOwner);
-        treasuryManager.createTreasury("unique_test_lottery_1day", 100000 ether);
+        treasuryManager.createTreasury("unique_test_lottery_1day", 0);
 
         emit log_string("Unique test treasury created");
 

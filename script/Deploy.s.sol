@@ -105,9 +105,9 @@ contract DeployScript is Script {
 
         // Create treasuries
         console.log("Creating treasuries...");
-        treasuryManager.createTreasury("unique_test_lottery_1day", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_7days", 1000000000000000000000);
-        treasuryManager.createTreasury("unique_test_lottery_ad", 1000000000000000000000);
+        treasuryManager.createTreasury("unique_test_lottery_1day", 0);
+        treasuryManager.createTreasury("unique_test_lottery_7days", 0);
+        treasuryManager.createTreasury("unique_test_lottery_ad", 0);
         console.log("Treasuries created successfully");
 
         console.log("Core contracts deployment completed");
