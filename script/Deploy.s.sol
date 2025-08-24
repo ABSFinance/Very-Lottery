@@ -38,6 +38,7 @@ contract DeployScript is Script {
         console.log("Deployer address:", deployer);
 
         vm.startBroadcast(deployerPrivateKey);
+        console.log("Broadcast started successfully");
 
         // Deploy core contracts
         console.log("Deploying core contracts...");
@@ -50,16 +51,17 @@ contract DeployScript is Script {
         console.log("Lottery contracts deployed successfully");
 
         // IMPORTANT: Setup contracts INSIDE broadcast to ensure they are actual transactions
-        console.log("Setting up contracts...");
+        console.log("=== STARTING CONTRACT SETUP ===");
         _setupContracts();
-        console.log("Contract setup completed");
+        console.log("=== CONTRACT SETUP COMPLETED ===");
 
         // IMPORTANT: Register contracts INSIDE broadcast to ensure they are actual transactions
-        console.log("Registering contracts...");
+        console.log("=== STARTING CONTRACT REGISTRATION ===");
         _registerContracts();
-        console.log("Contracts registered successfully");
+        console.log("=== CONTRACT REGISTRATION COMPLETED ===");
 
         vm.stopBroadcast();
+        console.log("Broadcast stopped successfully");
 
         // Log deployment summary
         console.log("Generating deployment summary...");
@@ -196,6 +198,7 @@ contract DeployScript is Script {
     }
 
     function _setupContracts() internal {
+        console.log("=== _setupContracts() FUNCTION CALLED ===");
         console.log("Setting up contracts...");
 
         // IMPORTANT: Proxy contracts are already initialized during deployment
@@ -405,6 +408,7 @@ contract DeployScript is Script {
     }
 
     function _registerContracts() internal {
+        console.log("=== _registerContracts() FUNCTION CALLED ===");
         // Register contracts in registry using low-level calls to ensure transaction broadcasting
         console.log("Registering contracts in registry...");
 
