@@ -49,17 +49,17 @@ contract DeployScript is Script {
         _deployLotteryContracts();
         console.log("Lottery contracts deployed successfully");
 
-        vm.stopBroadcast();
-
-        // IMPORTANT: Setup contracts AFTER broadcast to ensure they are actual transactions
+        // IMPORTANT: Setup contracts INSIDE broadcast to ensure they are actual transactions
         console.log("Setting up contracts...");
         _setupContracts();
         console.log("Contract setup completed");
 
-        // IMPORTANT: Register contracts AFTER broadcast to ensure they are actual transactions
+        // IMPORTANT: Register contracts INSIDE broadcast to ensure they are actual transactions
         console.log("Registering contracts...");
         _registerContracts();
         console.log("Contracts registered successfully");
+
+        vm.stopBroadcast();
 
         // Log deployment summary
         console.log("Generating deployment summary...");
@@ -373,7 +373,6 @@ contract DeployScript is Script {
 
         // IMPORTANT: Wait a few blocks to ensure transactions are mined
         console.log("Waiting for transactions to be mined...");
-        vm.roll(block.number + 2);
 
         // Verify setup by calling functions
         console.log("Verifying setup...");
