@@ -4,6 +4,9 @@ cache/
 broadcast/
 script/
 
+# Frontend
+frontend/
+
 # Node modules (if any)
 node_modules/
 npm-debug.log*
