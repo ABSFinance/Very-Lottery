@@ -4,9 +4,6 @@ cache/
 broadcast/
 script/
 
-# Frontend
-frontend/
-
 # Node modules (if any)
 node_modules/
 npm-debug.log*
@@ -126,7 +123,6 @@ script/
 
 # Gas reports
 gas_report.txt
-
 # Deployment artifacts
 deployments/
 
