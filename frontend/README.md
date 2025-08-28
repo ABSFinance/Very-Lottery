@@ -1,107 +1,256 @@
-# VERY BOLT - WEPIN 로그인 통합 앱
+# ETH LOTTERY - Smart Contract Lottery System
 
-VERY 토큰을 받을 수 있는 모바일 스타일 웹 애플리케이션입니다. WEPIN 지갑과 VeryNetwork(Chain ID: 4613) 블록체인 상호작용을 지원합니다.
+A comprehensive smart contract lottery system built with Foundry and React, featuring multiple lottery types and referral systems.
 
-## 🚀 주요 기능
+## 🚀 Project Overview
 
-- **WEPIN 지갑 연동**: 블록체인 지갑 기능
-- **VeryNetwork 지원**: Chain ID 4613 전용 블록체인 상호작용
-- **소셜 로그인**: Google, Apple, Discord, Naver, Facebook, Line, Kakao 등
-- **VERY 토큰 시스템**: 당첨금, 참여자 관리
-- **다국어 지원**: 한국어, 영어, 일본어
-- **반응형 디자인**: 모바일 최적화 UI
+This project consists of two main components:
+- **Smart Contracts**: Solidity contracts for lottery management, treasury, and referral systems
+- **Frontend**: React-based web application for lottery interaction
 
-## 📋 설치 및 설정
+## 🏗️ Project Structure
 
-### 1. 의존성 설치
+```
+Eth-Lottery/
+├── contracts/          # Smart contract source code
+├── script/            # Foundry deployment scripts
+├── test/              # Smart contract tests
+├── frontend/          # React web application
+├── lib/               # Foundry dependencies
+└── docs/              # Project documentation
+```
 
+## 🔧 Smart Contracts
+
+### Core Contracts
+- **Cryptolotto1Day**: Daily lottery system
+- **Cryptolotto7Days**: Weekly jackpot system  
+- **CryptolottoAd**: Advertisement-based lottery
+- **TreasuryManager**: Treasury management system
+- **CryptolottoReferral**: Referral and reward system
+
+### Features
+- Multiple lottery types (Daily, Weekly, Ads)
+- Referral system with rewards
+- Treasury management
+- Circuit breaker functionality
+- Comprehensive testing suite
+
+## 🎯 Frontend Application
+
+### Features
+- **WEPIN Wallet Integration**: Blockchain wallet functionality
+- **VeryNetwork Support**: Chain ID 4613 blockchain interaction
+- **Social Login**: Google, Apple, Discord, Naver, Facebook, Line, Kakao
+- **VERY Token System**: Prize management and participant tracking
+- **Multi-language Support**: Korean, English, Japanese
+- **Responsive Design**: Mobile-optimized UI
+
+### Technology Stack
+- **Frontend**: React + TypeScript
+- **Styling**: Tailwind CSS
+- **Wallet**: WEPIN SDK
+- **Blockchain**: VeryNetwork (Chain ID: 4613)
+- **Build Tool**: Vite
+
+## 📋 Installation & Setup
+
+### Prerequisites
+- Node.js 18.x or higher
+- Foundry (for smart contract development)
+- Git
+
+### 1. Clone the Repository
 ```bash
+git clone <repository-url>
+cd Eth-Lottery
+```
+
+### 2. Smart Contract Setup
+```bash
+# Install Foundry dependencies
+forge install
+
+# Build contracts
+forge build
+
+# Run tests
+forge test
+```
+
+### 3. Frontend Setup
+```bash
+cd frontend
+
+# Install dependencies
 npm install
-```
 
-### 2. 환경 변수 설정
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
 
-프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가하세요:
-
-```env
-# WEPIN 설정 (WEPIN Workspace에서 발급)
-REACT_APP_WEPIN_APP_ID=your-wepin-app-id
-REACT_APP_WEPIN_APP_KEY=your-wepin-app-key
-
-# 환경 설정
-REACT_APP_ENV=development
-```
-
-### 3. WEPIN 설정
-
-1. [WEPIN Workspace](https://workspace.wepin.io/)에서 앱 등록
-2. App ID와 App Key 발급
-3. 환경 변수에 설정
-
-## 🏃‍♂️ 실행
-
-### 개발 서버 실행
-
-```bash
+# Start development server
 npm run dev
 ```
 
-브라우저에서 `http://localhost:5173`으로 접속
+### 4. Environment Variables
+Create a `.env` file in the frontend directory:
 
-### 빌드
+```env
+# WEPIN Configuration
+VITE_WEPIN_APP_KEY=your-wepin-app-key
 
-```bash
-npm run build
+# Network Configuration
+VITE_RPC_URL=https://rpc.verylabs.io
+VITE_EXPLORER_URL=https://veryscan.io
+
+# Contract Addresses (NEW WORKING CONTRACTS!)
+VITE_CONTRACT_CRYPTOLOTTO_1DAY=your-cryptolotto-1day-contract-address
+VITE_CONTRACT_CRYPTOLOTTO_7DAYS=your-cryptolotto-7days-contract-address
+VITE_CONTRACT_CRYPTOLOTTO_AD=your-cryptolotto-ad-contract-address
+
+# Core Contract Addresses (from previous deployment)
+VITE_CONTRACT_TREASURY_MANAGER=your-treasury-manager-contract-address
+VITE_CONTRACT_REGISTRY=your-registry-contract-address
+VITE_CONTRACT_STATS_AGGREGATOR=your-stats-aggregator-contract-address
+VITE_CONTRACT_FUNDS_DISTRIBUTOR=your-funds-distributor-contract-address
+VITE_CONTRACT_CRYPTOLOTTO_REFERRAL=your-cryptolotto-referral-contract-address
+VITE_CONTRACT_AD_TOKEN=your-ad-token-contract-address
+VITE_CONTRACT_OWNABLE=your-ownable-contract-address
+
+# Deployer Address
+VITE_DEPLOYER_ADDRESS=your-deployer-address
 ```
 
-## 🔧 기술 스택
+## 🏃‍♂️ Running the Project
 
-- **Frontend**: React + TypeScript
-- **Styling**: Tailwind CSS
-- **Wallet**: WEPIN SDK (동적 import)
-- **Blockchain**: VeryNetwork (Chain ID: 4613)
-- **Authentication**: WEPIN OAuth
-- **Build Tool**: Vite
+### Smart Contracts
+```bash
+# Run all tests
+forge test
 
-## 📱 사용법
+# Run specific test suites
+forge test --match-contract Cryptolotto -vv
+forge test --match-contract CryptolottoIntegration -vv
+forge test --match-contract CryptolottoSecurity -vv
 
-1. **로그인**: "WEPIN 로그인" 버튼 클릭
-2. **소셜 계정 선택**: 지원되는 소셜 계정으로 로그인
-3. **VERY 토큰 받기**: 로그인 후 토큰 수령 가능
-4. **VeryNetwork Provider**: "Provider 가져오기" 버튼으로 블록체인 연결
-5. **언어 변경**: 하단 언어 버튼으로 전환
+# Generate coverage report
+forge coverage --report lcov
 
-## 🌐 VeryNetwork 정보
+# Build contracts
+forge build
+```
+
+### Frontend
+```bash
+cd frontend
+
+# Development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 🌐 VeryNetwork Configuration
 
 - **Chain ID**: 4613
 - **Network Name**: VeryNetwork
 - **Provider ID**: `verynetwork`
-- **지원 기능**: EIP-1193 표준 Ethereum Provider
+- **RPC URL**: https://rpc.verylabs.io
+- **Explorer**: https://veryscan.io
 
-## ⚠️ 주의사항
+## 🧪 Testing
 
-- 환경 변수는 반드시 `.env` 파일에 설정
-- WEPIN Workspace에서 앱 등록 필요
-- VeryNetwork 전용으로 설계됨
-- 프로덕션 환경에서는 보안 설정 강화
+### Smart Contract Tests
+```bash
+# Run all tests
+forge test
 
-## 🐛 문제 해결
+# Run with verbose output
+forge test -vv
 
-### 로그인 실패 시
+# Run specific test file
+forge test --match-path test/Cryptolotto.t.sol
 
-- 환경 변수 설정 확인
-- WEPIN 앱 등록 상태 확인
+# Run fuzzing tests
+forge test --match-contract CryptolottoFuzz -vv
+```
 
-### VeryNetwork Provider 연결 실패 시
+### Frontend Tests
+```bash
+cd frontend
+npm test
+```
 
-- WEPIN Provider 초기화 상태 확인
-- 네트워크 연결 상태 확인
+## 📚 Documentation
 
-### 빌드 오류 시
+- **Smart Contracts**: See `contracts/` directory for detailed contract documentation
+- **Deployment**: Check `script/` directory for deployment scripts
+- **Testing**: Review `test/` directory for comprehensive test coverage
+- **CI/CD**: GitHub Actions workflow for automated testing and building
 
-- Node.js 버전 확인 (18.x 이상 권장)
-- 의존성 재설치: `rm -rf node_modules && npm install`
+## 🚀 Deployment
 
-## 📄 라이선스
+### Smart Contracts
+```bash
+# Deploy to Verychain
+forge script script/Deploy.s.sol --rpc-url https://rpc.verylabs.io --broadcast
+```
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+### Frontend
+```bash
+cd frontend
+npm run build
+# Deploy dist/ folder to your hosting service
+```
+
+## ⚠️ Important Notes
+
+- Environment variables must be properly configured
+- WEPIN Workspace app registration required
+- Designed specifically for VeryNetwork
+- Secure private key management for deployment
+- Comprehensive testing recommended before production
+
+## 🐛 Troubleshooting
+
+### Smart Contract Issues
+- Check Foundry installation: `foundryup`
+- Verify dependencies: `forge install`
+- Review test output for specific errors
+
+### Frontend Issues
+- Verify environment variables
+- Check WEPIN app registration status
+- Ensure VeryNetwork provider is available
+- Review browser console for errors
+
+### Build Issues
+- Verify Node.js version (18.x+ recommended)
+- Clear cache: `rm -rf node_modules && npm install`
+- Check Foundry version: `forge --version`
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📞 Support
+
+For issues and questions:
+- Check existing documentation
+- Review test files for examples
+- Open an issue on GitHub
+- Check CI/CD logs for build issues
