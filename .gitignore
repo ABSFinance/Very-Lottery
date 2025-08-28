@@ -2,6 +2,7 @@
 out/
 cache/
 broadcast/
+script/
 
 # Node modules (if any)
 node_modules/
@@ -116,6 +117,9 @@ typechain-types/
 # Coverage
 coverage/
 coverage.json
+
+# Deploy
+script/
 
 # Gas reports
 gas_report.txt
