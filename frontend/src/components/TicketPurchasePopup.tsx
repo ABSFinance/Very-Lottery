@@ -34,15 +34,33 @@ export const TicketPurchasePopup: React.FC<TicketPurchasePopupProps> = ({
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
+  // Check if this is an ADS LUCKY game
+  const isAdsLucky = ticket.id === "ads-lucky";
+  
   // Calculate total price based on game config or fallback to ticket.price
-  const pricePerTicket =
-    ticket.gameConfig?.ticketPrice || `${ticket.price} VERY`;
-  const pricePerTicketNumber = ticket.gameConfig?.ticketPrice
-    ? parseFloat(ticket.gameConfig.ticketPrice.replace(" VERY", ""))
-    : ticket.price;
+  const pricePerTicket = isAdsLucky 
+    ? "1 AD" 
+    : (ticket.gameConfig?.ticketPrice || `${ticket.price} VERY`);
+  const pricePerTicketNumber = isAdsLucky 
+    ? 1 
+    : (ticket.gameConfig?.ticketPrice
+        ? parseFloat(ticket.gameConfig.ticketPrice.replace(/ (AD|VERY)/, ""))
+        : ticket.price);
   const totalPrice = quantity * pricePerTicketNumber;
   const canAfford = userBalance >= totalPrice;
   const isValidQuantity = quantity > 0 && quantity <= ticket.maxQuantity;
+
+  // Get the currency symbol for display
+  const getCurrencySymbol = () => {
+    if (isAdsLucky) return "AD";
+    return "VERY";
+  };
+
+  // Get the currency name for display
+  const getCurrencyName = () => {
+    if (isAdsLucky) return "AD 토큰";
+    return "VERY";
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -208,7 +226,7 @@ export const TicketPurchasePopup: React.FC<TicketPurchasePopupProps> = ({
             <div className="flex justify-between">
               <span className="text-gray-300">총 가격:</span>
               <span className="text-white font-semibold">
-                {totalPrice} VERY
+                {totalPrice} {getCurrencySymbol()}
               </span>
             </div>
             <div className="flex justify-between">
@@ -238,12 +256,12 @@ export const TicketPurchasePopup: React.FC<TicketPurchasePopupProps> = ({
             disabled={!isValidQuantity || !canAfford || isLoading}
             className="w-full h-12 bg-[#F07878] hover:bg-[#E06868] text-white font-semibold text-lg rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "처리중..." : `${totalPrice} VERY로 구매`}
+            {isLoading ? "처리중..." : `${totalPrice} ${getCurrencySymbol()}로 구매`}
           </Button>
 
           {/* User Balance */}
           <p className="text-center text-gray-400 text-sm">
-            {userBalance.toLocaleString()} VERY 보유중
+            {userBalance.toLocaleString()} {getCurrencyName()} 보유중
           </p>
         </CardContent>
       </Card>

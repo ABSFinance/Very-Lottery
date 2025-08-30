@@ -31,6 +31,7 @@ import {
   createDynamicGameConfig,
   fetchReferralStats,
   fetchUserBalance,
+  fetchAdTokenBalance,
   GameType,
   GameConfig,
   GAME_CONFIGS,
@@ -396,8 +397,15 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
           setTotalReferrals(referralStats.totalReferrals);
           setTotalEarnings(referralStats.totalRewards);
 
-          // Fetch user's ETH balance
-          const balance = await fetchUserBalance(account, veryNetworkProvider);
+          // Fetch user's balance based on game type
+          let balance: number;
+          if (gameType === "ads-lucky") {
+            // For ADS LUCKY, fetch AD token balance
+            balance = await fetchAdTokenBalance(account, veryNetworkProvider);
+          } else {
+            // For other games, fetch ETH balance
+            balance = await fetchUserBalance(account, veryNetworkProvider);
+          }
           setUserBalance(balance);
         } catch (e) {
           console.error("Failed to fetch user data:", e);
@@ -777,9 +785,17 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
 
       // Refresh user balance
       console.log("💎 Refreshing user balance...");
-      const newBalance = await fetchUserBalance(account, veryNetworkProvider);
+      let newBalance: number;
+      if (gameType === "ads-lucky") {
+        // For ADS LUCKY, fetch AD token balance
+        newBalance = await fetchAdTokenBalance(account, veryNetworkProvider);
+        console.log("✅ AD token balance refreshed:", newBalance);
+      } else {
+        // For other games, fetch ETH balance
+        newBalance = await fetchUserBalance(account, veryNetworkProvider);
+        console.log("✅ ETH balance refreshed:", newBalance);
+      }
       setUserBalance(newBalance);
-      console.log("✅ User balance refreshed:", newBalance);
 
       // Refresh referral stats
       console.log("👥 Refreshing referral stats...");

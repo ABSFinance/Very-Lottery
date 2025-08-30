@@ -62,7 +62,7 @@ export const GAME_CONFIGS: Record<GameType, GameConfig> = {
     title: "ADS LUCKY",
     description: "광고 시청하고 행운을 얻어라! 무료 티켓의 기회!",
     contractAddress: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_AD || '0x1CE13D1788bDd03ad4d9471FA36622988B2Ca87',
-    ticketPrice: "0 VERY",
+    ticketPrice: "1 AD",
     maxTicketsPerPlayer: 10,
     gameDuration: 86400, // 24 hours in seconds
     feePercentage: 5,
@@ -486,6 +486,32 @@ export const fetchUserBalance = async (
     return balanceInEther;
   } catch (error) {
     console.error("Failed to fetch user balance:", error);
+    return 0;
+  }
+};
+
+// Function to fetch user's AD token balance (hardcoded for now)
+export const fetchAdTokenBalance = async (
+  account: string,
+  provider: any
+): Promise<number> => {
+  try {
+    if (!account || !provider) {
+      return 0;
+    }
+
+    // For now, return hardcoded AD token balance
+    // This can be updated later to actually fetch from the AD token contract
+    const hardcodedAdBalance = 1; // Hardcoded to 25 AD tokens
+    
+    console.log("User AD token balance (hardcoded):", {
+      account,
+      adTokenBalance: hardcodedAdBalance
+    });
+    
+    return hardcodedAdBalance;
+  } catch (error) {
+    console.error("Failed to fetch AD token balance:", error);
     return 0;
   }
 };
