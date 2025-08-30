@@ -1,203 +1,482 @@
-# 🎰 Cryptolotto - Decentralized Lottery Platform
+# ETH LOTTERY - Smart Contract Lottery System
 
-## 📋 **프로젝트 개요**
+A comprehensive smart contract lottery system built with Foundry and React, featuring multiple lottery types and referral systems.
 
-Cryptolotto는 Verychain 블록체인 기반의 탈중앙화 복권 플랫폼입니다. 1일, 7일, Ad Lottery 게임을 지원하며, 안전하고 투명한 복권 시스템을 제공합니다.
+## 🚀 Project Overview
 
-## 🏗️ **아키텍처**
+This project consists of two main components:
+- **Smart Contracts**: Solidity contracts for lottery management, treasury, and referral systems
+- **Frontend**: React-based web application for lottery interaction
+
+## 🏗️ Project Structure
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Cryptolotto Platform                    │
-├─────────────────────────────────────────────────────────────┤
-│  Lottery Games    │  Treasury System   │  Analytics      │
-│  ├─ 1Day Game    │  ├─ Treasury Mgr   │  ├─ Stats Agg   │
-│  ├─ 7Days Game   │  ├─ Funds Dist     │  ├─ Analytics   │
-│  └─ Ad Lottery   │  └─ Referral Sys   │  └─ Monitoring  │
-├─────────────────────────────────────────────────────────────┤
-│  Security & Utils │  Storage System    │  Access Control │
-│  ├─ Circuit Brkr  │  ├─ Storage Layout │  ├─ Ownable     │
-│  ├─ Gas Optimizer │  ├─ Storage Access │  └─ Registry    │
-│  └─ Security Utils│  └─ Storage Opt    │                 │
-└─────────────────────────────────────────────────────────────┘
+Eth-Lottery/
+├── contracts/          # Smart contract source code
+├── script/            # Foundry deployment scripts
+├── test/              # Smart contract tests
+├── frontend/          # React web application
+├── lib/               # Foundry dependencies
+└── docs/              # Project documentation
 ```
 
-## 🚀 **CI/CD 파이프라인**
+## 🔄 **Complete System Flow Diagram**
 
-### **자동화된 워크플로우**
+```mermaid
+graph TB
+    subgraph "🌐 User Interface Layer"
+        U[👤 User]
+        M[Mobile App]
+        W[Web App]
+        U --> M
+        U --> W
+    end
 
-1. **테스트 자동화** ✅
-   - 모든 테스트 자동 실행
-   - 단위 테스트, 통합 테스트, Fuzzing 테스트
-   - 성능 테스트 및 보안 테스트
+    subgraph "🔐 Authentication & Wallet"
+        WEPIN[WEPIN SDK]
+        OAUTH[OAuth Providers]
+        WALLET[Wallet Management]
+        OAUTH --> WEPIN
+        WEPIN --> WALLET
+    end
 
-2. **빌드 자동화** ✅
-   - 컨트랙트 컴파일 및 검증
-   - 아티팩트 자동 업로드
+    subgraph "🎮 Game Logic Layer"
+        DL[Daily LUCKY]
+        WJ[Weekly JACKPOT]
+        AL[ADS LUCKY]
+        TICKET[Ticket Purchase]
+        REF[Referral System]
+    end
 
-3. **배포 자동화** ✅
-   - Verychain 자동 배포
-   - Veryscan에서 무료 검증
-   - 릴리즈 자동 생성
+    subgraph "💰 Token & Payment System"
+        VERY[VERY Token]
+        AD[AD Token]
+        TREASURY[Treasury Manager]
+        PAYMENT[Payment Processing]
+    end
 
-### **워크플로우 파일**
+    subgraph "⛓️ Smart Contract Layer"
+        subgraph "Core Contracts"
+            C1D[Cryptolotto1Day]
+            C7D[Cryptolotto7Days]
+            CAD[CryptolottoAd]
+            TM[TreasuryManager]
+            CR[CryptolottoReferral]
+        end
+        
+        subgraph "Support Contracts"
+            AT[AdToken]
+            TR[TokenRegistry]
+            SA[StatsAggregator]
+            FD[FundsDistributor]
+            CR[ContractRegistry]
+        end
+    end
 
-- `.github/workflows/ci.yml` - 메인 CI/CD 파이프라인
-- `.github/workflows/deploy.yml` - 배포 전용 워크플로우
+    subgraph "📊 Analytics & Monitoring"
+        AE[Analytics Engine]
+        MS[Monitoring System]
+        STATS[Statistics]
+        LOGS[Event Logs]
+    end
 
-### **실행 방법**
+    subgraph "🎯 Reward & Distribution"
+        WIN[Winner Selection]
+        REWARD[Reward Distribution]
+        FEE[Fee Management]
+        CLAIM[Claim Process]
+    end
 
-```bash
-# 로컬에서 테스트 실행
-./test/run_tests.sh
+    subgraph "💾 Data Storage"
+        BC[Blockchain Storage]
+        LOCAL[Local Storage]
+        SESSION[Session Storage]
+    end
 
-# GitHub Actions에서 자동 실행
-git push origin master
+    %% User Flow
+    U --> WEPIN
+    WEPIN --> TICKET
+    TICKET --> PAYMENT
+    PAYMENT --> VERY
+    PAYMENT --> AD
+    
+    %% Game Flow
+    TICKET --> DL
+    TICKET --> WJ
+    TICKET --> AL
+    
+    %% Contract Interaction
+    DL --> C1D
+    WJ --> C7D
+    AL --> CAD
+    PAYMENT --> TM
+    
+    %% Referral Flow
+    REF --> CR
+    CR --> REWARD
+    
+    %% Analytics Flow
+    C1D --> AE
+    C7D --> AE
+    CAD --> AE
+    AE --> STATS
+    AE --> LOGS
+    
+    %% Reward Flow
+    WIN --> REWARD
+    REWARD --> FEE
+    REWARD --> CLAIM
+    CLAIM --> VERY
+    
+    %% Data Flow
+    AE --> BC
+    WEPIN --> LOCAL
+    TICKET --> SESSION
+    
+    %% Styling
+    classDef userLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef authLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef gameLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef tokenLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef contractLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef analyticsLayer fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef rewardLayer fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef storageLayer fill:#fafafa,stroke:#424242,stroke-width:2px
+    
+    class U,M,W userLayer
+    class WEPIN,OAUTH,WALLET authLayer
+    class DL,WJ,AL,TICKET,REF gameLayer
+    class VERY,AD,TREASURY,PAYMENT tokenLayer
+    class C1D,C7D,CAD,TM,CR,AT,TR,SA,FD contractLayer
+    class AE,MS,STATS,LOGS analyticsLayer
+    class WIN,REWARD,FEE,CLAIM rewardLayer
+    class BC,LOCAL,SESSION storageLayer
 ```
 
-## 🧪 **테스트 스위트**
+## 🔄 **Detailed User Journey Flow**
 
-### **테스트 커버리지**
-- **단위 테스트**: 42개 ✅
-- **통합 테스트**: 17개 ✅
-- **Fuzzing 테스트**: 8개 ✅
-- **성능 테스트**: 5개 ✅
-- **보안 테스트**: 5개 ✅
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant W as WEPIN SDK
+    participant SC as Smart Contracts
+    participant BC as Blockchain
+    participant T as Treasury
 
-### **테스트 실행**
+    Note over U,T: 🚀 User Registration & Login
+    U->>F: Access Application
+    F->>W: Initialize WEPIN SDK
+    W->>F: SDK Ready
+    U->>F: Choose OAuth Provider
+    F->>W: Login Request
+    W->>F: Authentication Success
+    F->>U: Show Game Dashboard
 
-```bash
-# 모든 테스트 실행
-forge test
+    Note over U,T: 🎮 Game Selection & Ticket Purchase
+    U->>F: Select Game Type
+    F->>SC: Fetch Game Contract
+    SC->>F: Game Information
+    U->>F: Purchase Ticket
+    F->>W: Transaction Request
+    W->>BC: Send Transaction
+    BC->>SC: Execute Contract
+    SC->>T: Transfer Funds
+    SC->>F: Transaction Success
+    F->>U: Ticket Confirmation
 
-# 특정 테스트 실행
-forge test --match-contract CryptolottoIntegration
+    Note over U,T: 🔗 Referral System
+    U->>F: Share Referral Link
+    F->>U: Generate Referral URL
+    U->>F: New User with Referral
+    F->>SC: Register Referral
+    SC->>F: Referral Recorded
 
-# 가스 리포트 생성
-forge test --gas-report
+    Note over U,T: 🏆 Winner Selection & Rewards
+    SC->>SC: Execute Lottery Logic
+    SC->>F: Winner Announcement
+    F->>U: Show Results
+    U->>F: Claim Rewards
+    F->>SC: Claim Request
+    SC->>T: Process Payout
+    T->>W: Transfer Rewards
+    W->>U: Rewards Received
 
-# 커버리지 리포트
-forge coverage --report lcov
+    Note over U,T: 📊 Analytics & Monitoring
+    SC->>SC: Log Events
+    SC->>F: Update Statistics
+    F->>U: Show Dashboard
 ```
 
-## 📦 **설치 및 실행**
+## 🏗️ **System Architecture Components**
 
-### **필수 요구사항**
-- Foundry
-- Node.js 18+
+### **Frontend Layer** (`frontend/`)
+- **React + TypeScript**: Modern web application framework
+- **Tailwind CSS**: Utility-first CSS framework
+- **WEPIN SDK Integration**: Blockchain wallet functionality
+- **Responsive Design**: Mobile-first approach
+
+### **Smart Contract Layer** (`contracts/`)
+- **47 Total Contracts**: Comprehensive blockchain infrastructure
+- **Modular Architecture**: Organized by functionality
+- **Security Features**: Access control, circuit breakers, rate limiting
+- **Upgradeable Design**: UUPS proxy pattern support
+
+### **Blockchain Integration**
+- **VeryNetwork**: Chain ID 4613
+- **Ethereum Compatibility**: Solidity smart contracts
+- **Gas Optimization**: Efficient transaction processing
+- **Event Logging**: Comprehensive audit trail
+
+### **Authentication & Security**
+- **Multi-Provider OAuth**: Google, Apple, Discord, Naver, Facebook, Line, Kakao
+- **Wallet Management**: WEPIN SDK integration
+- **Session Persistence**: Local storage management
+- **Access Control**: Role-based permissions
+
+### **Game Logic & Economics**
+- **Multiple Lottery Types**: Daily, Weekly, Advertisement-based
+- **Token System**: VERY and AD tokens
+- **Referral Rewards**: Multi-level referral system
+- **Fee Management**: 10% fee structure
+
+### **Data & Analytics**
+- **Real-time Statistics**: Live game data
+- **Performance Monitoring**: Gas usage, transaction success rates
+- **User Analytics**: Player behavior tracking
+- **Event Logging**: Comprehensive audit trail
+
+## 🔧 Smart Contracts
+
+### Core Contracts
+- **Cryptolotto1Day**: Daily lottery system
+- **Cryptolotto7Days**: Weekly jackpot system  
+- **CryptolottoAd**: Advertisement-based lottery
+- **TreasuryManager**: Treasury management system
+- **CryptolottoReferral**: Referral and reward system
+
+### Features
+- Multiple lottery types (Daily, Weekly, Ads)
+- Referral system with rewards
+- Treasury management
+- Circuit breaker functionality
+- Comprehensive testing suite
+
+## 🎯 Frontend Application
+
+### Features
+- **WEPIN Wallet Integration**: Blockchain wallet functionality
+- **VeryNetwork Support**: Chain ID 4613 blockchain interaction
+- **Social Login**: Google, Apple, Discord, Naver, Facebook, Line, Kakao
+- **VERY Token System**: Prize management and participant tracking
+- **Multi-language Support**: Korean, English, Japanese
+- **Responsive Design**: Mobile-optimized UI
+
+### Technology Stack
+- **Frontend**: React + TypeScript
+- **Styling**: Tailwind CSS
+- **Wallet**: WEPIN SDK
+- **Blockchain**: VeryNetwork (Chain ID: 4613)
+- **Build Tool**: Vite
+
+## 📋 Installation & Setup
+
+### Prerequisites
+- Node.js 18.x or higher
+- Foundry (for smart contract development)
 - Git
 
-### **설치**
-
+### 1. Clone the Repository
 ```bash
-# 저장소 클론
-git clone https://github.com/your-username/cryptolotto.git
-cd cryptolotto
+git clone <repository-url>
+cd Eth-Lottery
+```
 
-# Foundry 설치 (이미 설치된 경우 생략)
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-
-# 의존성 설치
+### 2. Smart Contract Setup
+```bash
+# Install Foundry dependencies
 forge install
 
-# 환경 변수 설정
-cp env.example .env
-# .env 파일을 편집하여 필요한 값들을 설정
-```
-
-### **개발**
-
-```bash
-# 컨트랙트 빌드
+# Build contracts
 forge build
 
-# 테스트 실행
+# Run tests
+forge test
+```
+
+### 3. Frontend Setup
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Start development server
+npm run dev
+```
+
+### 4. Environment Variables
+Create a `.env` file in the frontend directory:
+
+```env
+# WEPIN Configuration
+VITE_WEPIN_APP_KEY=your-wepin-app-key
+
+# Network Configuration
+VITE_RPC_URL=https://rpc.verylabs.io
+VITE_EXPLORER_URL=https://veryscan.io
+
+# Contract Addresses (NEW WORKING CONTRACTS!)
+VITE_CONTRACT_CRYPTOLOTTO_1DAY=your-cryptolotto-1day-contract-address
+VITE_CONTRACT_CRYPTOLOTTO_7DAYS=your-cryptolotto-7days-contract-address
+VITE_CONTRACT_CRYPTOLOTTO_AD=your-cryptolotto-ad-contract-address
+
+# Core Contract Addresses (from previous deployment)
+VITE_CONTRACT_TREASURY_MANAGER=your-treasury-manager-contract-address
+VITE_CONTRACT_REGISTRY=your-registry-contract-address
+VITE_CONTRACT_STATS_AGGREGATOR=your-stats-aggregator-contract-address
+VITE_CONTRACT_FUNDS_DISTRIBUTOR=your-funds-distributor-contract-address
+VITE_CONTRACT_CRYPTOLOTTO_REFERRAL=your-cryptolotto-referral-contract-address
+VITE_CONTRACT_AD_TOKEN=your-ad-token-contract-address
+VITE_CONTRACT_OWNABLE=your-ownable-contract-address
+
+# Deployer Address
+VITE_DEPLOYER_ADDRESS=your-deployer-address
+```
+
+## 🏃‍♂️ Running the Project
+
+### Smart Contracts
+```bash
+# Run all tests
 forge test
 
-# Verychain 배포
-forge script script/Deploy.s.sol --rpc-url https://rpc.verylabs.io --broadcast
+# Run specific test suites
+forge test --match-contract Cryptolotto -vv
+forge test --match-contract CryptolottoIntegration -vv
+forge test --match-contract CryptolottoSecurity -vv
+
+# Generate coverage report
+forge coverage --report lcov
+
+# Build contracts
+forge build
 ```
 
-## 🔧 **환경 변수**
-
-`.env` 파일에 다음 변수들을 설정하세요:
-
+### Frontend
 ```bash
-# 공개 설정 (Public)
-RPC_URL=https://rpc.verylabs.io
-VERYCHAIN_CHAIN_ID=4613
+cd frontend
 
-# 비밀 설정 (Private) - GitHub Secrets에만 저장
-PRIVATE_KEY=your_private_key_here
-DEPLOYER_ADDRESS=your_deployer_address_here
+# Development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-### **GitHub Secrets 설정**
-GitHub 저장소의 Settings > Secrets and variables > Actions에서 다음 secret만 설정하세요:
+## 🌐 VeryNetwork Configuration
 
-```
-PRIVATE_KEY=your_private_key_here
-```
-
-**참고**: RPC URL은 공개되어도 안전하므로 GitHub Secrets에 저장할 필요가 없습니다.
-
-## 📊 **주요 기능**
-
-### **복권 게임**
-- **1일 복권**: 매일 새로운 게임
-- **7일 복권**: 주간 복권 게임
-- **Ad Lottery**: AdToken을 사용한 광고 복권
-
-### **수수료 구조**
-- **총 수수료**: 10%
-- **리퍼럴 수수료**: 2%
-- **Ad Lottery 수수료**: 3%
-- **개발자 수수료**: 5%
-
-### **보안 기능**
-- 재진입 공격 방지
-- 오버플로우/언더플로우 방지
-- 권한 검증 시스템
-- 긴급 정지 기능
-
-## 🌐 **Verychain 특별 기능**
-
-### **네트워크 정보**
-- **Network Name**: Verychain
 - **Chain ID**: 4613
-- **Mainnet RPC**: https://rpc.verylabs.io
-- **Mainnet Explorer**: https://veryscan.io
+- **Network Name**: VeryNetwork
+- **Provider ID**: `verynetwork`
+- **RPC URL**: https://rpc.verylabs.io
+- **Explorer**: https://veryscan.io
 
-### **Veryscan 사용**
-- **API 키 불필요**: 무료로 사용 가능
-- **자동 검증**: 배포 후 자동으로 블록 익스플로러에서 확인
-- **무료 서비스**: 모든 기능을 무료로 제공
+## 🧪 Testing
 
-### **배포 명령어**
+### Smart Contract Tests
 ```bash
-# Verychain 메인넷 배포
+# Run all tests
+forge test
+
+# Run with verbose output
+forge test -vv
+
+# Run specific test file
+forge test --match-path test/Cryptolotto.t.sol
+
+# Run fuzzing tests
+forge test --match-contract CryptolottoFuzz -vv
+```
+
+### Frontend Tests
+```bash
+cd frontend
+npm test
+```
+
+## 📚 Documentation
+
+- **Smart Contracts**: See `contracts/` directory for detailed contract documentation
+- **Deployment**: Check `script/` directory for deployment scripts
+- **Testing**: Review `test/` directory for comprehensive test coverage
+- **CI/CD**: GitHub Actions workflow for automated testing and building
+
+## 🚀 Deployment
+
+### Smart Contracts
+```bash
+# Deploy to Verychain
 forge script script/Deploy.s.sol --rpc-url https://rpc.verylabs.io --broadcast
 ```
 
-## 🤝 **기여하기**
+### Frontend
+```bash
+cd frontend
+npm run build
+# Deploy dist/ folder to your hosting service
+```
+
+## ⚠️ Important Notes
+
+- Environment variables must be properly configured
+- WEPIN Workspace app registration required
+- Designed specifically for VeryNetwork
+- Secure private key management for deployment
+- Comprehensive testing recommended before production
+
+## 🐛 Troubleshooting
+
+### Smart Contract Issues
+- Check Foundry installation: `foundryup`
+- Verify dependencies: `forge install`
+- Review test output for specific errors
+
+### Frontend Issues
+- Verify environment variables
+- Check WEPIN app registration status
+- Ensure VeryNetwork provider is available
+- Review browser console for errors
+
+### Build Issues
+- Verify Node.js version (18.x+ recommended)
+- Clear cache: `rm -rf node_modules && npm install`
+- Check Foundry version: `forge --version`
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
-## 📄 **라이선스**
+## 📞 Support
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
-
-## 📞 **연락처**
-
-- 프로젝트 링크: [https://github.com/your-username/cryptolotto](https://github.com/your-username/cryptolotto)
-- 이슈 리포트: [https://github.com/your-username/cryptolotto/issues](https://github.com/your-username/cryptolotto/issues)
-- Verychain Explorer: [https://veryscan.io](https://veryscan.io)
-
----
-
-**⭐ 이 프로젝트가 도움이 되었다면 스타를 눌러주세요!** 
+For issues and questions:
+- Check existing documentation
+- Review test files for examples
+- Open an issue on GitHub
+- Check CI/CD logs for build issues 

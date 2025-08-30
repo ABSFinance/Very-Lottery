@@ -34,7 +34,7 @@ export const MyTicketsCard: React.FC<MyTicketsCardProps> = ({
     switch (type) {
       case "daily-lucky":
         return [
-          `1 VERY로 이 최대 ${maxTicketsPerPlayer}개의 티켓을 구매가능`,
+          `0.01 VERY로 이 최대 ${maxTicketsPerPlayer}개의 티켓을 구매가능`,
           "하루마다 당첨자 발표 및 전송 및 리셋",
           "10% 수수료",
         ];
