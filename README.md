@@ -1,6 +1,6 @@
-# Very Lucky - Smart Contract Lottery System
+# Very Lucky - Smart Contract Raffle System
 
-A comprehensive smart contract lottery system built with Foundry and React, featuring multiple lottery types and referral systems, powered by VeryChain.
+A comprehensive smart contract raffle system built with Foundry and React, featuring multiple raffle types and referral systems, powered by VeryChain.
 
 ## 📋 Table of Contents
 
@@ -72,8 +72,8 @@ YouTube의 설명 영상을 시청해 주세요. 모든 질문에 답변이 될 
 ## 🏗️ Project Structure
 
 This project consists of two main components:
-- **Smart Contracts**: Solidity contracts for lottery management, treasury, and referral systems
-- **Frontend**: React-based web application for lottery interaction
+- **Smart Contracts**: Solidity contracts for raffle management, treasury, and referral systems
+- **Frontend**: React-based web application for raffle interaction
 
 ```
 Very-lucky
@@ -112,7 +112,7 @@ Very-lucky
 - **Access Control**: Role-based permissions
 
 ### **Game Logic & Economics**
-- **Multiple Lottery Types**: Daily, Weekly, Advertisement-based
+- **Multiple raffle Types**: Daily, Weekly, Advertisement-based
 - **Token System**: VERY and AD tokens
 - **Referral Rewards**: Multi-level referral system
 - **Fee Management**: 10% fee structure
@@ -296,7 +296,7 @@ sequenceDiagram
     SC->>F: Referral Recorded
 
     Note over U,T: 🏆 Winner Selection & Rewards
-    SC->>SC: Execute Lottery Logic
+    SC->>SC: Execute raffle Logic
     SC->>F: Winner Announcement
     F->>U: Show Results
     U->>F: Claim Rewards
@@ -314,14 +314,14 @@ sequenceDiagram
 ## 🔧 Smart Contracts
 
 ### Core Contracts
-- **Cryptolotto1Day**: Daily lottery system
+- **Cryptolotto1Day**: Daily raffle system
 - **Cryptolotto7Days**: Weekly jackpot system  
-- **CryptolottoAd**: Advertisement-based lottery
+- **CryptolottoAd**: Advertisement-based raffle
 - **TreasuryManager**: Treasury management system
 - **CryptolottoReferral**: Referral and reward system
 
 ### Features
-- Multiple lottery types (Daily, Weekly, Ads)
+- Multiple raffle types (Daily, Weekly, Ads)
 - Referral system with rewards
 - Treasury management
 - Circuit breaker functionality
@@ -504,7 +504,7 @@ sequenceDiagram
     SC->>F: Referral Recorded
 
     Note over U,T: 🏆 Winner Selection & Rewards
-    SC->>SC: Execute Lottery Logic
+    SC->>SC: Execute raffle Logic
     SC->>F: Winner Announcement
     F->>U: Show Results
     U->>F: Claim Rewards
@@ -546,7 +546,7 @@ sequenceDiagram
 - **Access Control**: Role-based permissions
 
 ### **Game Logic & Economics**
-- **Multiple Lottery Types**: Daily, Weekly, Advertisement-based
+- **Multiple raffle Types**: Daily, Weekly, Advertisement-based
 - **Token System**: VERY and AD tokens
 - **Referral Rewards**: Multi-level referral system
 - **Fee Management**: 10% fee structure
@@ -560,14 +560,14 @@ sequenceDiagram
 ## 🔧 Smart Contracts
 
 ### Core Contracts
-- **Cryptolotto1Day**: Daily lottery system
+- **Cryptolotto1Day**: Daily raffle system
 - **Cryptolotto7Days**: Weekly jackpot system  
-- **CryptolottoAd**: Advertisement-based lottery
+- **CryptolottoAd**: Advertisement-based raffle
 - **TreasuryManager**: Treasury management system
 - **CryptolottoReferral**: Referral and reward system
 
 ### Features
-- Multiple lottery types (Daily, Weekly, Ads)
+- Multiple raffle types (Daily, Weekly, Ads)
 - Referral system with rewards
 - Treasury management
 - Circuit breaker functionality
@@ -599,7 +599,7 @@ sequenceDiagram
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd Eth-Lottery
+cd Eth-raffle
 ```
 
 ### 2. Smart Contract Setup
