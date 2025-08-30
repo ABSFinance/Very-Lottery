@@ -1,17 +1,81 @@
-# ETH LOTTERY - Smart Contract Lottery System
+# Very Lucky - Smart Contract Lottery System
 
-A comprehensive smart contract lottery system built with Foundry and React, featuring multiple lottery types and referral systems.
+A comprehensive smart contract lottery system built with Foundry and React, featuring multiple lottery types and referral systems, powered by VeryChain.
 
-## 🚀 Project Overview
+## 📋 Table of Contents
+
+- [프로젝트 개요](#프로젝트-개요)
+- [게임 목록](#게임-목록)
+- [게임 방법](#게임-방법)
+- [주요 기능](#주요-기능)
+- [Project Structure](#project-structure)
+- [Complete System Flow Diagram](#complete-system-flow-diagram)
+- [Detailed User Journey Flow](#detailed-user-journey-flow)
+- [System Architecture Components](#system-architecture-components)
+- [Smart Contracts](#smart-contracts)
+- [Frontend Application](#frontend-application)
+- [설치 방법](#설치-방법)
+- [Running the Project](#running-the-project)
+- [VeryNetwork Configuration](#verynetwork-configuration)
+- [Testing](#testing)
+- [Documentation](#documentation)
+- [Important Notes](#important-notes)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+- [기여자](#기여자)
+
+
+## 🇰🇷 프로젝트 개요
+
+VeryLucky는 VeryChain DApp(탈중앙화 애플리케이션)으로 구동되는 복권 시스템입니다. 백엔드 코드는 탈중앙화된 피어투피어 네트워크에서 실행되며, 스마트 컨트랙트와 프론트엔드로 구성되어 있습니다. VeryLucky는 자율적으로 작동하며 핵심 기능을 제어하는 개체가 없습니다. VeryLucky의 데이터와 운영 기록은 공개된 탈중앙화 Very 블록체인 네트워크에 암호화되어 저장됩니다.
+
+VeryLucky의 주요 아이디어는 간단합니다: 전 세계 사람들이 정해진 시간 동안 하나의 지갑에 동일한 금액의 VERY를 기여합니다. 타이머가 끝나면 이 스마트 컨트랙트 기반 지갑이 자동으로 받은 모든 VERY를 무작위로 선택된 한 명의 지갑 참가자에게 보냅니다.
+
+## 🎮 게임 목록
+
+| 게임명 | 지속시간 | 가격 | 컨트랙트 주소 |
+|--------|----------|------|----------------|
+| Daily Lucky | 1일 | 0.01 VERY | 0x118f17f1c67bc53e6341de3f9b6112abf81505f0 |
+| Weekly Lucky | 7일 | 1 VERY | 0x106302aa07955306c31b8e916a16500482016ec2 |
+| ADS Lucky | 1일 | 1 AD | 0x51f37f32cd84908f58eb2c5b7e141b61d5774f0a |
+
+## 🎯 게임 방법
+
+YouTube의 설명 영상을 시청해 주세요. 모든 질문에 답변이 될 것입니다.
+
+1. **Wepin 지갑 사용**: 게임을 시작하려면 Google ID 가 필요합니다.
+게임을 시작하기 전에 지갑에 충분한 ETH를 충전하세요.
+
+2. **게임 선택**: 3개의 게임이 동시에 실행됩니다. 각 게임은 다른 지속시간과 입장 비용을 가집니다. 같은 게임에 여러 번 참여할 수 있으며, 모든 게임에 동시에 참여할 수도 있습니다.
+
+3. **지갑 주소 복사**: 올바른 지갑 주소로 자금을 보내는지 확인하세요. 각 게임은 홈페이지와 공식 GitHub 페이지에 표시되는 고유한 주소를 가집니다.
+
+4. **자금 전송**: 각 게임은 고유한 가격을 가집니다. 게임에 참여하려면 주어진 주소로 정확한 금액의 VERY를 보내야 합니다. 모든 것이 올바르다면 플레이어 목록에서 지갑 주소를 찾을 수 있습니다.
+
+5. **결과 대기**: 잭팟 당첨자에 대한 알림을 받으려면 텔레그램 채널에 참여하세요. 당첨자가 되면 게임이 끝난 직후 모든 잭팟 금액을 지갑으로 즉시 받게 됩니다.
+
+## ✨ 주요 기능
+
+- **안전한 게임**: 다른 플레이어가 없어도 안전하게 게임에 참여할 수 있습니다. 게임이 끝날 때까지 다른 사람이 참여하지 않으면 VERY을 자동으로 지갑으로 돌려받습니다.
+
+- **즉시 결과**: Verychat에 참여하여 휴대폰으로 즉시 알림을 받으세요.
+
+- **전 세계 이용 가능**: 전 세계 모든 사람이 Very Lucky 를 플레이할 수 있습니다. 국경, 제한 또는 특별한 조건이 없습니다. 게임을 시작하려면 Very만 있으면 됩니다.
+
+- **모든 게임 플레이**: Very Lucky 에서는 한 게임에 제한적으로 참여할 수 있습니다. 또한 모든 게임을 동시에 플레이할 수 있습니다. 이는 승리 확률을 높이지만, 당첨자는 항상 무작위로 선택되므로 승리를 보장하지는 않습니다.
+
+- **Wepin 지원**: Wepin 지갑을 사용하여 한 번의 클릭으로 게임을 플레이하세요. Google ID 만있으면 Very Lucky 플레이 과정이 더욱 간단하고 사용자 친화적입니다.
+
+---
+
+## 🏗️ Project Structure
 
 This project consists of two main components:
 - **Smart Contracts**: Solidity contracts for lottery management, treasury, and referral systems
 - **Frontend**: React-based web application for lottery interaction
 
-## 🏗️ Project Structure
-
 ```
-Eth-Lottery/
+Very-lucky
 ├── contracts/          # Smart contract source code
 ├── script/            # Foundry deployment scripts
 ├── test/              # Smart contract tests
@@ -267,9 +331,8 @@ sequenceDiagram
 ### Features
 - **WEPIN Wallet Integration**: Blockchain wallet functionality
 - **VeryNetwork Support**: Chain ID 4613 blockchain interaction
-- **Social Login**: Google, Apple, Discord, Naver, Facebook, Line, Kakao
+- **Social Login**: Google, 
 - **VERY Token System**: Prize management and participant tracking
-- **Multi-language Support**: Korean, English, Japanese
 - **Responsive Design**: Mobile-optimized UI
 
 ### Technology Stack
@@ -279,7 +342,7 @@ sequenceDiagram
 - **Blockchain**: VeryNetwork (Chain ID: 4613)
 - **Build Tool**: Vite
 
-## 📋 Installation & Setup
+## 📋 설치 방법 (Installation & Setup)
 
 ### Prerequisites
 - Node.js 18.x or higher
@@ -417,22 +480,9 @@ npm test
 - **Smart Contracts**: See `contracts/` directory for detailed contract documentation
 - **Deployment**: Check `script/` directory for deployment scripts
 - **Testing**: Review `test/` directory for comprehensive test coverage
-- **CI/CD**: GitHub Actions workflow for automated testing and building
 
-## 🚀 Deployment
 
-### Smart Contracts
-```bash
-# Deploy to Verychain
-forge script script/Deploy.s.sol --rpc-url https://rpc.verylabs.io --broadcast
-```
 
-### Frontend
-```bash
-cd frontend
-npm run build
-# Deploy dist/ folder to your hosting service
-```
 
 ## ⚠️ Important Notes
 
@@ -464,19 +514,8 @@ npm run build
 
 This project is licensed under the MIT License.
 
-## 🤝 Contributing
+## 🤝 기여자 (Contributing)
+@munsunouk, @hyeyoung-Moon
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
 
-## 📞 Support
 
-For issues and questions:
-- Check existing documentation
-- Review test files for examples
-- Open an issue on GitHub
-- Check CI/CD logs for build issues 
