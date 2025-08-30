@@ -8,7 +8,10 @@ import {
   WepinProviderLike,
   WepinUserInfo,
   AccountInfo,
-  getGlobalLoginState
+  getGlobalLoginState,
+  getWepinStatus,
+  needsWepinRegistration,
+  registerUserToWepin
 } from "./wepin";
 import { buildReferralLink, shareReferralLink } from "./referral";
 
@@ -34,18 +37,77 @@ export const createLoginHandler = ({
   setGlobalLoginState: (state: any) => void;
 }) => {
   return async () => {
-    if (!wepinLogin || !isInitialized) return;
+    if (!wepinLogin || !wepinSdk || !isInitialized) return;
+    
     setIsLoading(true);
-    const result = await loginWithGoogle(wepinLogin);
-    if (result.status === "success") {
-      let walletAddress: string | undefined;
-      try {
-        const accounts = await getAccounts(wepinSdk as WepinSDKLike);
-        const very =
-          (accounts || []).find((a: AccountInfo) =>
+    
+    try {
+      console.log("🚀 Starting login process...");
+      
+      // Step 1: OAuth Login with Google
+      console.log("📱 Step 1: OAuth login with Google...");
+      const result = await loginWithGoogle(wepinLogin);
+      
+      if (result.status === "success") {
+        console.log("✅ OAuth login successful, checking Wepin status...");
+        
+        // Step 2: Check if user needs to register with Wepin
+        const wepinStatus = await getWepinStatus(wepinSdk);
+        console.log("🔍 Current Wepin status:", wepinStatus);
+        
+        if (wepinStatus === "login_before_register") {
+          console.log("📝 User needs to complete Wepin registration...");
+          
+          // Step 3: Automatic Registration
+          try {
+            console.log("🔄 Starting automatic Wepin registration...");
+            const registrationResult = await registerUserToWepin(wepinSdk);
+            
+            if (registrationResult.status === "success") {
+              console.log("🎉 Wepin registration completed successfully!");
+              
+              // Verify final status after registration
+              const finalStatus = await getWepinStatus(wepinSdk);
+              console.log("🔍 Final Wepin status after registration:", finalStatus);
+              
+              if (finalStatus === "login") {
+                console.log("✅ User is now fully logged in and registered");
+              } else {
+                console.warn("⚠️ Registration completed but status is still:", finalStatus);
+              }
+            } else {
+              console.error("❌ Wepin registration failed with status:", registrationResult.status);
+              alert("Wepin 등록에 실패했습니다. 다시 시도해주세요.");
+              setIsLoading(false);
+              return;
+            }
+          } catch (registrationError) {
+            console.error("❌ Wepin registration process failed:", registrationError);
+            alert("Wepin 등록 과정에서 오류가 발생했습니다. 다시 시도해주세요.");
+            setIsLoading(false);
+            return;
+          }
+        } else if (wepinStatus === "login") {
+          console.log("✅ User is already fully logged in and registered");
+        } else {
+          console.log("⚠️ Unexpected Wepin status:", wepinStatus);
+        }
+        
+        // Step 4: Get wallet accounts and complete login
+        console.log("💳 Getting wallet accounts...");
+        let walletAddress: string | undefined;
+        
+        try {
+          const accounts = await getAccounts(wepinSdk);
+          const very = (accounts || []).find((a: AccountInfo) =>
             (a?.network || "").toLowerCase().includes("very")
           ) || accounts?.[0];
-        walletAddress = very?.address;
+          
+          walletAddress = very?.address;
+          console.log("✅ Wallet address obtained:", walletAddress);
+        } catch (accountError) {
+          console.warn("⚠️ Failed to get accounts:", accountError);
+        }
         
         // Update both local and global login state
         const loginState = {
@@ -54,15 +116,28 @@ export const createLoginHandler = ({
           walletAddress: walletAddress,
         };
         
+        console.log("🔄 Updating login state:", loginState);
         updateGlobalLoginState(loginState);
         setGlobalLoginState(loginState);
-      } catch {}
-      setIsLoggedIn(true);
-      setUserInfo({ ...result.userInfo, walletAddress });
-    } else {
-      alert(`로그인에 실패했습니다: ${result.message}`);
+        
+        // Update local component state
+        setIsLoggedIn(true);
+        setUserInfo({ ...result.userInfo, walletAddress });
+        
+        console.log("🎉 Login process completed successfully!");
+        
+      } else {
+        console.error("❌ OAuth login failed:", result.message);
+        alert(`로그인에 실패했습니다: ${result.message}`);
+      }
+      
+    } catch (error) {
+      console.error("❌ Login process failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+      alert(`로그인 과정에서 오류가 발생했습니다: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 };
 

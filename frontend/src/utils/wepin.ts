@@ -23,6 +23,8 @@ export interface AccountInfo {
 export interface WepinSDKLike {
   init(): Promise<void>;
   getAccounts(options?: GetAccountsOptions): Promise<AccountInfo[]>;
+  getStatus(): Promise<string>; // WepinSDK lifecycle status
+  register(): Promise<IWepinUser>; // Register user to Wepin
   send(params: {
     account: {
       address: string;
@@ -81,6 +83,20 @@ export const getCurrentWepinInstances = (): WepinInstances | null => {
   // If no last instances, try to get from global state or return null
   console.log("No last Wepin instances available");
   return null;
+};
+
+// Check if we can restore Wepin instances from stored state
+export const canRestoreWepinInstances = (): boolean => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return !!(parsed.isLoggedIn && parsed.userInfo);
+    }
+  } catch (error) {
+    console.warn('Failed to check stored Wepin state:', error);
+  }
+  return false;
 };
 
 // Global login state management with localStorage persistence
@@ -198,6 +214,102 @@ export interface OAuthToken {
   refreshToken?: string;
 }
 
+// Wepin User interface for registration
+export interface IWepinUser {
+  status: string; // 'success' | 'fail'
+  userInfo?: {
+    userId: string;
+    email: string;
+    provider: 'google' | 'apple' | 'naver' | 'discord' | 'email' | 'external_token';
+    use2FA: boolean;
+  };
+  userStatus: {
+    loginStatus: 'complete' | 'pinRequired' | 'registerRequired';
+    pinRequired?: boolean;
+    walletId: string;
+  };
+  token?: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
+// WepinSDK Lifecycle status types
+export type WepinLifeCycle = 
+  | "not_initialized"    // WepinSDK이 초기화되지 않음
+  | "initializing"       // WepinSDK초기화 진행 중
+  | "initialized"        // WepinSDK초기화 완료
+  | "before_login"       // WepinSDK은 초기화되었으나 사용자는 로그인되지 않음
+  | "login"              // 사용자가 로그인 되었고 위핀에도 가입되어있음
+  | "login_before_register"; // 사용자가 로그인하였으나 위핀에 가입되지 않음
+
+// Utility function to get WepinSDK status
+export const getWepinStatus = async (sdk: WepinSDKLike): Promise<WepinLifeCycle> => {
+  try {
+    const status = await sdk.getStatus();
+    console.log("🔍 WepinSDK Status:", status);
+    return status as WepinLifeCycle;
+  } catch (error) {
+    console.error("❌ Failed to get WepinSDK status:", error);
+    return "not_initialized";
+  }
+};
+
+// Function to check if WepinSDK is in a specific state
+export const isWepinInState = async (sdk: WepinSDKLike, targetState: WepinLifeCycle): Promise<boolean> => {
+  try {
+    const currentStatus = await getWepinStatus(sdk);
+    return currentStatus === targetState;
+  } catch (error) {
+    console.error("❌ Failed to check WepinSDK state:", error);
+    return false;
+  }
+};
+
+// Function to check if user is fully logged in and registered
+export const isUserFullyLoggedIn = async (sdk: WepinSDKLike): Promise<boolean> => {
+  try {
+    const status = await getWepinStatus(sdk);
+    return status === "login";
+  } catch (error) {
+    console.error("❌ Failed to check if user is fully logged in:", error);
+    return false;
+  }
+};
+
+// Function to check if user needs to register with Wepin
+export const needsWepinRegistration = async (sdk: WepinSDKLike): Promise<boolean> => {
+  try {
+    const status = await getWepinStatus(sdk);
+    return status === "login_before_register";
+  } catch (error) {
+    console.error("❌ Failed to check if user needs registration:", error);
+    return false;
+  }
+};
+
+// Function to register user to Wepin
+export const registerUserToWepin = async (sdk: WepinSDKLike): Promise<IWepinUser> => {
+  try {
+    console.log("🔄 Starting Wepin user registration...");
+    
+    // Check if user is in the correct state for registration
+    const status = await getWepinStatus(sdk);
+    if (status !== "login_before_register") {
+      throw new Error(`Cannot register user. Current status: ${status}. Expected: login_before_register`);
+    }
+    
+    console.log("✅ User status is correct for registration, proceeding...");
+    const userInfo = await sdk.register();
+    
+    console.log("🎉 User registration successful:", userInfo);
+    return userInfo;
+  } catch (error) {
+    console.error("❌ Failed to register user to Wepin:", error);
+    throw error;
+  }
+};
+
 export interface LoginResult {
   provider: OauthProvider;
   token: OAuthToken;
@@ -209,8 +321,6 @@ export interface LoginErrorResult {
   idToken?: string;
   accessToken?: string;
 }
-
-// (moved above)
 
 // Get Wepin configuration from environment variables
 const getWepinConfig = () => {

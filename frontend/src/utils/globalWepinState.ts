@@ -16,6 +16,41 @@ const notifyStateChange = () => {
   stateChangeListeners.forEach(listener => listener());
 };
 
+// Add localStorage persistence
+const STORAGE_KEY = 'wepin_global_state';
+
+// Helper functions for localStorage
+const saveToStorage = (state: any) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn('Failed to save to localStorage:', error);
+  }
+};
+
+const loadFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.warn('Failed to load from localStorage:', error);
+    return null;
+  }
+};
+
+// Load initial state from localStorage
+const initializeFromStorage = () => {
+  const storedState = loadFromStorage();
+  if (storedState) {
+    globalLoginState = storedState.loginState || null;
+    // Note: We don't restore Wepin instances from storage as they need to be re-initialized
+    console.log('🌍 Restored login state from localStorage:', globalLoginState);
+  }
+};
+
+// Initialize on module load
+initializeFromStorage();
+
 // Set global Wepin instances
 export const setGlobalWepinInstances = (instances: WepinInstances) => {
   globalWepinInstances = instances;
@@ -35,7 +70,9 @@ export const setGlobalLoginState = (state: {
   walletAddress: string | null;
 }) => {
   globalLoginState = state;
-  console.log("🌍 Global login state set:", state);
+  // Persist to localStorage
+  saveToStorage({ loginState: state });
+  console.log("🌍 Global login state set and persisted:", state);
   notifyStateChange();
 };
 
@@ -48,7 +85,13 @@ export const getGlobalLoginState = () => {
 export const clearGlobalWepinState = () => {
   globalWepinInstances = null;
   globalLoginState = null;
-  console.log("🌍 Global Wepin state cleared");
+  // Remove from localStorage
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.warn('Failed to remove from localStorage:', error);
+  }
+  console.log("🌍 Global Wepin state cleared and removed from storage");
   notifyStateChange();
 };
 
@@ -74,6 +117,30 @@ export const subscribeToWepinStateChanges = (listener: () => void) => {
 export const initializeGlobalStateFromExisting = () => {
   // Try to get from localStorage or other sources if needed
   console.log("🌍 Initializing global state from existing sources");
+};
+
+// Check if user should be auto-logged in based on stored state
+export const shouldAutoLogin = (): boolean => {
+  const storedState = loadFromStorage();
+  return !!(storedState?.loginState?.isLoggedIn && storedState?.loginState?.userInfo);
+};
+
+// Get stored user info for auto-login
+export const getStoredUserInfo = () => {
+  const storedState = loadFromStorage();
+  return storedState?.loginState?.userInfo || null;
+};
+
+// Force refresh login state from storage
+export const refreshLoginStateFromStorage = () => {
+  const storedState = loadFromStorage();
+  if (storedState?.loginState) {
+    globalLoginState = storedState.loginState;
+    console.log('🔄 Refreshed login state from storage:', globalLoginState);
+    notifyStateChange();
+    return true;
+  }
+  return false;
 };
 
 // Get a specific component from global instances

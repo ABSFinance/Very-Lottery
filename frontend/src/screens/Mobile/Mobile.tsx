@@ -26,6 +26,9 @@ import {
   getGlobalLoginState as getGlobalWepinLoginState,
   clearGlobalWepinState,
   subscribeToWepinStateChanges,
+  shouldAutoLogin,
+  getStoredUserInfo,
+  refreshLoginStateFromStorage,
 } from "../../utils/globalWepinState";
 import { captureInboundRef } from "../../utils/referral";
 import {
@@ -105,6 +108,18 @@ export const Mobile = (): JSX.Element => {
     validateConfig();
     (async () => {
       try {
+        // First, try to restore login state from storage
+        console.log("🔄 Attempting to restore login state from storage in Mobile...");
+        const restored = refreshLoginStateFromStorage();
+        if (restored) {
+          const globalState = getGlobalWepinLoginState();
+          if (globalState?.isLoggedIn && globalState?.userInfo) {
+            console.log("✅ Successfully restored login state in Mobile:", globalState);
+            setIsLoggedIn(true);
+            setUserInfo(globalState.userInfo);
+          }
+        }
+
         // Check if global instances already exist
         const existingInstances = getGlobalWepinInstances();
         if (existingInstances) {
@@ -152,6 +167,14 @@ export const Mobile = (): JSX.Element => {
                 error
               );
             }
+          }
+        } else if (shouldAutoLogin()) {
+          // Check if we have stored login state that we can restore
+          const storedUserInfo = getStoredUserInfo();
+          if (storedUserInfo) {
+            console.log("🔄 Restoring login state from storage in Mobile:", storedUserInfo);
+            setUserInfo(storedUserInfo);
+            setIsLoggedIn(true);
           }
         }
       } catch (e) {

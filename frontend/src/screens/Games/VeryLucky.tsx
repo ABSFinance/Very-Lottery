@@ -19,6 +19,9 @@ import {
   setGlobalWepinInstances,
   setGlobalLoginState,
   clearGlobalWepinState,
+  shouldAutoLogin,
+  getStoredUserInfo,
+  refreshLoginStateFromStorage,
 } from "../../utils/globalWepinState";
 import {
   getGameContractInfo,
@@ -119,6 +122,24 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
     return unsubscribe;
   }, [isLoggedIn]);
 
+  // Try to restore login state from storage on mount
+  useEffect(() => {
+    console.log("🔄 Attempting to restore login state from storage...");
+    const restored = refreshLoginStateFromStorage();
+    if (restored) {
+      const globalState = getGlobalLoginState();
+      if (globalState?.isLoggedIn && globalState?.userInfo) {
+        console.log("✅ Successfully restored login state:", globalState);
+        setIsLoggedIn(true);
+        setUserInfo(globalState.userInfo);
+        if (globalState.walletAddress) {
+          setAccount(globalState.walletAddress);
+        }
+        setIsCheckingLogin(false);
+      }
+    }
+  }, []);
+
   // Update game config when gameType changes
   useEffect(() => {
     setGameConfig(GAME_CONFIGS[gameType]);
@@ -169,6 +190,14 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
       "isCheckingLogin:",
       isCheckingLogin
     );
+    
+    // Debug localStorage state
+    try {
+      const stored = localStorage.getItem('wepin_global_state');
+      console.log("🔍 localStorage state:", stored ? JSON.parse(stored) : "No stored state");
+    } catch (e) {
+      console.warn("Failed to read localStorage:", e);
+    }
   }, [isLoggedIn, account, userInfo, isInitialized, isCheckingLogin]);
 
   // Create handlers using the same pattern as Mobile.tsx
@@ -325,6 +354,22 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
             setUserInfo(null);
           }
           setIsCheckingLogin(false);
+        } else if (shouldAutoLogin()) {
+          // Check if we have stored login state that we can restore
+          const storedUserInfo = getStoredUserInfo();
+          if (storedUserInfo) {
+            console.log("🔄 Restoring login state from storage:", storedUserInfo);
+            setUserInfo(storedUserInfo);
+            if (storedUserInfo.walletAddress) {
+              setAccount(storedUserInfo.walletAddress);
+            }
+            setIsLoggedIn(true);
+            setIsCheckingLogin(false);
+          } else {
+            setIsLoggedIn(false);
+            setUserInfo(null);
+            setIsCheckingLogin(false);
+          }
         } else {
           console.log("No global login state, user is logged out");
           setIsLoggedIn(false);
@@ -645,15 +690,8 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
         // Show success message
         alert(`티켓 구매 성공! 트랜잭션 ID: ${result.transactionId}`);
 
-        // Refresh ticket count after successful purchase
-        console.log("🔄 Refreshing ticket count after purchase...");
-        const newTicketCount = await fetchUserTicketCount(
-          gameType,
-          account,
-          veryNetworkProvider
-        );
-        console.log("🎫 New ticket count after purchase:", newTicketCount);
-        setUserTicketCount(newTicketCount);
+        // Refresh all contract data after successful purchase
+        await refreshAllContractData();
       } else {
         // Show error message
         alert(`티켓 구매 실패: ${result.error}`);
@@ -689,15 +727,8 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
         // Close popup
         closePurchasePopup();
 
-        // Refresh ticket count
-        if (isLoggedIn && account && veryNetworkProvider) {
-          const newTicketCount = await fetchUserTicketCount(
-            gameType,
-            account,
-            veryNetworkProvider
-          );
-          setUserTicketCount(newTicketCount);
-        }
+        // Refresh all contract data after successful purchase
+        await refreshAllContractData();
 
         // Show success message
         alert(
@@ -709,6 +740,57 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
     } catch (error) {
       console.error("Popup purchase failed:", error);
       throw error; // Let the popup handle the error display
+    }
+  };
+
+  // Function to refresh all contract data after successful purchase
+  const refreshAllContractData = async () => {
+    if (!isLoggedIn || !account || !veryNetworkProvider) {
+      console.warn("Cannot refresh contract data: missing login state or provider");
+      return;
+    }
+
+    try {
+      console.log("🔄 Starting contract data refresh after purchase...");
+      
+      // Refresh ticket count
+      console.log("🎫 Refreshing ticket count...");
+      const newTicketCount = await fetchUserTicketCount(
+        gameType,
+        account,
+        veryNetworkProvider
+      );
+      setUserTicketCount(newTicketCount);
+      console.log("✅ Ticket count refreshed:", newTicketCount);
+
+      // Refresh jackpot
+      console.log("💰 Refreshing jackpot...");
+      const newJackpot = await fetchJackpot(gameType, veryNetworkProvider);
+      setJackpot(newJackpot);
+      console.log("✅ Jackpot refreshed:", newJackpot);
+
+      // Refresh remaining time
+      console.log("⏰ Refreshing remaining time...");
+      const newRemainingTime = await fetchRemainingTime(gameType, veryNetworkProvider);
+      setRemainingTime(newRemainingTime);
+      console.log("✅ Remaining time refreshed:", newRemainingTime);
+
+      // Refresh user balance
+      console.log("💎 Refreshing user balance...");
+      const newBalance = await fetchUserBalance(account, veryNetworkProvider);
+      setUserBalance(newBalance);
+      console.log("✅ User balance refreshed:", newBalance);
+
+      // Refresh referral stats
+      console.log("👥 Refreshing referral stats...");
+      const referralStats = await fetchReferralStats(account, veryNetworkProvider);
+      setTotalReferrals(referralStats.totalReferrals);
+      setTotalEarnings(referralStats.totalRewards);
+      console.log("✅ Referral stats refreshed:", referralStats);
+
+      console.log("🎉 All contract data refreshed successfully after purchase!");
+    } catch (error) {
+      console.error("❌ Failed to refresh contract data after purchase:", error);
     }
   };
 
