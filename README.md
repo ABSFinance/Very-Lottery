@@ -4,25 +4,26 @@ A comprehensive smart contract lottery system built with Foundry and React, feat
 
 ## 📋 Table of Contents
 
-- [프로젝트 개요](#프로젝트-개요)
-- [게임 목록](#게임-목록)
-- [게임 방법](#게임-방법)
-- [주요 기능](#주요-기능)
-- [Project Structure](#project-structure)
-- [Complete System Flow Diagram](#complete-system-flow-diagram)
-- [Detailed User Journey Flow](#detailed-user-journey-flow)
-- [System Architecture Components](#system-architecture-components)
-- [Smart Contracts](#smart-contracts)
-- [Frontend Application](#frontend-application)
+- [프로젝트 개요](#-프로젝트-개요)
+- [게임 목록](#-게임-목록)
+- [게임 방법](#-게임-방법)
+- [주요 기능](#-주요-기능)
+- [Project Structure](#️-project-structure)
+- [System Architecture Components](#️-system-architecture-components)
+- [Complete System Flow Diagram](#️-complete-system-flow-diagram)
+- [Detailed User Journey Flow](#️-detailed-user-journey-flow)
+- [Smart Contracts](#-smart-contracts)
+- [Frontend Application](#-frontend-application)
 - [설치 방법](#설치-방법)
-- [Running the Project](#running-the-project)
-- [VeryNetwork Configuration](#verynetwork-configuration)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Important Notes](#important-notes)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
-- [기여자](#기여자)
+- [Running the Project](#️-running-the-project)
+- [VeryNetwork Configuration](#️-verynetwork-configuration)
+- [Testing](#️-testing)
+- [Documentation](#-documentation)
+- [Important Notes](#️-important-notes)
+- [Troubleshooting](#️-troubleshooting)
+- [License](#-license)
+- [기여자](#️-기여자)
+- [Support](#-support)
 
 
 ## 🇰🇷 프로젝트 개요
@@ -84,6 +85,44 @@ Very-lucky
 └── docs/              # Project documentation
 ```
 
+## 🏗️ **System Architecture Components**
+
+### **Frontend Layer** (`frontend/`)
+- **React + TypeScript**: Modern web application framework
+- **Tailwind CSS**: Utility-first CSS framework
+- **WEPIN SDK Integration**: Blockchain wallet functionality
+- **Responsive Design**: Mobile-first approach
+
+### **Smart Contract Layer** (`contracts/`)
+- **47 Total Contracts**: Comprehensive blockchain infrastructure
+- **Modular Architecture**: Organized by functionality
+- **Security Features**: Access control, circuit breakers, rate limiting
+- **Upgradeable Design**: UUPS proxy pattern support
+
+### **Blockchain Integration**
+- **VeryNetwork**: Chain ID 4613
+- **Ethereum Compatibility**: Solidity smart contracts
+- **Gas Optimization**: Efficient transaction processing
+- **Event Logging**: Comprehensive audit trail
+
+### **Authentication & Security**
+- **Multi-Provider OAuth**: Google, Apple, Discord, Naver, Facebook, Line, Kakao
+- **Wallet Management**: WEPIN SDK integration
+- **Session Persistence**: Local storage management
+- **Access Control**: Role-based permissions
+
+### **Game Logic & Economics**
+- **Multiple Lottery Types**: Daily, Weekly, Advertisement-based
+- **Token System**: VERY and AD tokens
+- **Referral Rewards**: Multi-level referral system
+- **Fee Management**: 10% fee structure
+
+### **Data & Analytics**
+- **Real-time Statistics**: Live game data
+- **Performance Monitoring**: Gas usage, transaction success rates
+- **User Analytics**: Player behavior tracking
+- **Event Logging**: Comprehensive audit trail
+
 ## 🔄 **Complete System Flow Diagram**
 
 ```mermaid
@@ -97,6 +136,214 @@ graph TB
     end
 
     subgraph "🔐 Authentication & Wallet"
+        WEPIN[WEPIN SDK]
+        OAUTH[OAuth Providers]
+        WALLET[Wallet Management]
+        OAUTH --> WEPIN
+        WEPIN --> WALLET
+    end
+
+    subgraph "🎮 Game Logic Layer"
+        DL[Daily LUCKY]
+        WJ[Weekly JACKPOT]
+        AL[ADS LUCKY]
+        TICKET[Ticket Purchase]
+        REF[Referral System]
+    end
+
+    subgraph "💰 Token & Payment System"
+        VERY[VERY Token]
+        AD[AD Token]
+        TREASURY[Treasury Manager]
+        PAYMENT[Payment Processing]
+    end
+
+    subgraph "⛓️ Smart Contract Layer"
+        subgraph "Core Contracts"
+            C1D[Cryptolotto1Day]
+            C7D[Cryptolotto7Days]
+            CAD[CryptolottoAd]
+            TM[TreasuryManager]
+            CR[CryptolottoReferral]
+        end
+        
+        subgraph "Support Contracts"
+            AT[AdToken]
+            TR[TokenRegistry]
+            SA[StatsAggregator]
+            FD[FundsDistributor]
+            CR[ContractRegistry]
+        end
+    end
+
+    subgraph "📊 Analytics & Monitoring"
+        AE[Analytics Engine]
+        MS[Monitoring System]
+        STATS[Statistics]
+        LOGS[Event Logs]
+    end
+
+    subgraph "🎯 Reward & Distribution"
+        WIN[Winner Selection]
+        REWARD[Reward Distribution]
+        FEE[Fee Management]
+        CLAIM[Claim Process]
+    end
+
+    subgraph "💾 Data Storage"
+        BC[Blockchain Storage]
+        LOCAL[Local Storage]
+        SESSION[Session Storage]
+    end
+
+    %% User Flow
+    U --> WEPIN
+    WEPIN --> TICKET
+    TICKET --> PAYMENT
+    PAYMENT --> VERY
+    PAYMENT --> AD
+    
+    %% Game Flow
+    TICKET --> DL
+    TICKET --> WJ
+    TICKET --> AL
+    
+    %% Contract Interaction
+    DL --> C1D
+    WJ --> C7D
+    AL --> CAD
+    PAYMENT --> TM
+    
+    %% Referral Flow
+    REF --> CR
+    CR --> REWARD
+    
+    %% Analytics Flow
+    C1D --> AE
+    C7D --> AE
+    CAD --> AE
+    AE --> STATS
+    AE --> LOGS
+    
+    %% Reward Flow
+    WIN --> REWARD
+    REWARD --> FEE
+    REWARD --> CLAIM
+    CLAIM --> VERY
+    
+    %% Data Flow
+    AE --> BC
+    WEPIN --> LOCAL
+    TICKET --> SESSION
+    
+    %% Styling
+    classDef userLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef authLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef gameLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef tokenLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef contractLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef analyticsLayer fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef rewardLayer fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef storageLayer fill:#fafafa,stroke:#424242,stroke-width:2px
+    
+    class U,M,W userLayer
+    class WEPIN,OAUTH,WALLET authLayer
+    class DL,WJ,AL,TICKET,REF gameLayer
+    class VERY,AD,TREASURY,PAYMENT tokenLayer
+    class C1D,C7D,CAD,TM,CR,AT,TR,SA,FD contractLayer
+    class AE,MS,STATS,LOGS analyticsLayer
+    class WIN,REWARD,FEE,CLAIM rewardLayer
+    class BC,LOCAL,SESSION storageLayer
+```
+
+## 🔄 **Detailed User Journey Flow**
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant W as WEPIN SDK
+    participant SC as Smart Contracts
+    participant BC as Blockchain
+    participant T as Treasury
+
+    Note over U,T: 🚀 User Registration & Login
+    U->>F: Access Application
+    F->>W: Initialize WEPIN SDK
+    W->>F: SDK Ready
+    U->>F: Choose OAuth Provider
+    F->>W: Login Request
+    W->>F: Authentication Success
+    F->>U: Show Game Dashboard
+
+    Note over U,T: 🎮 Game Selection & Ticket Purchase
+    U->>F: Select Game Type
+    F->>SC: Fetch Game Contract
+    SC->>F: Game Information
+    U->>F: Purchase Ticket
+    F->>W: Transaction Request
+    W->>BC: Send Transaction
+    BC->>SC: Execute Contract
+    SC->>T: Transfer Funds
+    SC->>F: Transaction Success
+    F->>U: Ticket Confirmation
+
+    Note over U,T: 🔗 Referral System
+    U->>F: Share Referral Link
+    F->>U: Generate Referral URL
+    U->>F: New User with Referral
+    F->>SC: Register Referral
+    SC->>F: Referral Recorded
+
+    Note over U,T: 🏆 Winner Selection & Rewards
+    SC->>SC: Execute Lottery Logic
+    SC->>F: Winner Announcement
+    F->>U: Show Results
+    U->>F: Claim Rewards
+    F->>SC: Claim Request
+    SC->>T: Process Payout
+    T->>W: Transfer Rewards
+    W->>U: Rewards Received
+
+    Note over U,T: 📊 Analytics & Monitoring
+    SC->>SC: Log Events
+    SC->>F: Update Statistics
+    F->>U: Show Dashboard
+```
+
+## 🔧 Smart Contracts
+
+### Core Contracts
+- **Cryptolotto1Day**: Daily lottery system
+- **Cryptolotto7Days**: Weekly jackpot system  
+- **CryptolottoAd**: Advertisement-based lottery
+- **TreasuryManager**: Treasury management system
+- **CryptolottoReferral**: Referral and reward system
+
+### Features
+- Multiple lottery types (Daily, Weekly, Ads)
+- Referral system with rewards
+- Treasury management
+- Circuit breaker functionality
+- Comprehensive testing suite
+
+## 🎯 Frontend Application
+
+### Features
+- **WEPIN Wallet Integration**: Blockchain wallet functionality
+- **VeryNetwork Support**: Chain ID 4613 blockchain interaction
+- **Social Login**: Google, 
+- **VERY Token System**: Prize management and participant tracking
+- **Responsive Design**: Mobile-optimized UI
+
+### Technology Stack
+- **Frontend**: React + TypeScript
+- **Styling**: Tailwind CSS
+- **Wallet**: WEPIN SDK
+- **Blockchain**: VeryNetwork (Chain ID: 4613)
+- **Build Tool**: Vite
+
+---
         WEPIN[WEPIN SDK]
         OAUTH[OAuth Providers]
         WALLET[Wallet Management]
@@ -516,6 +763,20 @@ This project is licensed under the MIT License.
 
 ## 🤝 기여자 (Contributing)
 @munsunouk, @hyeyoung-Moon
+
+## 📞 Support
+
+For issues and questions:
+- Check existing documentation
+- Review test files for examples
+- Open an issue on GitHub
+- Check CI/CD logs for build issues
+
+### 지원 채널 (Support Channels)
+
+- **GitHub Issues**: 버그 리포트 및 기능 요청
+- **Verychat**: 실시간 지원 및 커뮤니티
+- **이메일**: 공식 지원 채널을 통한 문의
 
 
 
