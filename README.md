@@ -599,7 +599,7 @@ sequenceDiagram
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd Eth-raffle
+cd Very-lucky
 ```
 
 ### 2. Smart Contract Setup
