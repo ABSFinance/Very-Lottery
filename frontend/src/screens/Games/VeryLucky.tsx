@@ -975,11 +975,10 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
           {/* Center: Title */}
           <div className="flex items-center gap-2">
             <span className="text-white font-semibold text-lg">
-              {gameType === "daily-lucky" && "Daily_LUCKY"}
-              {gameType === "weekly-jackpot" && "Weekly_JACKPOT"}
-              {gameType === "ads-lucky" && "ADS_LUCKY"}
+              {gameType === "daily-lucky" && "Daily LUCKY"}
+              {gameType === "weekly-jackpot" && "Weekly JACKPOT"}
+              {gameType === "ads-lucky" && "ADS LUCKY"}
             </span>
-            <span className="text-gray-400 text-sm">3</span>
           </div>
 
           {/* Right: Icons */}
