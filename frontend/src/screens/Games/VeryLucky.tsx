@@ -32,6 +32,9 @@ import {
   fetchReferralStats,
   fetchUserBalance,
   fetchAdTokenBalance,
+  getAdTokenApproval,
+  approveAdTokens,
+  buyAdTicket,
   GameType,
   GameConfig,
   GAME_CONFIGS,
@@ -73,6 +76,8 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
   const [userTicketCount, setUserTicketCount] = useState<number>(0);
   const [remainingTime, setRemainingTime] = useState<string>("00:00:00");
   const [userBalance, setUserBalance] = useState<number>(0);
+  const [userAdBalance, setUserAdBalance] = useState<number>(0);
+  const [adTokenApproval, setAdTokenApproval] = useState<number>(0);
 
   // Wepin state
   const [wepinSdk, setWepinSdk] = useState<WepinSDKLike | null>(null);
@@ -82,6 +87,9 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
   const [userInfo, setUserInfo] = useState<
     (WepinUserInfo & { walletAddress?: string }) | null
   >(null);
+  
+  // Flag to prevent state restoration after logout
+  const [hasLoggedOut, setHasLoggedOut] = useState(false);
 
   // Use global Wepin instances
   const wepin = getGlobalWepinInstances();
@@ -125,6 +133,11 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
 
   // Try to restore login state from storage on mount
   useEffect(() => {
+    if (hasLoggedOut) {
+      console.log("🚫 Skipping state restoration - user has logged out");
+      return;
+    }
+    
     console.log("🔄 Attempting to restore login state from storage...");
     const restored = refreshLoginStateFromStorage();
     if (restored) {
@@ -139,7 +152,7 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
         setIsCheckingLogin(false);
       }
     }
-  }, []);
+  }, [hasLoggedOut]);
 
   // Update game config when gameType changes
   useEffect(() => {
@@ -203,8 +216,8 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
 
   // Create handlers using the same pattern as Mobile.tsx
   const handleLogin = useMemo(
-    () =>
-      createLoginHandler({
+    () => {
+      const loginHandler = createLoginHandler({
         wepinLogin,
         wepinSdk,
         isInitialized,
@@ -214,20 +227,38 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
         updateGlobalLoginState,
         checkAndUpdateGlobalLoginState,
         setGlobalLoginState,
-      }),
+      });
+      
+      return async () => {
+        await loginHandler();
+        // Reset logout flag when user logs in
+        setHasLoggedOut(false);
+        console.log("🔄 VeryLucky login completed, logout flag reset");
+      };
+    },
     [wepinLogin, wepinSdk, isInitialized]
   );
 
   const handleLogout = useMemo(
-    () =>
-      createLogoutHandler({
+    () => {
+      const logoutHandler = createLogoutHandler({
         wepinLogin,
         isInitialized,
         setIsLoggedIn,
         setUserInfo,
         clearGlobalLoginState,
         clearGlobalWepinState,
-      }),
+      });
+      
+      return async () => {
+        await logoutHandler();
+        // Additional cleanup for VeryLucky component
+        setAccount("");
+        setIsCheckingLogin(false);
+        setHasLoggedOut(true); // Set flag to prevent state restoration
+        console.log("🔄 VeryLucky logout completed, UI should show login component");
+      };
+    },
     [wepinLogin, isInitialized]
   );
 
@@ -402,11 +433,20 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
           if (gameType === "ads-lucky") {
             // For ADS LUCKY, fetch AD token balance
             balance = await fetchAdTokenBalance(account, veryNetworkProvider);
+            setUserAdBalance(balance);
+            setUserBalance(0); // ETH balance is 0 for AD lottery
+            
+            // Also fetch AD token approval status
+            const approval = await getAdTokenApproval(account, veryNetworkProvider);
+            setAdTokenApproval(approval);
+            console.log("🔐 AD Token approval status:", approval);
           } else {
             // For other games, fetch ETH balance
             balance = await fetchUserBalance(account, veryNetworkProvider);
+            setUserBalance(balance);
+            setUserAdBalance(0); // AD balance is 0 for other games
+            setAdTokenApproval(0); // No approval needed for other games
           }
-          setUserBalance(balance);
         } catch (e) {
           console.error("Failed to fetch user data:", e);
         }
@@ -414,9 +454,14 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
 
       fetchUserData();
     }
-  }, [isLoggedIn, account, veryNetworkProvider]);
+  }, [isLoggedIn, account, veryNetworkProvider, gameType]);
 
   useEffect(() => {
+    if (hasLoggedOut) {
+      console.log("🚫 Skipping sessionStorage restoration - user has logged out");
+      return;
+    }
+    
     // Get data passed from Mobile.tsx
     try {
       const storedData = sessionStorage.getItem("game_data");
@@ -467,7 +512,7 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
       setIsCheckingLogin(false);
       setIsLoggedIn(false);
     }
-  }, [wepin]);
+  }, [wepin, hasLoggedOut]);
 
   useEffect(() => {
     // Load contract data if logged in and provider is available
@@ -495,6 +540,10 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
       veryNetworkProvider: !!veryNetworkProvider,
       gameType,
       userTicketCount,
+      userBalance,
+      userAdBalance,
+      adTokenApproval,
+      needsApproval: needsAdTokenApproval(),
       isInitialized,
       isLoading,
     });
@@ -504,6 +553,9 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
     veryNetworkProvider,
     gameType,
     userTicketCount,
+    userBalance,
+    userAdBalance,
+    adTokenApproval,
     isInitialized,
     isLoading,
   ]);
@@ -712,12 +764,87 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
     }
   };
 
+  // Check if AD token approval is needed
+  const needsAdTokenApproval = (): boolean => {
+    if (gameType !== "ads-lucky") return false;
+    return adTokenApproval < 1; // Need at least 1 AD token approved to buy 1 ticket
+  };
+
+  // Handle AD token approval
+  const handleAdTokenApproval = async () => {
+    if (!account || !veryNetworkProvider) {
+      throw new Error("User account or provider not available");
+    }
+
+    try {
+      console.log("🔐 Approving AD tokens for Ad Lottery...");
+      
+      // Approve 100 AD tokens (enough for 100 tickets)
+      const result = await approveAdTokens(account, veryNetworkProvider, 100);
+      
+      console.log("✅ AD token approval successful:", result);
+      
+      // Refresh approval status
+      const newApproval = await getAdTokenApproval(account, veryNetworkProvider);
+      setAdTokenApproval(newApproval);
+      
+      return {
+        success: true,
+        transactionId: result.txId,
+        message: "AD 토큰 승인이 완료되었습니다!"
+      };
+    } catch (error) {
+      console.error("❌ AD token approval failed:", error);
+      throw error;
+    }
+  };
+
+  // Handle Ad Lottery ticket purchase
+  const handleAdTicketPurchase = async (quantity: number) => {
+    if (!account || !veryNetworkProvider) {
+      throw new Error("User account or provider not available");
+    }
+
+    try {
+      console.log(`🎫 Purchasing ${quantity} Ad Lottery tickets...`);
+      
+      // Call buyAdTicket function from contracts.ts
+      const result = await buyAdTicket(account, veryNetworkProvider, quantity);
+      
+      console.log("✅ Ad Lottery ticket purchase successful:", result);
+      
+      // Refresh all contract data after successful purchase
+      await refreshAllContractData();
+      
+      return {
+        success: true,
+        transactionId: result.txId,
+        message: `Ad Lottery 티켓 구매 성공! ${quantity}장 구매 완료.`
+      };
+    } catch (error) {
+      console.error("❌ Ad Lottery ticket purchase failed:", error);
+      throw error;
+    }
+  };
+
   // Handle popup ticket purchase
   const handlePopupPurchase = async (ticketId: string, quantity: number) => {
     try {
       console.log(`Popup: Purchasing ${quantity} tickets for ${ticketId}`);
 
-      // Use the enhanced TicketPurchaseService with quantity and referrer
+      // Check if this is Ad Lottery and use the appropriate purchase method
+      if (gameType === "ads-lucky") {
+        const result = await handleAdTicketPurchase(quantity);
+        
+        // Close popup
+        closePurchasePopup();
+
+        // Show success message
+        alert(result.message + ` 트랜잭션 ID: ${result.transactionId}`);
+        return;
+      }
+
+      // Use the enhanced TicketPurchaseService with quantity and referrer for other games
       const result = await TicketPurchaseService.purchaseTicket({
         gameType,
         isLoggedIn,
@@ -785,17 +912,19 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
 
       // Refresh user balance
       console.log("💎 Refreshing user balance...");
-      let newBalance: number;
       if (gameType === "ads-lucky") {
         // For ADS LUCKY, fetch AD token balance
-        newBalance = await fetchAdTokenBalance(account, veryNetworkProvider);
-        console.log("✅ AD token balance refreshed:", newBalance);
+        const newAdBalance = await fetchAdTokenBalance(account, veryNetworkProvider);
+        setUserAdBalance(newAdBalance);
+        setUserBalance(0); // ETH balance is 0 for AD lottery
+        console.log("✅ AD token balance refreshed:", newAdBalance);
       } else {
         // For other games, fetch ETH balance
-        newBalance = await fetchUserBalance(account, veryNetworkProvider);
-        console.log("✅ ETH balance refreshed:", newBalance);
+        const newEthBalance = await fetchUserBalance(account, veryNetworkProvider);
+        setUserBalance(newEthBalance);
+        setUserAdBalance(0); // AD balance is 0 for other games
+        console.log("✅ ETH balance refreshed:", newEthBalance);
       }
-      setUserBalance(newBalance);
 
       // Refresh referral stats
       console.log("👥 Refreshing referral stats...");
@@ -817,7 +946,13 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
         <div className="w-full h-16 bg-[#171b25] flex items-center justify-between px-4">
           {/* Left: Back Arrow */}
           <button
-            onClick={() => window.history.back()}
+            onClick={() => {
+              // Navigate directly to home instead of using history.back()
+              window.history.pushState({}, "", "/");
+              window.dispatchEvent(
+                new CustomEvent("navigation", { detail: { path: "/" } })
+              );
+            }}
             className="text-white hover:text-gray-300 transition-colors"
           >
             <svg
@@ -1018,6 +1153,23 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
                 ticketCount={userTicketCount}
                 gameType={gameType}
                 maxTicketsPerPlayer={gameConfig.maxTicketsPerPlayer}
+                userAccount={account}
+                provider={veryNetworkProvider}
+                onTokenCountUpdate={async (newCount) => {
+                  // Fetch the real AD token balance from the blockchain when AD tokens are earned
+                  if (gameType === "ads-lucky" && account && veryNetworkProvider) {
+                    try {
+                      console.log("🔄 Fetching updated AD token balance from blockchain...");
+                      const realAdBalance = await fetchAdTokenBalance(account, veryNetworkProvider);
+                      setUserAdBalance(realAdBalance);
+                      console.log("✅ AD token balance updated from blockchain:", realAdBalance);
+                    } catch (error) {
+                      console.error("❌ Failed to fetch AD token balance:", error);
+                      // Fallback to the passed count if blockchain fetch fails
+                      setUserAdBalance(newCount);
+                    }
+                  }
+                }}
               />
             </div>
 
@@ -1031,7 +1183,7 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
                   : "#ff6c74",
               }}
               disabled={isCheckingLogin || isProcessingPurchase}
-              onClick={() => {
+              onClick={async () => {
                 if (!isLoggedIn && !isCheckingLogin) {
                   // Redirect to home for login
                   window.history.pushState({}, "", "/");
@@ -1039,8 +1191,30 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
                     new CustomEvent("navigation", { detail: { path: "/" } })
                   );
                 } else if (isLoggedIn) {
-                  // Open the ticket purchase popup
-                  openPurchasePopup();
+                  // For Ad Lottery, check if approval is needed first
+                  if (gameType === "ads-lucky") {
+                    setIsProcessingPurchase(true);
+                    try {
+                      if (needsAdTokenApproval()) {
+                        // Need to approve AD tokens first
+                        const result = await handleAdTokenApproval();
+                        alert(result.message + ` 트랜잭션 ID: ${result.transactionId}`);
+                      } else {
+                        // Already approved, can buy tickets
+                        const result = await handleAdTicketPurchase(1);
+                        alert(result.message + ` 트랜잭션 ID: ${result.transactionId}`);
+                      }
+                    } catch (error) {
+                      console.error("Ad Lottery operation failed:", error);
+                      const operation = needsAdTokenApproval() ? "승인" : "구매";
+                      alert(`Ad Lottery ${operation}에 실패했습니다: ` + (error instanceof Error ? error.message : String(error)));
+                    } finally {
+                      setIsProcessingPurchase(false);
+                    }
+                  } else {
+                    // For other games, open the ticket purchase popup
+                    openPurchasePopup();
+                  }
                 }
               }}
             >
@@ -1050,6 +1224,8 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
                 ? "처리 중..."
                 : !isLoggedIn
                 ? "로그인"
+                : gameType === "ads-lucky" && needsAdTokenApproval()
+                ? "승인"
                 : gameConfig.ticketPrice === "0 VERY"
                 ? "무료 티켓 받기"
                 : "구매"}
@@ -1065,7 +1241,7 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
           onClose={closePurchasePopup}
           onPurchase={handlePopupPurchase}
           ticket={selectedTicket}
-          userBalance={userBalance}
+          userBalance={gameType === "ads-lucky" ? userAdBalance : userBalance}
         />
       )}
 

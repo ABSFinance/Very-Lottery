@@ -119,13 +119,17 @@ contract Cryptolotto1Day is BaseGame {
     /**
      * @dev Select winner (using centralized storage)
      */
-    function _pickWinner() internal view override returns (address) {
+    function _pickWinner(
+        uint256 gameId
+    ) internal view override returns (address) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
-        StorageLayout.Game storage game = gameStorage.games[currentGameId];
+        StorageLayout.Game storage game = gameStorage.games[gameId];
         require(game.players.length > 0, "No players in game");
+
+        // If there's only one player, they automatically win
+        if (game.players.length == 1) {
+            return game.players[0];
+        }
 
         uint256 randomIndex = enhancedRandomNumberSecure(
             0,

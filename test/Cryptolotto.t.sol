@@ -230,7 +230,7 @@ contract CryptolottoTest is Test {
         stats = new StatsAggregator();
         fundsDistributor = new FundsDistributor();
         referral = new CryptolottoReferral();
-        adToken = new AdToken(1000000 * 10 ** 18); // 1M tokens initial supply
+        adToken = new AdToken(0); // 0 initial supply - tokens only earned through watching ads
 
         // Deploy TreasuryManager as regular contract
         TreasuryManager treasuryManagerContract = new TreasuryManager();
@@ -888,6 +888,81 @@ contract CryptolottoTest is Test {
         );
     }
 
+    function testCompleteAdLotteryFlow() public {
+        // Complete Ad Lottery flow test:
+        // 1. Buy 1Day ticket (generates fees for Ad Lottery)
+        // 2. Watch ad (earn AD tokens)
+        // 3. Buy Ad ticket (spend AD tokens, jackpot funded by 1Day fees)
+        // 4. Check jackpot is properly funded
+
+        // Step 1: Buy 1Day ticket to generate fees
+        uint256 ticketPrice = 0.01 ether;
+        vm.deal(player1, ticketPrice);
+
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
+
+        // Check that 1Day lottery has the correct jackpot (90% after fee deduction)
+        uint256 expected1DayJackpot = (ticketPrice * 90) / 100; // 90% after 10% fee
+        uint256 actual1DayJackpot = lottery1Day.getCurrentGameJackpot();
+        assertEq(
+            actual1DayJackpot,
+            expected1DayJackpot,
+            "1Day jackpot should be 90% of ticket price"
+        );
+
+        // Step 2: Watch ad to earn AD tokens
+        vm.prank(adToken.owner());
+        adToken.watchAd(player1);
+
+        // Check player1 has AD tokens
+        uint256 adTokenBalance = adToken.balanceOf(player1);
+        assertEq(
+            adTokenBalance,
+            1 ether,
+            "Player should have 1 AD token after watching ad"
+        );
+
+        // Step 3: Buy Ad Lottery ticket
+        vm.prank(player1);
+        adToken.approve(address(lotteryAd), 1 ether);
+
+        vm.prank(player1);
+        lotteryAd.buyAdTicket(1);
+
+        // Step 4: Check Ad Lottery jackpot is funded by 1Day fees
+        uint256 adLotteryJackpot = lotteryAd.getCurrentGameJackpot();
+
+        // The Ad Lottery jackpot should now contain the 3% fee from 1Day lottery
+        uint256 expectedAdLotteryFee = (ticketPrice * 3) / 100; // 3% fee
+        assertEq(
+            adLotteryJackpot,
+            expectedAdLotteryFee,
+            "Ad Lottery jackpot should be funded by 1Day fees"
+        );
+
+        // Verify AD tokens were burned
+        uint256 finalAdTokenBalance = adToken.balanceOf(player1);
+        assertEq(
+            finalAdTokenBalance,
+            0,
+            "AD tokens should be burned after buying Ad ticket"
+        );
+
+        // Verify Ad Lottery contract has no AD tokens
+        uint256 lotteryAdTokenBalance = lotteryAd.getAdTokenBalance();
+        assertEq(
+            lotteryAdTokenBalance,
+            0,
+            "Ad Lottery contract should have no AD tokens"
+        );
+
+        emit log_string("Complete Ad Lottery flow test passed!");
+        emit log_named_uint("1Day jackpot", actual1DayJackpot);
+        emit log_named_uint("Ad Lottery jackpot", adLotteryJackpot);
+        emit log_named_uint("Expected Ad Lottery fee", expectedAdLotteryFee);
+    }
+
     function testAdLotteryBatchPurchase() public {
         // Ad Lottery 배치 구매 테스트
         uint256[] memory ticketCounts = new uint256[](3);
@@ -996,7 +1071,12 @@ contract CryptolottoTest is Test {
 
         // assertEq(uint256(state), 1, "Game should be ACTIVE after buying ticket");
         // assertEq(gamePlayerCount, 1, "Should have 1 player");
-        assertEq(jackpot, ticketPrice, "Jackpot should equal ticket price");
+        // Jackpot should be 90% of ticket price after 10% fee deduction
+        assertEq(
+            jackpot,
+            (ticketPrice * 90) / 100,
+            "Jackpot should equal 90% of ticket price after fee deduction"
+        );
 
         emit log_string("Start new game test passed");
     }
@@ -1035,7 +1115,12 @@ contract CryptolottoTest is Test {
         emit log_named_uint("Game state", uint256(state));
 
         // assertEq(gamePlayerCount, 1, "Should have 1 player");
-        assertEq(jackpot, ticketPrice, "Jackpot should equal ticket price");
+        // Jackpot should be 90% of ticket price after 10% fee deduction
+        assertEq(
+            jackpot,
+            (ticketPrice * 90) / 100,
+            "Jackpot should equal 90% of ticket price after fee deduction"
+        );
         assertEq(uint256(state), 1, "Game should be ACTIVE");
 
         emit log_string("Simple buy ticket test passed");
@@ -1104,7 +1189,8 @@ contract CryptolottoTest is Test {
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery1Day.getCurrentGameState();
         // assertEq(gamePlayerCount, 1);
-        assertEq(jackpot, ticketPrice);
+        // Jackpot should be 90% of ticket price after 10% fee deduction
+        assertEq(jackpot, (ticketPrice * 90) / 100);
     }
 
     function testBuyMultipleTickets() public {
@@ -1123,7 +1209,8 @@ contract CryptolottoTest is Test {
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery1Day.getCurrentGameState();
         // assertEq(gamePlayerCount, 1);
-        assertEq(jackpot, ticketPrice * 5);
+        // Jackpot should be 90% of total value after 10% fee deduction
+        assertEq(jackpot, (ticketPrice * 5 * 90) / 100);
 
         // Try to buy 5 tickets but send wrong amount
         vm.prank(player1);
@@ -1153,7 +1240,8 @@ contract CryptolottoTest is Test {
         // uint256 gamePlayerCount = lottery7Days.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery7Days.getCurrentGameState();
         // assertEq(gamePlayerCount, 1);
-        assertEq(jackpot, ticketPrice * 3);
+        // Jackpot should be 90% of total value after 10% fee deduction
+        assertEq(jackpot, (ticketPrice * 3 * 90) / 100);
     }
 
     function testBuyMultipleTicketsSamePlayer() public {
@@ -1199,7 +1287,8 @@ contract CryptolottoTest is Test {
         uint256 jackpot = lottery1Day.getCurrentGameJackpot();
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery1Day.getCurrentGameState();
-        assertEq(jackpot, ticketPrice * 5);
+        // Jackpot should be 90% of total value after 10% fee deduction
+        assertEq(jackpot, (ticketPrice * 5 * 90) / 100);
     }
 
     function testBuyMultipleTicketsFallback() public {
@@ -1459,10 +1548,11 @@ contract CryptolottoTest is Test {
         uint256 jackpot = lottery1Day.getCurrentGameJackpot();
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery1Day.getCurrentGameState();
+        // Jackpot should be 90% of total value after 10% fee deduction
         assertEq(
             jackpot,
-            ticketPrice * 2,
-            "Jackpot should be 2 * ticket price"
+            (ticketPrice * 2 * 90) / 100,
+            "Jackpot should be 90% of 2 * ticket price after fee deduction"
         );
 
         // Fast forward time to end the game
@@ -1501,7 +1591,12 @@ contract CryptolottoTest is Test {
         // uint256 gamePlayerCount = lottery1Day.getCurrentGamePlayerCount();
         // StorageLayout.GameState state = lottery1Day.getCurrentGameState();
         // assertEq(gamePlayerCount, 1, "Should have 1 player");
-        assertEq(jackpot, ticketPrice, "Jackpot should equal ticket price");
+        // Jackpot should be 90% of ticket price after 10% fee deduction
+        assertEq(
+            jackpot,
+            (ticketPrice * 90) / 100,
+            "Jackpot should equal 90% of ticket price after fee deduction"
+        );
         // assertEq(uint256(state), 1, "Game should be ACTIVE");
     }
 
@@ -2449,7 +2544,7 @@ contract CryptolottoTest is Test {
     // ===== BUYTICKET AUTO-RESTART TESTS =====
 
     function testBuyTicketAutoRestartExpiredGame() public {
-        // Test that buyTicket properly rejects attempts to buy tickets on expired games
+        // Test that buyTicket automatically handles expired games and starts new ones
 
         // Start a game by buying a ticket
         vm.deal(player1, 1 ether);
@@ -2472,10 +2567,11 @@ contract CryptolottoTest is Test {
             block.timestamp,
             "Initial end time should be in the future"
         );
+        // Jackpot should be 90% of ticket price after 10% fee deduction
         assertEq(
             initialJackpot,
-            ticketPrice,
-            "Initial jackpot should equal ticket price"
+            (ticketPrice * 90) / 100,
+            "Initial jackpot should equal 90% of ticket price after fee deduction"
         );
 
         emit log_named_uint("Initial game ID", initialGameId);
@@ -2500,33 +2596,41 @@ contract CryptolottoTest is Test {
             "Game should still be ACTIVE (corrupted)"
         );
 
-        // Now try to buy a ticket on the expired game - this should fail
+        // Now try to buy a ticket on the expired game - this should automatically end the game and start a new one
         vm.deal(player2, 1 ether);
         vm.prank(player2);
 
-        // Expect the transaction to revert with our new error message
-        vm.expectRevert("Game has expired, cannot buy tickets");
+        // This should succeed and automatically handle the expired game
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
 
-        // Game state should remain the same (no auto-restart)
+        // Game state should now be in a new game
         StorageLayout.GameState finalState = lottery1Day.getCurrentGameState();
         uint256 finalGameId = lottery1Day.getCurrentGameNumber();
         uint256 finalEndTime = lottery1Day.getCurrentGameEndTime();
         uint256 finalJackpot = lottery1Day.getCurrentGameJackpot();
 
-        // Game should still be ACTIVE (no change)
-        assertEq(uint256(finalState), 1, "Game should still be ACTIVE");
-        assertEq(finalGameId, initialGameId, "Game ID should not change");
-        assertEq(finalEndTime, initialEndTime, "End time should not change");
-        assertEq(finalJackpot, initialJackpot, "Jackpot should not change");
+        // Game should be ACTIVE in a new game
+        assertEq(uint256(finalState), 1, "Game should be ACTIVE in new game");
+        assertGt(finalGameId, initialGameId, "Game ID should have increased");
+        assertGt(
+            finalEndTime,
+            block.timestamp,
+            "New end time should be in the future"
+        );
+        // New jackpot should be 90% of ticket price after 10% fee deduction
+        assertEq(
+            finalJackpot,
+            (ticketPrice * 90) / 100,
+            "New jackpot should equal 90% of ticket price after fee deduction"
+        );
 
-        // Game should still be expired
+        // Game should not be expired anymore
         bool stillExpired = lottery1Day.isGameTimeExpired();
-        assertTrue(stillExpired, "Game should still be expired");
+        assertFalse(stillExpired, "New game should not be expired");
     }
 
     function testBuyTicketAutoRestartWithMultiplePlayers() public {
-        // Test that buyTicket properly rejects attempts to buy tickets on expired games with multiple players
+        // Test that buyTicket automatically handles expired games with multiple players and starts new ones
 
         // Start a game with multiple players
         vm.deal(player1, 1 ether);
@@ -2553,10 +2657,11 @@ contract CryptolottoTest is Test {
             block.timestamp,
             "Initial end time should be in the future"
         );
+        // Jackpot should be 90% of total value after 10% fee deduction
         assertEq(
             initialJackpot,
-            ticketPrice * 2,
-            "Initial jackpot should equal 2 * ticket price"
+            (ticketPrice * 2 * 90) / 100,
+            "Initial jackpot should equal 90% of 2 * ticket price after fee deduction"
         );
 
         emit log_named_uint("Initial game ID", initialGameId);
@@ -2581,33 +2686,41 @@ contract CryptolottoTest is Test {
             "Game should still be ACTIVE (corrupted)"
         );
 
-        // Now try to buy a ticket on the expired game - this should fail
+        // Now try to buy a ticket on the expired game - this should automatically end the game and start a new one
         vm.deal(player3, 1 ether);
         vm.prank(player3);
 
-        // Expect the transaction to revert with our new error message
-        vm.expectRevert("Game has expired, cannot buy tickets");
+        // This should succeed and automatically handle the expired game
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
 
-        // Game state should remain the same (no auto-restart)
+        // Game state should now be in a new game
         StorageLayout.GameState finalState = lottery1Day.getCurrentGameState();
         uint256 finalGameId = lottery1Day.getCurrentGameNumber();
         uint256 finalEndTime = lottery1Day.getCurrentGameEndTime();
         uint256 finalJackpot = lottery1Day.getCurrentGameJackpot();
 
-        // Game should still be ACTIVE (no change)
-        assertEq(uint256(finalState), 1, "Game should still be ACTIVE");
-        assertEq(finalGameId, initialGameId, "Game ID should not change");
-        assertEq(finalEndTime, initialEndTime, "End time should not change");
-        assertEq(finalJackpot, initialJackpot, "Jackpot should not change");
+        // Game should be ACTIVE in a new game
+        assertEq(uint256(finalState), 1, "Game should be ACTIVE in new game");
+        assertGt(finalGameId, initialGameId, "Game ID should have increased");
+        assertGt(
+            finalEndTime,
+            block.timestamp,
+            "New end time should be in the future"
+        );
+        // New jackpot should be 90% of ticket price after 10% fee deduction
+        assertEq(
+            finalJackpot,
+            (ticketPrice * 90) / 100,
+            "New jackpot should equal 90% of ticket price after fee deduction"
+        );
 
-        // Game should still be expired
+        // Game should not be expired anymore
         bool stillExpired = lottery1Day.isGameTimeExpired();
-        assertTrue(stillExpired, "Game should still be expired");
+        assertFalse(stillExpired, "New game should not be expired");
     }
 
     function testBuyTicketAutoRestartPreservesPlayerInfo() public {
-        // Test that player info is preserved and expired games cannot have tickets purchased
+        // Test that player info is preserved and expired games are automatically handled
 
         // Start a game and buy tickets
         vm.deal(player1, 1 ether);
@@ -2642,15 +2755,14 @@ contract CryptolottoTest is Test {
         bool isExpired = lottery1Day.isGameTimeExpired();
         assertTrue(isExpired, "Game should be expired");
 
-        // Try to buy another ticket on the expired game - this should fail
+        // Try to buy another ticket on the expired game - this should automatically handle the expired game
         vm.deal(player1, 1 ether);
         vm.prank(player1);
 
-        // Expect the transaction to revert with our new error message
-        vm.expectRevert("Game has expired, cannot buy tickets");
+        // This should succeed and automatically handle the expired game
         lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
 
-        // Check that player info remains unchanged (no auto-restart)
+        // Check that player info is updated in the new game
         (
             uint256 ticketCountAfter,
             uint256 lastPurchaseTimeAfter,
@@ -2658,23 +2770,23 @@ contract CryptolottoTest is Test {
         ) = lottery1Day.getPlayerInfo(player1);
         assertEq(
             ticketCountAfter,
-            3,
-            "Player should still have 3 tickets (no auto-restart)"
+            1,
+            "Player should have 1 ticket in the new game"
         );
-        assertEq(
+        assertGt(
             lastPurchaseTimeAfter,
             lastPurchaseTimeBefore,
-            "Last purchase time should not change (no auto-restart)"
+            "Last purchase time should be updated"
         );
         assertEq(
             totalSpentAfter,
-            totalSpentBefore,
-            "Total spent should not change (no auto-restart)"
+            ticketPrice,
+            "Total spent should be reset to ticket price in new game"
         );
 
-        // Game should still be expired
+        // Game should not be expired anymore
         bool stillExpired = lottery1Day.isGameTimeExpired();
-        assertTrue(stillExpired, "Game should still be expired");
+        assertFalse(stillExpired, "New game should not be expired");
     }
 
     // ============ DEBUG TEST ============
@@ -2838,7 +2950,7 @@ contract CryptolottoTest is Test {
             100;
         uint256 expectedDeveloperFee = (ticketPrice * developerFeePercent) /
             100;
-        // Treasury receives ad lottery fee + developer fee (referral fee goes to referrer)
+        // Treasury receives  + developer fee (referral fee goes to referrer)
         uint256 expectedTreasuryAmount = expectedAdLotteryFee +
             expectedDeveloperFee;
 
@@ -3763,6 +3875,269 @@ contract CryptolottoTest is Test {
         // Verify the operation completed successfully
         assertTrue(gasUsed > 0, "Gas should be consumed");
         assertTrue(gasUsed < 1000000, "Gas usage should be reasonable"); // Less than 1M gas
+    }
+
+    // ============ AD TOKEN MINTING TESTS ============
+
+    function testAdTokenMintingAfterWatchAd() public {
+        // Test that Ad Tokens can be minted after watching ads
+        address user = makeAddr("adWatcher1");
+
+        // Get initial supply
+        uint256 initialSupply = adToken.totalSupply();
+        uint256 initialUserBalance = adToken.balanceOf(user);
+
+        // Watch ad and mint tokens (call from owner)
+        vm.prank(adToken.owner());
+        adToken.watchAd(user);
+
+        // Check that tokens were minted
+        uint256 finalSupply = adToken.totalSupply();
+        uint256 finalUserBalance = adToken.balanceOf(user);
+
+        assertEq(
+            finalSupply,
+            initialSupply + adToken.adReward(),
+            "Total supply should increase by ad reward"
+        );
+        assertEq(
+            finalUserBalance,
+            initialUserBalance + adToken.adReward(),
+            "User balance should increase by ad reward"
+        );
+
+        // Check that user is now a holder
+        assertTrue(
+            adToken.isHolder(user),
+            "User should be a holder after receiving tokens"
+        );
+    }
+
+    function testAdTokenMintingLimits() public {
+        // Test daily limits and cooldown for ad watching
+        address user = makeAddr("adWatcher2");
+
+        // First ad watch should work
+        vm.prank(adToken.owner());
+        adToken.watchAd(user);
+        uint256 firstBalance = adToken.balanceOf(user);
+
+        // Second ad watch should fail due to cooldown
+        vm.prank(adToken.owner());
+        vm.expectRevert(AdToken.MustWaitBetweenAds.selector);
+        adToken.watchAd(user);
+
+        // Fast forward 1 hour + 1 second
+        vm.warp(block.timestamp + 3601);
+
+        // Now second ad watch should work
+        vm.prank(adToken.owner());
+        adToken.watchAd(user);
+        uint256 secondBalance = adToken.balanceOf(user);
+
+        assertEq(
+            secondBalance,
+            firstBalance + adToken.adReward(),
+            "Second ad watch should mint tokens"
+        );
+    }
+
+    function testAdTokenMintingControl() public {
+        // Test owner controls for minting
+        address user = makeAddr("adWatcher3");
+
+        // Disable minting
+        adToken.setMintingEnabled(false);
+
+        // Ad watching should fail
+        vm.prank(adToken.owner());
+        vm.expectRevert(AdToken.MintingDisabled.selector);
+        adToken.watchAd(user);
+
+        // Re-enable minting
+        adToken.setMintingEnabled(true);
+
+        // Ad watching should work again
+        vm.prank(adToken.owner());
+        adToken.watchAd(user);
+        assertEq(
+            adToken.balanceOf(user),
+            adToken.adReward(),
+            "Ad watching should work after re-enabling minting"
+        );
+    }
+
+    // ============ JACKPOT FEE DEDUCTION TESTS ============
+
+    function testJackpotSizeWithFeeDeduction() public {
+        // Test that jackpot size correctly reflects 10% fee deduction
+        // When a ticket is purchased, 10% goes to fees, 90% should go to jackpot
+
+        // Get ticket price and fee percentages
+        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        uint256 totalFeePercent = lottery1Day.TOTAL_FEE_PERCENT();
+
+        // Calculate expected amounts
+        uint256 expectedTotalFee = (ticketPrice * totalFeePercent) / 100;
+        uint256 expectedJackpotIncrease = ticketPrice - expectedTotalFee; // 90% of ticket price
+
+        emit log_named_uint("Ticket price", ticketPrice);
+        emit log_named_uint("Total fee percent", totalFeePercent);
+        emit log_named_uint("Expected total fee", expectedTotalFee);
+        emit log_named_uint(
+            "Expected jackpot increase",
+            expectedJackpotIncrease
+        );
+
+        // Get initial jackpot
+        uint256 initialJackpot = lottery1Day.getCurrentGameJackpot();
+        emit log_named_uint("Initial jackpot", initialJackpot);
+
+        // Buy 1 ticket
+        vm.deal(player1, ticketPrice);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: ticketPrice}(address(0), 1);
+
+        // Get updated jackpot
+        uint256 updatedJackpot = lottery1Day.getCurrentGameJackpot();
+        uint256 actualJackpotIncrease = updatedJackpot - initialJackpot;
+
+        emit log_named_uint("Updated jackpot", updatedJackpot);
+        emit log_named_uint("Actual jackpot increase", actualJackpotIncrease);
+
+        // Verify jackpot increased by 90% of ticket price (after 10% fee deduction)
+        assertEq(
+            actualJackpotIncrease,
+            expectedJackpotIncrease,
+            "Jackpot should increase by 90% of ticket price (after 10% fee deduction)"
+        );
+
+        // Verify the math: jackpot increase + fees = ticket price
+        assertEq(
+            actualJackpotIncrease + expectedTotalFee,
+            ticketPrice,
+            "Jackpot increase + fees should equal ticket price"
+        );
+
+        emit log_string("Jackpot fee deduction test passed successfully");
+    }
+
+    function testJackpotSizeWithMultipleTickets() public {
+        // Test jackpot calculation with multiple tickets
+
+        // Get ticket price and fee percentages
+        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        uint256 totalFeePercent = lottery1Day.TOTAL_FEE_PERCENT();
+        uint256 ticketCount = 5;
+        uint256 totalValue = ticketPrice * ticketCount;
+
+        // Calculate expected amounts
+        uint256 expectedTotalFee = (totalValue * totalFeePercent) / 100;
+        uint256 expectedJackpotIncrease = totalValue - expectedTotalFee; // 90% of total value
+
+        emit log_named_uint("Ticket count", ticketCount);
+        emit log_named_uint("Total value", totalValue);
+        emit log_named_uint("Expected total fee", expectedTotalFee);
+        emit log_named_uint(
+            "Expected jackpot increase",
+            expectedJackpotIncrease
+        );
+
+        // Get initial jackpot
+        uint256 initialJackpot = lottery1Day.getCurrentGameJackpot();
+        emit log_named_uint("Initial jackpot", initialJackpot);
+
+        // Buy 5 tickets
+        vm.deal(player1, totalValue);
+        vm.prank(player1);
+        lottery1Day.buyTicket{value: totalValue}(address(0), ticketCount);
+
+        // Get updated jackpot
+        uint256 updatedJackpot = lottery1Day.getCurrentGameJackpot();
+        uint256 actualJackpotIncrease = updatedJackpot - initialJackpot;
+
+        emit log_named_uint("Updated jackpot", updatedJackpot);
+        emit log_named_uint("Actual jackpot increase", actualJackpotIncrease);
+
+        // Verify jackpot increased by 90% of total value (after 10% fee deduction)
+        assertEq(
+            actualJackpotIncrease,
+            expectedJackpotIncrease,
+            "Jackpot should increase by 90% of total value for multiple tickets"
+        );
+
+        // Verify the math: jackpot increase + fees = total value
+        assertEq(
+            actualJackpotIncrease + expectedTotalFee,
+            totalValue,
+            "Jackpot increase + fees should equal total value for multiple tickets"
+        );
+
+        emit log_string(
+            "Multiple tickets jackpot fee deduction test passed successfully"
+        );
+    }
+
+    function testJackpotFeeDistributionAccuracy() public {
+        // Test that fee distribution is mathematically accurate
+
+        (uint256 ticketPrice, , , ) = lottery1Day.getGameConfig();
+        uint256 totalFeePercent = lottery1Day.TOTAL_FEE_PERCENT();
+        uint256 referralFeePercent = lottery1Day.REFERRAL_FEE_PERCENT();
+        uint256 adLotteryFeePercent = lottery1Day.AD_LOTTERY_FEE_PERCENT();
+        uint256 developerFeePercent = lottery1Day.DEVELOPER_FEE_PERCENT();
+
+        // Test with different ticket counts
+        uint256[] memory ticketCounts = new uint256[](3);
+        ticketCounts[0] = 1;
+        ticketCounts[1] = 10;
+        ticketCounts[2] = 100;
+
+        for (uint256 i = 0; i < ticketCounts.length; i++) {
+            uint256 ticketCount = ticketCounts[i];
+            uint256 totalValue = ticketPrice * ticketCount;
+
+            // Calculate expected fees
+            uint256 expectedTotalFee = (totalValue * totalFeePercent) / 100;
+            uint256 expectedReferralFee = (totalValue * referralFeePercent) /
+                100;
+            uint256 expectedAdLotteryFee = (totalValue * adLotteryFeePercent) /
+                100;
+            uint256 expectedDeveloperFee = (totalValue * developerFeePercent) /
+                100;
+            uint256 expectedJackpotIncrease = totalValue - expectedTotalFee;
+
+            // Verify fee calculations add up correctly
+            assertEq(
+                expectedTotalFee,
+                expectedReferralFee +
+                    expectedAdLotteryFee +
+                    expectedDeveloperFee,
+                "Total fee should equal sum of individual fees"
+            );
+
+            // Verify jackpot calculation
+            assertEq(
+                expectedJackpotIncrease + expectedTotalFee,
+                totalValue,
+                "Jackpot increase + total fees should equal total value"
+            );
+
+            // Verify jackpot is 90% of total value
+            assertEq(
+                expectedJackpotIncrease,
+                (totalValue * 90) / 100,
+                "Jackpot should be 90% of total value"
+            );
+
+            emit log_string(
+                "Fee distribution accuracy verified for multiple tickets"
+            );
+        }
+
+        emit log_string(
+            "Jackpot fee distribution accuracy test passed successfully"
+        );
     }
 
     // ============ GAME STATE RECOVERY TESTS ============

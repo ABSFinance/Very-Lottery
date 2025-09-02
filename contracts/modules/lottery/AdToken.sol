@@ -26,6 +26,8 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     error InvalidBurnAmount();
     error InsufficientBalanceForBurn();
     error TransferNotAllowed();
+    error MintingDisabled();
+    error MaxSupplyExceeded();
 
     // 광고 보상 관련 변수
     /**
@@ -63,6 +65,16 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      */
     mapping(address => uint256) public lastRewardReset;
 
+    // Minting 관련 변수
+    /**
+     * @notice Whether minting is enabled
+     */
+    bool public mintingEnabled = true;
+    /**
+     * @notice Maximum total supply (0 means unlimited)
+     */
+    uint256 public maxSupply = 0; // 0 means unlimited
+
     // 통계 추적 변수
     /**
      * @notice Total number of transfers
@@ -96,7 +108,11 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param reward Amount of utility tokens rewarded
      * @param timestamp Timestamp when ad was watched
      */
-    event AdWatched(address indexed viewer, uint256 indexed reward, uint256 indexed timestamp);
+    event AdWatched(
+        address indexed viewer,
+        uint256 indexed reward,
+        uint256 indexed timestamp
+    );
     /**
      * @notice Emitted when reward amount is updated
      * @param newReward New reward amount in utility tokens
@@ -121,13 +137,45 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param newMax New max daily reward in utility tokens
      * @param timestamp Timestamp when max daily reward was updated
      */
-    event MaxDailyRewardUpdated(uint256 indexed oldMax, uint256 indexed newMax, uint256 indexed timestamp);
+    event MaxDailyRewardUpdated(
+        uint256 indexed oldMax,
+        uint256 indexed newMax,
+        uint256 indexed timestamp
+    );
+    /**
+     * @notice Emitted when tokens are minted for watching ads
+     * @param to Address that received the minted tokens
+     * @param amount Amount of tokens minted
+     * @param timestamp Timestamp when tokens were minted
+     */
+    event TokensMinted(
+        address indexed to,
+        uint256 indexed amount,
+        uint256 indexed timestamp
+    );
+    /**
+     * @notice Emitted when minting is enabled/disabled
+     * @param enabled Whether minting is enabled
+     * @param timestamp Timestamp when minting status was changed
+     */
+    event MintingStatusChanged(bool indexed enabled, uint256 indexed timestamp);
+    /**
+     * @notice Emitted when max supply is updated
+     * @param oldMax Previous max supply
+     * @param newMax New max supply
+     * @param timestamp Timestamp when max supply was updated
+     */
+    event MaxSupplyUpdated(
+        uint256 indexed oldMax,
+        uint256 indexed newMax,
+        uint256 indexed timestamp
+    );
 
     /**
      * @notice Constructor for the AdToken utility token contract
      * @param initialSupply Initial utility token supply
      */
-    constructor(uint256 initialSupply) ERC20("AdToken", "ADT") Ownable() {
+    constructor(uint256 initialSupply) ERC20("AdToken", "AD") Ownable() {
         _mint(msg.sender, initialSupply);
 
         // 초기 holder 설정
@@ -163,19 +211,20 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /**
-     * @notice Watch an ad and receive utility tokens
+     * @notice Watch an ad and receive utility tokens (mint new tokens)
      * @param viewer Address of the viewer
      */
     function watchAd(address viewer) external {
         if (emergencyPaused) revert ContractEmergencyPaused();
         if (viewer == address(0)) revert InvalidViewerAddress();
         if (viewer == address(this)) revert CannotWatchForContract();
-        if (balanceOf(msg.sender) < adReward) {
-            revert InsufficientTokensForReward();
-        }
+        if (!mintingEnabled) revert MintingDisabled();
 
-        // 최소 1시간 간격으로 광고 시청 가능
-        if (block.timestamp < lastAdWatchTime[viewer] + 3600 + 1) {
+        // 최소 1시간 간격으로 광고 시청 가능 (첫 시청은 허용)
+        if (
+            lastAdWatchTime[viewer] != 0 &&
+            block.timestamp < lastAdWatchTime[viewer] + 3600
+        ) {
             revert MustWaitBetweenAds();
         } // solhint-disable-line not-rely-on-time
 
@@ -185,8 +234,13 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
             revert DailyRewardLimitExceeded();
         }
 
-        // 유틸리티 토큰 전송
-        _transfer(msg.sender, viewer, adReward);
+        // 최대 공급량 확인
+        if (maxSupply > 0 && totalSupply() + adReward > maxSupply) {
+            revert MaxSupplyExceeded();
+        }
+
+        // 새로운 토큰 민팅
+        _mint(viewer, adReward);
 
         // 기록 업데이트
         lastAdWatchTime[viewer] = block.timestamp; // solhint-disable-line not-rely-on-time
@@ -198,7 +252,14 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
         ++totalAdsWatchedCount; // solhint-disable-line gas-increment-by-one
         totalRewardsEarnedAmount += adReward;
 
+        // Holder 수 업데이트
+        if (!isHolder[viewer]) {
+            isHolder[viewer] = true;
+            ++totalHoldersCount; // solhint-disable-line gas-increment-by-one
+        }
+
         emit AdWatched(viewer, adReward, block.timestamp); // solhint-disable-line not-rely-on-time
+        emit TokensMinted(viewer, adReward, block.timestamp); // solhint-disable-line not-rely-on-time
     }
 
     /**
@@ -226,6 +287,51 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
     }
 
     /**
+     * @notice Enable or disable minting
+     * @param enabled Whether to enable minting
+     */
+    function setMintingEnabled(bool enabled) external onlyOwner {
+        mintingEnabled = enabled;
+        emit MintingStatusChanged(enabled, block.timestamp); // solhint-disable-line not-rely-on-time
+    }
+
+    /**
+     * @notice Set maximum total supply (0 means unlimited)
+     * @param newMaxSupply New maximum supply
+     */
+    function setMaxSupply(uint256 newMaxSupply) external onlyOwner {
+        uint256 oldMax = maxSupply;
+        maxSupply = newMaxSupply;
+        emit MaxSupplyUpdated(oldMax, newMaxSupply, block.timestamp); // solhint-disable-line not-rely-on-time
+    }
+
+    /**
+     * @notice Mint tokens to a specific address (owner only)
+     * @param to Address to mint tokens to
+     * @param amount Amount of tokens to mint
+     */
+    function mint(address to, uint256 amount) external onlyOwner {
+        if (!mintingEnabled) revert MintingDisabled();
+        if (to == address(0)) revert InvalidViewerAddress();
+        if (amount == 0) revert InvalidBurnAmount();
+
+        // 최대 공급량 확인
+        if (maxSupply > 0 && totalSupply() + amount > maxSupply) {
+            revert MaxSupplyExceeded();
+        }
+
+        _mint(to, amount);
+
+        // Holder 수 업데이트
+        if (!isHolder[to]) {
+            isHolder[to] = true;
+            ++totalHoldersCount; // solhint-disable-line gas-increment-by-one
+        }
+
+        emit TokensMinted(to, amount, block.timestamp); // solhint-disable-line not-rely-on-time
+    }
+
+    /**
      * @notice Get user statistics for utility token usage
      * @param user The user address
      * @return lastWatch Last watch timestamp
@@ -235,7 +341,9 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @return lastReset Last reset timestamp
      * @return canWatchNow Whether user can watch now
      */
-    function getUserStats(address user)
+    function getUserStats(
+        address user
+    )
         external
         view
         returns (
@@ -247,8 +355,10 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
             bool canWatchNow
         )
     {
-        uint256 timeSinceLastWatch = block.timestamp - lastAdWatchTime[user]; // solhint-disable-line not-rely-on-time
-        canWatchNow = timeSinceLastWatch > 3600 - 1;
+        // First time watching is always allowed, otherwise check cooldown
+        canWatchNow =
+            lastAdWatchTime[user] == 0 ||
+            (block.timestamp >= lastAdWatchTime[user] + 3600); // solhint-disable-line not-rely-on-time
 
         return (
             lastAdWatchTime[user],
@@ -343,7 +453,11 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param from Sender address
      * @param to Recipient address
      */
-    function _beforeTokenTransfer(address from, address to, uint256 /* amount */ ) internal virtual override {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 /* amount */
+    ) internal virtual override {
         // 긴급 정지 확인
         if (emergencyPaused) revert TransferNotAllowed();
         if (from == address(0) && to == address(0)) revert TransferNotAllowed();
@@ -355,7 +469,10 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param amount Amount of utility tokens to transfer
      * @return bool Success status
      */
-    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+    function transfer(
+        address to,
+        uint256 amount
+    ) public virtual override returns (bool) {
         if (emergencyPaused) revert TransferNotAllowed();
 
         // Holder 수 업데이트
@@ -378,7 +495,11 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param amount Amount of utility tokens to transfer
      * @return bool Success status
      */
-    function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public virtual override returns (bool) {
         if (emergencyPaused) revert TransferNotAllowed();
 
         // Holder 수 업데이트
@@ -399,7 +520,10 @@ contract AdToken is ERC20, ERC20Burnable, Ownable {
      * @param burner Address authorized to burn utility tokens
      * @param amount Amount of utility tokens to burn
      */
-    function burnFromAuthorized(address burner, uint256 amount) external onlyOwner {
+    function burnFromAuthorized(
+        address burner,
+        uint256 amount
+    ) external onlyOwner {
         if (burner == address(0)) revert InvalidBurnerAddress();
         if (amount == 0) revert InvalidBurnAmount();
         if (balanceOf(burner) < amount) revert InsufficientBalanceForBurn();

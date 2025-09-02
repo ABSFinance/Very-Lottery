@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
+import { watchAd, fetchAdTokenBalance } from "../utils/contracts";
 
 export interface MyTicketsCardProps {
   ticketCount: number;
   gameType: "daily-lucky" | "weekly-jackpot" | "ads-lucky";
   maxTicketsPerPlayer?: number;
   className?: string;
+  // New props for blockchain interaction
+  userAccount?: string;
+  provider?: any;
+  onTokenCountUpdate?: (newCount: number) => void;
 }
 
 export const MyTicketsCard: React.FC<MyTicketsCardProps> = ({
@@ -13,9 +18,30 @@ export const MyTicketsCard: React.FC<MyTicketsCardProps> = ({
   gameType,
   maxTicketsPerPlayer = 100,
   className = "",
+  userAccount,
+  provider,
+  onTokenCountUpdate,
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [tokenCount, setTokenCount] = useState(0); // Default token count starts at 0
+  const [isWatchingAd, setIsWatchingAd] = useState(false);
+
+  // Initialize token count from actual AD token balance when component loads
+  useEffect(() => {
+    const initializeTokenCount = async () => {
+      if (gameType === "ads-lucky" && userAccount && provider) {
+        try {
+          const balance = await fetchAdTokenBalance(userAccount, provider);
+          setTokenCount(balance);
+          console.log("🎯 Initialized AD token count:", balance);
+        } catch (error) {
+          console.error("Failed to fetch initial AD token balance:", error);
+        }
+      }
+    };
+
+    initializeTokenCount();
+  }, [gameType, userAccount, provider]);
 
   const getGameTypeText = (type: string) => {
     switch (type) {
@@ -65,10 +91,45 @@ export const MyTicketsCard: React.FC<MyTicketsCardProps> = ({
     setIsVideoOpen(true);
   };
 
-  const handleVideoClose = () => {
+  const handleVideoClose = async () => {
     setIsVideoOpen(false);
-    // Increase token count by 1 when video is closed (after watching ad)
-    setTokenCount(prev => prev + 1);
+    
+    // If we have the necessary props for blockchain interaction, call watchAd
+    if (userAccount && provider && gameType === "ads-lucky") {
+      setIsWatchingAd(true);
+      try {
+        console.log("🎬 Video finished, calling watchAd function...");
+        
+        // Call the watchAd function from contracts.ts
+        const result = await watchAd(userAccount, provider);
+        console.log("✅ watchAd transaction successful:", result.txId);
+        
+        // Fetch updated AD token balance from the contract
+        const newBalance = await fetchAdTokenBalance(userAccount, provider);
+        console.log("✅ Updated AD token balance:", newBalance);
+        
+        // Update local token count with the real balance
+        setTokenCount(newBalance);
+        
+        // Notify parent component of the update
+        if (onTokenCountUpdate) {
+          onTokenCountUpdate(newBalance);
+        }
+        
+        // Show success message (optional)
+        console.log("🎉 Successfully earned AD tokens by watching ad!");
+        
+      } catch (error) {
+        console.error("❌ Error calling watchAd:", error);
+        // Still increase local count as fallback
+        setTokenCount(prev => prev + 1);
+      } finally {
+        setIsWatchingAd(false);
+      }
+    } else {
+      // Fallback: just increase local token count
+      setTokenCount(prev => prev + 1);
+    }
   };
 
   return (
@@ -116,9 +177,14 @@ export const MyTicketsCard: React.FC<MyTicketsCardProps> = ({
             {/* Exchange Button */}
             <button 
               onClick={handleVideoOpen}
-              className="w-full h-10 bg-[#F0D050] text-[#28282D] font-semibold rounded-lg hover:bg-[#E8C840] transition-colors"
+              disabled={isWatchingAd}
+              className={`w-full h-10 font-semibold rounded-lg transition-colors ${
+                isWatchingAd 
+                  ? "bg-[#F0D050] text-[#28282D] opacity-50 cursor-not-allowed" 
+                  : "bg-[#F0D050] text-[#28282D] hover:bg-[#E8C840]"
+              }`}
             >
-              광고보기
+              {isWatchingAd ? "처리 중..." : "광고보기"}
             </button>
           </CardContent>
         </Card>

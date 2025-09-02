@@ -327,8 +327,11 @@ abstract contract BaseGame is
         // Reset jackpot for new game
         newGame.jackpot = 0;
 
-        // FIX: Reset player ticket counts for clean state
-        _resetPlayerTicketCounts();
+        // FIX: Reset player ticket counts for clean state in new game
+        // Reset ticket counts for all players from the previous game
+        if (newGameId > 0) {
+            _resetPlayerTicketCountsForGame(newGameId - 1);
+        }
 
         gameStorage.totalGames++;
         _emitNewGameEvents(newGameId);
@@ -337,12 +340,12 @@ abstract contract BaseGame is
     /**
      * @notice End current game
      */
-    function _endCurrentGame() internal {
+    function _endCurrentGame(uint256 gameId) internal {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = _getCurrentGameId(gameStorage);
-        StorageLayout.Game storage currentGame = gameStorage.games[
-            currentGameId
-        ];
+        StorageLayout.Game storage currentGame = gameStorage.games[gameId];
+
+        // DEBUG: Log player count before ending game
+        emit GameStateChanged(gameId, currentGame.state, block.timestamp);
 
         // SIMPLE FIX: Handle the case where there are no players
         if (currentGame.players.length == 0) {
@@ -358,8 +361,8 @@ abstract contract BaseGame is
         }
 
         // Normal game ending with players
-        _updateGameState();
-        address winner = _pickWinner();
+        _updateGameState(gameId);
+        address winner = _pickWinner(gameId);
 
         _emitGameEndEvents(
             currentGame.gameNumber,
@@ -394,6 +397,8 @@ abstract contract BaseGame is
             // Ad Lottery fee is sent to the treasury for later distribution
             if (_isRegistryAvailable()) {
                 _executeAdLotteryFeeTransfer(amount);
+                // Notify Ad Lottery contract about the new fee
+                _notifyAdLotteryOfNewFee(amount);
             }
             emit AdLotteryFeeCollected(amount, block.timestamp);
         }
@@ -474,24 +479,10 @@ abstract contract BaseGame is
         _requireGameActive(ticketCount);
         uint256 currentGameId = _getCurrentGameId(getGameStorage());
 
-        // SIMPLE FIX: Check if current game is expired before processing
-        StorageLayout.Game storage currentGame = getGameStorage().games[
-            currentGameId
-        ];
-        if (
-            currentGame.state == StorageLayout.GameState.ACTIVE &&
-            block.timestamp >= currentGame.endTime
-        ) {
-            revert("Game has expired, cannot buy tickets");
-        }
-
+        // IMPROVED FLOW: Automatically handle expired games and start new ones
         currentGameId = _handleGameState(getGameStorage(), currentGameId);
 
-        // SIMPLE FIX: Check if the game was ended
-        if (currentGameId == type(uint256).max) {
-            revert("Game has ended, cannot buy tickets");
-        }
-
+        // After handling game state, ensure we have a valid active game
         _requireCurrentGameActive(currentGameId);
         _updatePlayerInfoOptimized(msg.sender, ticketCount, currentGameId);
         _transferToTreasury(msg.value);
@@ -556,24 +547,27 @@ abstract contract BaseGame is
             currentGameId
         ];
 
-        // SIMPLE FIX: Don't auto-restart games, just handle basic state transitions
+        // FLOW: init -> buyTicket -> time expired -> checkAndEndGame -> new game began
+
+        // Step 1: If game is WAITING, start a new game
         if (currentGame.state == StorageLayout.GameState.WAITING) {
             _startNewGame();
             return gameStorage.totalGames - 1;
         }
 
-        // SIMPLE FIX: For expired games, just end them without auto-restart
+        // Step 2: If game is ACTIVE but time expired, end it and start new game
         if (
             currentGame.state == StorageLayout.GameState.ACTIVE &&
             block.timestamp >= currentGame.endTime
         ) {
-            // Just end the current game, don't auto-restart
-            // This prevents the "Invalid range" error
-            _endCurrentGame();
-            // Return a special value to indicate the game is ended
-            return type(uint256).max; // Special value for ended game
+            // End the expired game (checkAndEndGame)
+            _endCurrentGame(currentGameId);
+            // Start a new game (new game began)
+            _startNewGame();
+            return gameStorage.totalGames - 1;
         }
 
+        // Step 3: Game is still active and not expired, continue with current game
         return currentGameId;
     }
 
@@ -840,9 +834,16 @@ abstract contract BaseGame is
         uint256 ticketCount,
         uint256 ticketPrice
     ) internal pure returns (uint256) {
-        return
-            LotteryUtils.calculateTotalValue(ticketPrice, ticketCount) +
-            jackpot;
+        uint256 totalValue = LotteryUtils.calculateTotalValue(
+            ticketPrice,
+            ticketCount
+        );
+        uint256 totalFee = LotteryUtils.calculateTreasuryFee(
+            totalValue,
+            TOTAL_FEE_PERCENT
+        );
+        uint256 jackpotIncrease = totalValue - totalFee; // 90% of total value after 10% fee deduction
+        return jackpot + jackpotIncrease;
     }
 
     /**
@@ -890,14 +891,19 @@ abstract contract BaseGame is
      */
     function _resetPlayerTicketCounts() internal {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = gameStorage.totalGames > 0
-            ? gameStorage.totalGames - 1
-            : 0;
+        uint256 currentGameId = _getCurrentGameId(gameStorage);
         StorageLayout.Game storage currentGame = gameStorage.games[
             currentGameId
         ];
 
         _resetPlayerTickets(gameStorage, currentGame.players);
+    }
+
+    function _resetPlayerTicketCountsForGame(uint256 gameId) internal {
+        StorageLayout.GameStorage storage gameStorage = getGameStorage();
+        StorageLayout.Game storage game = gameStorage.games[gameId];
+
+        _resetPlayerTickets(gameStorage, game.players);
     }
 
     /**
@@ -909,12 +915,19 @@ abstract contract BaseGame is
     ) internal {
         uint256 length = players.length;
         for (uint256 i = 0; i < length; i++) {
-            gameStorage.playerTicketCount[players[i]] = 0;
+            address player = players[i];
+            gameStorage.playerTicketCount[player] = 0;
+            // Also reset player info for new game
+            gameStorage.playerInfo[player].ticketCount = 0;
+            gameStorage.playerInfo[player].totalSpent = 0;
+            // Keep lastPurchaseTime as it's useful for tracking
         }
     }
 
     /**
      * @dev 게임 종료 확인 및 처리
+     * @notice Public function to manually check and end expired games
+     * Can be called by external automation services or manually
      */
     function checkAndEndGame() public {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
@@ -924,14 +937,15 @@ abstract contract BaseGame is
         ];
 
         if (_shouldEndGame(currentGame)) {
-            // SIMPLE FIX: Just end the current game, don't auto-restart
-            _endCurrentGame();
-            // Empty block intentionally left for future implementation
+            // End the expired game and start a new one
+            _endCurrentGame(currentGameId);
+            _startNewGame();
         }
     }
 
     /**
      * @dev 자동 게임 종료 (누구나 호출 가능)
+     * @notice Same as checkAndEndGame but with different name for compatibility
      */
     function autoEndGame() public {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
@@ -941,10 +955,9 @@ abstract contract BaseGame is
         ];
 
         if (_shouldEndGame(currentGame)) {
-            // SIMPLE FIX: Just end the current game, don't auto-restart
-            _endCurrentGame();
+            // End the expired game and start a new one
+            _endCurrentGame(currentGameId);
             _startNewGame();
-            // Empty block intentionally left for future implementation
         }
     }
 
@@ -962,12 +975,13 @@ abstract contract BaseGame is
     /**
      * @dev 게임 상태 업데이트
      */
-    function _updateGameState() internal {
+    function _updateGameState(uint256 gameId) internal {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = _getCurrentGameId(gameStorage);
-        StorageLayout.Game storage currentGame = gameStorage.games[
-            currentGameId
-        ];
+        StorageLayout.Game storage currentGame = gameStorage.games[gameId];
+
+        // DEBUG: Log game state update
+        emit GameStateChanged(gameId, currentGame.state, block.timestamp);
+
         currentGame.state = StorageLayout.GameState.ENDED;
     }
 
@@ -1005,12 +1019,12 @@ abstract contract BaseGame is
     /**
      * @dev 승자 선정 (기본 구현)
      */
-    function _pickWinner() internal virtual returns (address) {
+    function _pickWinner(uint256 gameId) internal virtual returns (address) {
         StorageLayout.GameStorage storage gameStorage = getGameStorage();
-        uint256 currentGameId = _getCurrentGameId(gameStorage);
-        StorageLayout.Game storage currentGame = gameStorage.games[
-            currentGameId
-        ];
+        StorageLayout.Game storage currentGame = gameStorage.games[gameId];
+
+        // DEBUG: Log player count in _pickWinner
+        emit GameStateChanged(gameId, currentGame.state, block.timestamp);
 
         // FIX: Enhanced safety check for corrupted game states
         if (currentGame.players.length == 0) {
@@ -1032,14 +1046,15 @@ abstract contract BaseGame is
         require(players.length > 0, "No players in game");
         require(players.length <= type(uint256).max, "Player count too large");
 
-        // Additional safety check for edge case
+        // If there's only one player, they automatically win
         if (players.length == 1) {
             return players[0];
         }
 
-        // FIX: Ensure valid range for random number generation
+        // For multiple players, select randomly
+        // FIX: Ensure we have at least 2 players before calling enhancedRandomNumberSecure
         require(
-            players.length > 1,
+            players.length >= 2,
             "Need at least 2 players for random selection"
         );
 
@@ -1226,15 +1241,24 @@ abstract contract BaseGame is
      */
     function _executeAdLotteryFeeTransfer(uint256 amount) internal {
         if (_isRegistryAvailable()) {
-            try
-                ITreasuryManager(registry.getContract("TreasuryManager"))
-                    .depositFunds{value: amount}(
-                    treasuryName,
-                    address(this),
-                    amount
-                )
-            {
-                emit AdLotteryFeeCollected(amount, block.timestamp);
+            try registry.getContract("CryptolottoAd") returns (
+                address adLotteryAddress
+            ) {
+                if (adLotteryAddress != address(0)) {
+                    // Get Ad Lottery treasury name dynamically
+                    string memory adLotteryTreasuryName = this
+                        .getAdLotteryTreasuryName(adLotteryAddress);
+
+                    // Deposit to Ad Lottery treasury
+                    ITreasuryManager(registry.getContract("TreasuryManager"))
+                        .depositFunds{value: amount}(
+                        adLotteryTreasuryName,
+                        address(this),
+                        amount
+                    );
+
+                    emit AdLotteryFeeCollected(amount, block.timestamp);
+                }
             } catch Error(string memory reason) {
                 emit TreasuryTransferFailed(
                     address(this),
@@ -1250,6 +1274,56 @@ abstract contract BaseGame is
                     block.timestamp
                 );
             }
+        }
+    }
+
+    /**
+     * @dev Get Ad Lottery treasury name from Ad Lottery contract
+     * @param adLotteryAddress The Ad Lottery contract address
+     * @return The treasury name
+     */
+    function getAdLotteryTreasuryName(
+        address adLotteryAddress
+    ) external view returns (string memory) {
+        // Call the Ad Lottery contract to get its treasury name
+        (bool success, bytes memory data) = adLotteryAddress.staticcall(
+            abi.encodeWithSignature("treasuryName()")
+        );
+
+        if (success && data.length > 0) {
+            return abi.decode(data, (string));
+        }
+
+        // Fallback to default if call fails
+        return "unique_test_lottery_ad";
+    }
+
+    /**
+     * @dev Notify Ad Lottery contract about new fee deposit
+     * @param amount The fee amount that was deposited
+     */
+    function _notifyAdLotteryOfNewFee(uint256 amount) internal {
+        try registry.getContract("CryptolottoAd") returns (
+            address adLotteryAddress
+        ) {
+            if (adLotteryAddress != address(0)) {
+                // Call the Ad Lottery contract to process the new fee
+                (bool success, ) = adLotteryAddress.call(
+                    abi.encodeWithSignature("processNewFee(uint256)", amount)
+                );
+                if (!success) {
+                    emit TreasuryOperationFailed(
+                        "ad_lottery_notification_failed",
+                        block.timestamp
+                    );
+                }
+            }
+        } catch {
+            // If notification fails, continue without error
+            emit TreasuryOperationFailed(
+                "ad_lottery_notification_failed",
+                block.timestamp
+            );
         }
     }
 
@@ -1555,8 +1629,8 @@ abstract contract BaseGame is
         ];
 
         if (currentGame.state == StorageLayout.GameState.ACTIVE) {
-            _updateGameState();
-            address winner = _pickWinner();
+            _updateGameState(currentGameId);
+            address winner = _pickWinner(currentGameId);
             _processWinnerPayout(winner, currentGame.jackpot);
             _processFounderDistribution(currentGame.jackpot);
             _updateGameStats(
@@ -1688,8 +1762,8 @@ abstract contract BaseGame is
         // Mark game as ended
         game.state = StorageLayout.GameState.ENDED;
 
-        // Reset player ticket counts for the next game
-        _resetPlayerTicketCounts();
+        // Reset player ticket counts for the current game
+        _resetPlayerTicketCountsForGame(gameId);
 
         // Emit game ended event
         emit GameStateChanged(
@@ -1769,7 +1843,7 @@ abstract contract BaseGame is
         }
 
         if (_shouldEndGame(currentGame)) {
-            _endCurrentGame();
+            _endCurrentGame(currentGameId);
             _startNewGame();
         }
     }

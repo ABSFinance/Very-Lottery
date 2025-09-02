@@ -1,5 +1,7 @@
 import Cryptolotto1DayABI from '../contracts/Cryptolotto1Day.json';
 import Cryptolotto7DaysABI from '../contracts/Cryptolotto7Days.json';
+import CryptolottoAdABI from '../contracts/CryptolottoAd.json';
+import AdTokenABI from '../contracts/AdToken.json';
 import CryptolottoReferralABI from '../contracts/CryptolottoReferral.json';
 import FundsDistributorABI from '../contracts/FundsDistributor.json';
 import { ethers } from 'ethers';
@@ -61,11 +63,11 @@ export const GAME_CONFIGS: Record<GameType, GameConfig> = {
   "ads-lucky": {
     title: "ADS LUCKY",
     description: "광고 시청하고 행운을 얻어라! 무료 티켓의 기회!",
-    contractAddress: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_AD || '0x1CE13D1788bDd03ad4d9471FA36622988B2Ca87',
+    contractAddress: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_AD || '0x4Cb35B421fe8536066f4E125D10631F787c1127d',
     ticketPrice: "1 AD",
     maxTicketsPerPlayer: 10,
     gameDuration: 86400, // 24 hours in seconds
-    feePercentage: 5,
+    feePercentage: 0, // Ad Lottery has 0% fee (funded by other lotteries)
     image: "/fruit-color-1-2.png",
     color: "#ff6d75",
   },
@@ -75,6 +77,8 @@ export const GAME_CONFIGS: Record<GameType, GameConfig> = {
 export const CONTRACT_ABIS = {
   Cryptolotto1Day: Cryptolotto1DayABI.abi,
   Cryptolotto7Days: Cryptolotto7DaysABI.abi,
+  CryptolottoAd: CryptolottoAdABI.abi,
+  AdToken: AdTokenABI.abi,
   CryptolottoReferral: CryptolottoReferralABI.abi,
   FundsDistributor: FundsDistributorABI.abi,
 };
@@ -83,21 +87,30 @@ export const CONTRACT_ABIS = {
 export const GAME_CONTRACT_MAPPING = {
   'daily-lucky': 'Cryptolotto1Day',
   'weekly-jackpot': 'Cryptolotto7Days',
-  'ads-lucky': 'Cryptolotto1Day', // Using 1Day for ads as well, can be updated later
+  'ads-lucky': 'CryptolottoAd', // Now using the correct Ad Lottery contract
 } as const;
 
 // Contract addresses from environment variables
 export const CONTRACT_ADDRESSES = {
-  Cryptolotto1Day: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_1DAY || '0x6bd878ED448a3Fd9de868484DE4bF5a8008310f4',
-  Cryptolotto7Days: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_7DAYS || '0x6f450FAD7D63B080245AAFe107C3616D7F78af0f',
+  Cryptolotto1Day: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_1DAY || '0x675AFABdcb05c282fD044e6eF2c29bBDA8B239ec',
+  Cryptolotto7Days: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_7DAYS || '0xaac3dbD5A1797fA33f1917233E01CABc90B00e52',
+  CryptolottoAd: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_AD || '0x4Cb35B421fe8536066f4E125D10631F787c1127d',
   CryptolottoReferral: import.meta.env.VITE_CONTRACT_CRYPTOLOTTO_REFERRAL || '0x90c5D5C21D34eFBDC2E61968620CE7AdE44e5471',
   FundsDistributor: import.meta.env.VITE_CONTRACT_FUNDS_DISTRIBUTOR || '0xaeBe0165b4F76fE6f410a02667E95842FB3ab634',
   TreasuryManager: import.meta.env.VITE_CONTRACT_TREASURY_MANAGER || '0xfF6b9dFb3d6f266e811377e6bD9C82Af31b68E67',
   ContractRegistry: import.meta.env.VITE_CONTRACT_REGISTRY || '0xd4960ea3628B4fd2CfE70E9caDC367632dCc31Ff',
   StatsAggregator: import.meta.env.VITE_CONTRACT_STATS_AGGREGATOR || '0x746a48BA8CDe3C449E60f784C006E19514644Cb0',
-  AdToken: import.meta.env.VITE_CONTRACT_AD_TOKEN || '0x01b287c96F9b9BF7C97704880af93a25a5599D83',
+  AdToken: import.meta.env.VITE_CONTRACT_AD_TOKEN || '0x2FCb95E82aeD23d367Ea6947578551c75eEd4944',
   Ownable: import.meta.env.VITE_CONTRACT_OWNABLE || '0x337Df0A7ca20B0CEB77Fe248F45BAD05F8be41b4',
 };
+
+// Debug: Log actual contract addresses being used
+console.log("🔍 Actual Contract Addresses:", {
+  Cryptolotto1Day: CONTRACT_ADDRESSES.Cryptolotto1Day,
+  Cryptolotto7Days: CONTRACT_ADDRESSES.Cryptolotto7Days,
+  CryptolottoAd: CONTRACT_ADDRESSES.CryptolottoAd,
+  AdToken: CONTRACT_ADDRESSES.AdToken,
+});
 
 // Network configuration from environment variables
 export const NETWORK_CONFIG = {
@@ -490,7 +503,7 @@ export const fetchUserBalance = async (
   }
 };
 
-// Function to fetch user's AD token balance (hardcoded for now)
+// Function to fetch user's AD token balance from contract
 export const fetchAdTokenBalance = async (
   account: string,
   provider: any
@@ -500,16 +513,31 @@ export const fetchAdTokenBalance = async (
       return 0;
     }
 
-    // For now, return hardcoded AD token balance
-    // This can be updated later to actually fetch from the AD token contract
-    const hardcodedAdBalance = 1; // Hardcoded to 25 AD tokens
+    const adTokenAddress = CONTRACT_ADDRESSES.AdToken;
     
-    console.log("User AD token balance (hardcoded):", {
+    if (adTokenAddress === "0x0000000000000000000000000000000000000000") {
+      console.warn("AdToken contract address not set, returning 0");
+      return 0;
+    }
+
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    const adTokenContract = new ethers.Contract(
+      adTokenAddress,
+      CONTRACT_ABIS.AdToken,
+      ethersProvider
+    );
+
+    // Call balanceOf function
+    const balance = await adTokenContract.balanceOf(account);
+    const balanceInTokens = Number(ethers.formatEther(balance));
+    
+    console.log("User AD token balance:", {
       account,
-      adTokenBalance: hardcodedAdBalance
+      balanceWei: balance.toString(),
+      balanceTokens: balanceInTokens
     });
     
-    return hardcodedAdBalance;
+    return balanceInTokens;
   } catch (error) {
     console.error("Failed to fetch AD token balance:", error);
     return 0;
@@ -643,6 +671,195 @@ export const sendTransactionWithWepin = async (
     return { txId: tx.hash };
   } catch (error) {
     console.error("Error calling buyTicket:", error);
+    throw error;
+  }
+};
+
+// Function to call watchAd on AdToken contract
+export const watchAd = async (
+  userAccount: string,
+  provider: any
+): Promise<{ txId: string }> => {
+  try {
+    if (!userAccount || !provider) {
+      throw new Error("User account and provider are required");
+    }
+
+    const adTokenAddress = CONTRACT_ADDRESSES.AdToken;
+    
+    if (adTokenAddress === "0x0000000000000000000000000000000000000000") {
+      throw new Error("AdToken contract address not set");
+    }
+
+    // Get AdToken ABI
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    const adTokenContract = new ethers.Contract(
+      adTokenAddress,
+      CONTRACT_ABIS.AdToken, // Using correct AdToken ABI
+      ethersProvider
+    );
+
+    console.log("Calling watchAd:", {
+      userAccount,
+      adTokenAddress,
+      network: "Very"
+    });
+
+    // Create a signer from the provider for the write operation
+    const signer = await ethersProvider.getSigner();
+    const contractWithSigner = adTokenContract.connect(signer);
+    
+    // Call watchAd with the signer
+    const tx = await (contractWithSigner as any).watchAd(userAccount);
+
+    console.log("watchAd transaction sent successfully:", tx);
+    return { txId: tx.hash };
+  } catch (error) {
+    console.error("Error calling watchAd:", error);
+    throw error;
+  }
+};
+
+// Function to get AD token approval for Ad Lottery contract
+export const getAdTokenApproval = async (
+  userAccount: string,
+  provider: any
+): Promise<number> => {
+  try {
+    if (!userAccount || !provider) {
+      return 0;
+    }
+
+    const adTokenAddress = CONTRACT_ADDRESSES.AdToken;
+    const adLotteryAddress = CONTRACT_ADDRESSES.CryptolottoAd;
+    
+    if (adTokenAddress === "0x0000000000000000000000000000000000000000" || 
+        adLotteryAddress === "0x0000000000000000000000000000000000000000") {
+      console.warn("AdToken or CryptolottoAd contract address not set");
+      return 0;
+    }
+
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    const adTokenContract = new ethers.Contract(
+      adTokenAddress,
+      CONTRACT_ABIS.AdToken,
+      ethersProvider
+    );
+
+    // Call allowance function to check approval
+    const allowance = await adTokenContract.allowance(userAccount, adLotteryAddress);
+    const allowanceInTokens = Number(ethers.formatEther(allowance));
+    
+    console.log("AD Token approval status:", {
+      userAccount,
+      adTokenAddress,
+      adLotteryAddress,
+      allowanceWei: allowance.toString(),
+      allowanceTokens: allowanceInTokens
+    });
+    
+    return allowanceInTokens;
+  } catch (error) {
+    console.error("Failed to fetch AD token approval:", error);
+    return 0;
+  }
+};
+
+// Function to approve AD tokens for Ad Lottery contract
+export const approveAdTokens = async (
+  userAccount: string,
+  provider: any,
+  amount: number = 1000 // Approve 1000 AD tokens by default
+): Promise<{ txId: string }> => {
+  try {
+    if (!userAccount || !provider) {
+      throw new Error("User account and provider are required");
+    }
+
+    const adTokenAddress = CONTRACT_ADDRESSES.AdToken;
+    const adLotteryAddress = CONTRACT_ADDRESSES.CryptolottoAd;
+    
+    if (adTokenAddress === "0x0000000000000000000000000000000000000000" || 
+        adLotteryAddress === "0x0000000000000000000000000000000000000000") {
+      throw new Error("AdToken or CryptolottoAd contract address not set");
+    }
+
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    const adTokenContract = new ethers.Contract(
+      adTokenAddress,
+      CONTRACT_ABIS.AdToken,
+      ethersProvider
+    );
+
+    // Convert amount to wei (18 decimals)
+    const amountWei = ethers.parseEther(amount.toString());
+
+    console.log("Approving AD tokens:", {
+      userAccount,
+      adTokenAddress,
+      adLotteryAddress,
+      amount,
+      amountWei: amountWei.toString(),
+      network: "Very"
+    });
+
+    // Create a signer from the provider for the write operation
+    const signer = await ethersProvider.getSigner();
+    const contractWithSigner = adTokenContract.connect(signer);
+    
+    // Call approve with the signer
+    const tx = await (contractWithSigner as any).approve(adLotteryAddress, amountWei);
+
+    console.log("AD token approval transaction sent successfully:", tx);
+    return { txId: tx.hash };
+  } catch (error) {
+    console.error("Error approving AD tokens:", error);
+    throw error;
+  }
+};
+
+// Function to buy Ad Lottery tickets using AD tokens
+export const buyAdTicket = async (
+  userAccount: string,
+  provider: any,
+  ticketCount: number = 1
+): Promise<{ txId: string }> => {
+  try {
+    if (!userAccount || !provider) {
+      throw new Error("User account and provider are required");
+    }
+
+    const adLotteryAddress = CONTRACT_ADDRESSES.CryptolottoAd;
+    
+    if (adLotteryAddress === "0x0000000000000000000000000000000000000000") {
+      throw new Error("CryptolottoAd contract address not set");
+    }
+
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    const adLotteryContract = new ethers.Contract(
+      adLotteryAddress,
+      CONTRACT_ABIS.CryptolottoAd,
+      ethersProvider
+    );
+
+    console.log("Calling buyAdTicket:", {
+      userAccount,
+      adLotteryAddress,
+      ticketCount,
+      network: "Very"
+    });
+
+    // Create a signer from the provider for the write operation
+    const signer = await ethersProvider.getSigner();
+    const contractWithSigner = adLotteryContract.connect(signer);
+    
+    // Call buyAdTicket with the signer
+    const tx = await (contractWithSigner as any).buyAdTicket(ticketCount);
+
+    console.log("buyAdTicket transaction sent successfully:", tx);
+    return { txId: tx.hash };
+  } catch (error) {
+    console.error("Error calling buyAdTicket:", error);
     throw error;
   }
 }; 
