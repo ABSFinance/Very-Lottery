@@ -68,7 +68,7 @@ export const GAME_CONFIGS: Record<GameType, GameConfig> = {
     maxTicketsPerPlayer: 10,
     gameDuration: 86400, // 24 hours in seconds
     feePercentage: 0, // Ad Lottery has 0% fee (funded by other lotteries)
-    image: "/fruit-color-1-2.png",
+    image: "/fruit-color-1-3.png",
     color: "#ff6d75",
   },
 };

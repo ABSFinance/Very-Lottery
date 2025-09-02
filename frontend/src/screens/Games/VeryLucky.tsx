@@ -1131,7 +1131,9 @@ export const VeryLucky: React.FC<VeryLuckyProps> = ({
                 className="absolute w-[295px] h-7 top-[52px] left-[25px] text-[39px] text-center"
                 style={{ color: gameConfig.color }}
               >
-                {jackpot.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} VERY
+                {gameType === "ads-lucky" 
+                  ? `${jackpot} VERY` 
+                  : `${jackpot.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} VERY`}
               </div>
             </CardContent>
           </Card>
